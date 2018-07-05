@@ -8,15 +8,6 @@
 import XCTest
 @testable import Commander
 
-internal func XCTOptionRawAssertEqual(_ optionRaws: [Option.RawValue], option: Option) {
-    XCTAssertEqual(optionRaws.first!, option.option)
-}
-
-internal func XCTOptionScopesAssertEqual(_ optionRaws: [Option.RawValue], option: Option) {
-    var optionRaws = optionRaws; optionRaws.remove(at: 0)
-    XCTAssertEqual(optionRaws, option.scopes)
-}
-
 class OptionTests: XCTestCase {
     static var allTests = [
         ("testExample", testExample),
@@ -39,34 +30,68 @@ class OptionTests: XCTestCase {
     
     func testSimleOptionArrayLiteral() {
         var options = ["--option"]
-        
-        XCTOptionRawAssertEqual(options, option: try! Option(optionRaws: options))
-        XCTOptionScopesAssertEqual(options, option: try! Option(optionRaws: options))
+
+        XCTAssertEqual(options.last!, try Option(raws: options).rawValue)
         
         options = ["---option"]
         do {
-            _ = try Option(option: options.last!)
+            _ = try Option(raws: options)
             XCTAssertFalse(true)
         } catch CommanderError.option(.invalidPattern(pattern: _, rawValue: _)) {
             XCTAssertTrue(true)
         } catch _ {
             XCTAssertFalse(true)
         }
-        
+
         options = ["-o"]
         do {
-            _ = try Option(option: options.last!)
+            _ = try Option(raws: options)
             XCTAssertTrue(true)
-        } catch _ {
+        } catch let error {
+            debugPrint(error)
             XCTAssertFalse(true)
         }
-        
+
         options = ["-ou"]
         do {
-            _ = try Option(option: options.last!)
+            let option = try Option(raws: options)
+            debugPrint(option.rawValue)
             XCTAssertTrue(true)
         } catch _ {
             XCTAssertFalse(true)
         }
+    }
+    
+    func testComplexOptionWithScope() {
+        var options = "--option someScope"
+        var option = Option(rawValue: options)
+        
+        assertEqual(rawValue: "--option someScope")
+        
+        XCTAssertEqual(option.rawValue, options)
+        XCTAssertEqual(option.scopes.map { $1 }, [["someScope"]])
+        
+        let option1 = "--option1 scope1"
+        let option2 = "--option2 scope2"
+        options = option1 + " " + option2
+        
+        option = Option(rawValue: options)
+        
+        XCTAssertEqual(option.rawValue, options)
+        XCTAssertEqual(option.scopes.map { $1 }, [["scope1"], ["scope2"]])
+        
+        options = "--option scopeKey=scopeValue"
+        option = Option(rawValue: options)
+        
+        XCTAssertEqual(option.rawValue, options)
+        XCTAssertEqual(option.scopes.map { $0.0 }, ["--option"])
+        XCTAssertEqual(option.scopes.map { $1 }, [["scopeKey=scopeValue"]])
+    }
+}
+
+extension OptionTests {
+    fileprivate func assertEqual(rawValue: Option.RawValue) {
+        let option = Option(rawValue: rawValue)
+        XCTAssertEqual(rawValue, option.rawValue)
     }
 }

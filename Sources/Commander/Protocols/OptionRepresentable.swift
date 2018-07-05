@@ -7,9 +7,9 @@
 
 import Foundation
 
-public protocol OptionRepresentable: ExpressibleByArrayLiteral {
+public protocol OptionRepresentable: OptionSet where RawValue: Hashable {
     /// Type of the scope of the option.
-    associatedtype Scope: StringProtocol
+    associatedtype Scope = (RawValue, Set<RawValue>)
     /// Type of the style of the option.
     associatedtype OptionStyleType: OptionStyleRepresentable = OptionStyle
     /// The style of options of `OptionStyle`. Default would be `--option` as normal and `-o` as short.

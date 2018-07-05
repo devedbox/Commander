@@ -15,6 +15,6 @@ public protocol OptionStyleRepresentable: RegularExpressionConvertible {
 
 extension OptionStyleRepresentable where RegularExpression == NSRegularExpression {
     public func asRegex() throws -> RegularExpression {
-        return try RegularExpression(pattern: "((\(normalToken)([A-Za-z0-9]+-?)+)|(\(shortToken)[A-Za-z0-9]))", options: [.caseInsensitive, .anchorsMatchLines])
+        return try RegularExpression(pattern: "^((\(normalToken)([A-Za-z0-9]+-?)+)|(\(shortToken)[A-Za-z0-9]+))$", options: [.caseInsensitive, .anchorsMatchLines])
     }
 }
