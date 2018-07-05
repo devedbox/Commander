@@ -10,13 +10,14 @@ import Foundation
 let token = "--"
 
 public struct Option: OptionRepresentable {
-
+    
     public typealias RawValue = String
     public typealias Scope = (RawValue, Set<RawValue>)
     
     public typealias ArrayLiteralElement = RawValue
     
     private var _raws: Set<RawValue> = []
+    
     public var scopes: [Scope] {
         return _raws.map { ele -> Scope in
             var comps = ele.components(separatedBy: CharacterSet.whitespaces)

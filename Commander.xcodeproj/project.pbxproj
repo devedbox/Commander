@@ -21,6 +21,10 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		DCA3837120EE751D00F7C38B /* OptionWatchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCA3837020EE751D00F7C38B /* OptionWatchable.swift */; };
+		DCA3837320EE760100F7C38B /* ArgumentWatchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCA3837220EE760100F7C38B /* ArgumentWatchable.swift */; };
+		DCA3837520EE778100F7C38B /* InOutStreamable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCA3837420EE778100F7C38B /* InOutStreamable.swift */; };
+		DCA3837720EE81EE00F7C38B /* misc.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCA3837620EE81EE00F7C38B /* misc.swift */; };
 		DCF650A020ED062100D64498 /* Commandable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF6509F20ED062100D64498 /* Commandable.swift */; };
 		DCF650A220ED067500D64498 /* ArgumentRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF650A120ED067500D64498 /* ArgumentRepresentable.swift */; };
 		DCF650A420ED068500D64498 /* OptionRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF650A320ED068500D64498 /* OptionRepresentable.swift */; };
@@ -60,6 +64,10 @@
 /* Begin PBXFileReference section */
 		"Commander::Commander::Product" /* Commander.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Commander.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"Commander::CommanderTests::Product" /* CommanderTests.xctest */ = {isa = PBXFileReference; lastKnownFileType = file; path = CommanderTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DCA3837020EE751D00F7C38B /* OptionWatchable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionWatchable.swift; sourceTree = "<group>"; };
+		DCA3837220EE760100F7C38B /* ArgumentWatchable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArgumentWatchable.swift; sourceTree = "<group>"; };
+		DCA3837420EE778100F7C38B /* InOutStreamable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InOutStreamable.swift; sourceTree = "<group>"; };
+		DCA3837620EE81EE00F7C38B /* misc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = misc.swift; sourceTree = "<group>"; };
 		DCF6509F20ED062100D64498 /* Commandable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Commandable.swift; sourceTree = "<group>"; };
 		DCF650A120ED067500D64498 /* ArgumentRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArgumentRepresentable.swift; sourceTree = "<group>"; };
 		DCF650A320ED068500D64498 /* OptionRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionRepresentable.swift; sourceTree = "<group>"; };
@@ -102,7 +110,10 @@
 			children = (
 				DCF6509F20ED062100D64498 /* Commandable.swift */,
 				DCF650A120ED067500D64498 /* ArgumentRepresentable.swift */,
+				DCA3837220EE760100F7C38B /* ArgumentWatchable.swift */,
 				DCF650A320ED068500D64498 /* OptionRepresentable.swift */,
+				DCA3837020EE751D00F7C38B /* OptionWatchable.swift */,
+				DCA3837420EE778100F7C38B /* InOutStreamable.swift */,
 				DCF650B520ED1D6100D64498 /* RegularExpressionConvertible.swift */,
 				DCF650B320ED19DF00D64498 /* OptionStyleRepresentable.swift */,
 			);
@@ -164,7 +175,7 @@
 			name = Products;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		OBJ_5 /*  */ = {
+		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
@@ -172,7 +183,6 @@
 				OBJ_10 /* Tests */,
 				OBJ_14 /* Products */,
 			);
-			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_7 /* Sources */ = {
@@ -187,6 +197,7 @@
 			isa = PBXGroup;
 			children = (
 				OBJ_9 /* Commander.swift */,
+				DCA3837620EE81EE00F7C38B /* misc.swift */,
 				DCF650B720ED207E00D64498 /* Extensions */,
 				DCF650AC20ED0C1600D64498 /* Errors */,
 				DCF650A520ED06D800D64498 /* Types */,
@@ -261,7 +272,7 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5 /*  */;
+			mainGroup = OBJ_5;
 			productRefGroup = OBJ_14 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -279,14 +290,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
+				DCA3837520EE778100F7C38B /* InOutStreamable.swift in Sources */,
+				DCA3837720EE81EE00F7C38B /* misc.swift in Sources */,
 				DCF650AB20ED0B3300D64498 /* Argument.swift in Sources */,
 				OBJ_22 /* Commander.swift in Sources */,
 				DCF650A020ED062100D64498 /* Commandable.swift in Sources */,
 				DCF650B420ED19DF00D64498 /* OptionStyleRepresentable.swift in Sources */,
 				DCF650A420ED068500D64498 /* OptionRepresentable.swift in Sources */,
 				DCF650B920ED208F00D64498 /* Regex.swift in Sources */,
+				DCA3837320EE760100F7C38B /* ArgumentWatchable.swift in Sources */,
 				DCF650A720ED07F300D64498 /* Command.swift in Sources */,
 				DCF650B020ED0D2E00D64498 /* OptionStyle.swift in Sources */,
+				DCA3837120EE751D00F7C38B /* OptionWatchable.swift in Sources */,
 				DCF650A920ED0AB600D64498 /* Option.swift in Sources */,
 				DCF650A220ED067500D64498 /* ArgumentRepresentable.swift in Sources */,
 				DCF650AE20ED0C2400D64498 /* CommanderError.swift in Sources */,

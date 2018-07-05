@@ -6,7 +6,7 @@
 //
 
 import Foundation
-
-public struct Argument: ArgumentRepresentable {
-    public var description: String { return "" }
-}
+//
+//public struct Argument: ArgumentRepresentable {
+//    public var description: String { return "" }
+//}
