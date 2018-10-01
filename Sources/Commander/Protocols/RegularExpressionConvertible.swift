@@ -10,13 +10,13 @@ import Foundation
 // MARK: - RegularExpressionConvertible.
 
 public protocol RegularExpressionConvertible {
-    associatedtype RegularExpression: NSRegularExpression = NSRegularExpression
-    
-    func asRegex() throws -> RegularExpression
+  associatedtype RegularExpression: NSRegularExpression = NSRegularExpression
+  
+  func asRegex() throws -> RegularExpression
 }
 
 extension RegularExpressionConvertible {
-    public var regex: RegularExpression? {
-        return try? asRegex()
-    }
+  public var regex: RegularExpression? {
+    return try? asRegex()
+  }
 }

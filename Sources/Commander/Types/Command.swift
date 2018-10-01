@@ -8,6 +8,6 @@
 import Foundation
 
 public struct Command: Commandable {
-    public typealias ArgumentType = Argument
-    public typealias OptionType = Option
+  public typealias ArgumentType = Argument
+  public typealias OptionType = Option
 }

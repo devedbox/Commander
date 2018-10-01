@@ -8,16 +8,16 @@
 import Foundation
 
 public protocol ArgumentWatchable {
-    
-    associatedtype ArgumentType: ArgumentRepresentable
-    
-    var arguments: [ArgumentType] { get set }
-    
-    mutating func watch(_ argument: ArgumentType)
+  
+  associatedtype ArgumentType: ArgumentRepresentable
+  
+  var arguments: [ArgumentType] { get set }
+  
+  mutating func watch(_ argument: ArgumentType)
 }
 
 extension ArgumentWatchable {
-    public mutating func watch(_ argument: ArgumentType) {
-        self.arguments.append(argument)
-    }
+  public mutating func watch(_ argument: ArgumentType) {
+    self.arguments.append(argument)
+  }
 }

@@ -6,12 +6,12 @@
 //
 
 public enum CommanderError: Error {
-    case option(CommanderError.Option)
+  case option(CommanderError.Option)
 }
 
 extension CommanderError {
-    public enum Option: Error {
-        case invalidPattern(pattern: String, rawValue: String)
-        case invalidCountOfArrayLiteral(arrayLiteral: [String])
-    }
+  public enum Option: Error {
+    case invalidPattern(pattern: String, rawValue: String)
+    case invalidCountOfArrayLiteral(arrayLiteral: [String])
+  }
 }

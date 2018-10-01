@@ -8,13 +8,13 @@
 import Foundation
 
 public protocol OptionStyleRepresentable: RegularExpressionConvertible {
-    associatedtype Token: StringProtocol
-    var normalToken: Token { get }
-    var shortToken: Token { get }
+  associatedtype Token: StringProtocol
+  var normalToken: Token { get }
+  var shortToken: Token { get }
 }
 
 extension OptionStyleRepresentable where RegularExpression == NSRegularExpression {
-    public func asRegex() throws -> RegularExpression {
-        return try RegularExpression(pattern: "^((\(normalToken)([A-Za-z0-9]+-?)+)|(\(shortToken)[A-Za-z0-9]+))$", options: [.caseInsensitive, .anchorsMatchLines])
-    }
+  public func asRegex() throws -> RegularExpression {
+    return try RegularExpression(pattern: "^((\(normalToken)([A-Za-z0-9]+-?)+)|(\(shortToken)[A-Za-z0-9]+))$", options: [.caseInsensitive, .anchorsMatchLines])
+  }
 }

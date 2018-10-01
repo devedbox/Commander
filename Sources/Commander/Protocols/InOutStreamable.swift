@@ -8,15 +8,15 @@
 import Foundation
 
 public protocol InOutStreamable {
-    associatedtype Input
-    associatedtype Output
-    
-    var piper: (@autoclosure () -> Input) -> Output? { get }
-    func pipe(input: Input) -> Output?
+  associatedtype Input
+  associatedtype Output
+  
+  var piper: (@autoclosure () -> Input) -> Output? { get }
+  func pipe(input: Input) -> Output?
 }
 
 extension InOutStreamable {
-    public func pipe(input: Input) -> Output? {
-        return piper(input)
-    }
+  public func pipe(input: Input) -> Output? {
+    return piper(input)
+  }
 }

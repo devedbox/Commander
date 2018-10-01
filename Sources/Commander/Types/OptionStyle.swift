@@ -11,12 +11,12 @@
 //}
 
 public struct OptionStyle: OptionStyleRepresentable {
-    public typealias Token = String
-    
-    public var normalToken: String
-    public var shortToken: String
+  public typealias Token = String
+  
+  public var normalToken: String
+  public var shortToken: String
 }
 
 extension OptionStyle {
-    public static let `default` = OptionStyle(normalToken: "--", shortToken: "-")
+  public static let `default` = OptionStyle(normalToken: "--", shortToken: "-")
 }

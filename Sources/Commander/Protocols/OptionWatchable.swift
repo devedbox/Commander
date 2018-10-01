@@ -8,16 +8,16 @@
 import Foundation
 
 public protocol OptionWatchable {
-    
-    associatedtype OptionType: OptionRepresentable
-    
-    var option: OptionType { get set }
-    
-    mutating func watch(_ option: OptionType)
+  
+  associatedtype OptionType: OptionRepresentable
+  
+  var option: OptionType { get set }
+  
+  mutating func watch(_ option: OptionType)
 }
 
 extension OptionWatchable {
-    public mutating func watch(_ option: OptionType) {
-        self.option.formUnion(option)
-    }
+  public mutating func watch(_ option: OptionType) {
+    self.option.formUnion(option)
+  }
 }
