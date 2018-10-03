@@ -1,3 +1,10 @@
+//
+//  Commander.swift
+//  Commander
+//
+//  Created by devedbox on 2018/7/4.
+//
+
 #if os(Linux)
 import Glibc
 #else
@@ -6,18 +13,23 @@ import Darwin
 
 import Foundation
 
-public struct Commander {
-  var text = "Hello, World!"
+public final class Commander {
+  public static var commands: [AnyCommandRepresentable.Type] = []
   
-  public mutating func watch(command: Command) {
+  public init() { }
+  
+  public func dispatch() throws {
+    var commands = CommandLine.arguments.dropFirst()
+    let symbol = commands.popFirst()
+    let command = type(of: self).commands.first {
+      $0.symbol == symbol
+    }
     
-  }
-}
-
-public let verbose: Option = ["--verbose", "-v"]
-
-extension Commander {
-  public func dispatch() {
-    let args = CommandLine.arguments
+    guard command != nil else {
+      throw Error.invalidCommandGiven
+    }
+    
+    try command!.run(with: [String](commands))
+    dispatchMain()
   }
 }
