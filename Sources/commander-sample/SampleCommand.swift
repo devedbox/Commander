@@ -18,8 +18,8 @@ public struct SampleCommand: CommandRepresentable {
       (CodingKeys.verbose, .short("v", usage: ""))
     ]
     
-    public let verbose: Bool?
-    public let stringValue: String
+    public var verbose: Bool = false
+    public let stringValue: String?
   }
   
   public static let symbol: String = "sample"

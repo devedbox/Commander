@@ -10,7 +10,9 @@ import XCTest
 
 // MARK: - Mocks.
 
-struct SimpleOption: Decodable {
+struct SimpleOption: OptionsRepresentable {
+  static var optionKeys: [(CodingKey, OptionKeyDescription)] = []
+  
   public enum CodingKeys: String, CodingKey {
     case target
     case verbose
