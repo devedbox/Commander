@@ -85,8 +85,9 @@ extension DecodingError {
 
 extension CommanderDecoder {
   public enum Error: CustomStringConvertible, Swift.Error {
-    case invalidKeyValuePairs(pairs: [String])
     case decodingError(DecodingError)
+    case invalidKeyValuePairs(pairs: [String])
+    case unrecognizedArguments([Any])
     
     private var prefix: String {
       return "CommanderDecoder Error: "
@@ -94,10 +95,12 @@ extension CommanderDecoder {
     
     public var description: String {
       switch self {
+      case .decodingError(let error):
+        return (error.errorDescription ?? "Commander decoding error: \(String(describing: error))")
       case .invalidKeyValuePairs(let pairs):
         return prefix + "Invalid key-value pairs given: \(pairs.joined(separator: " "))"
-      case .decodingError(let error):
-        return prefix + (error.errorDescription ?? "Decoding error: \(String(describing: error))")
+      case .unrecognizedArguments(let args):
+        return prefix + "Unrecognized arguments '\(args.map { String(describing: $0) }.joined(separator: " "))'"
       }
     }
   }
@@ -222,6 +225,13 @@ public final class CommanderDecoder {
       option = key
     }
     
+    func advanceArguments() throws {
+      arguments.append([])
+      guard arguments.filter({ !$0.isEmpty }).count <= 1 else {
+        throw CommanderDecoder.Error.unrecognizedArguments(arguments.first!.map { $0.stringValue! })
+      }
+    }
+    
     switch type(of: self).optionsFormat {
     case .format(let symbol, short: let shortSymbol):
       while let item = iterator.next() {
@@ -230,7 +240,7 @@ public final class CommanderDecoder {
           let key = Optional.some(String(item[symbolIndex...]))
         {
           advance(with: key)
-          arguments.append([])
+          try advanceArguments()
         } else if
           let symbolIndex = item.endsIndex(matchs: shortSymbol),
           let key = Optional.some(String(item[symbolIndex...]))
@@ -241,7 +251,7 @@ public final class CommanderDecoder {
             key.forEach { container[String($0)] = .init(boolValue: true) }
             option = nil
           }
-          arguments.append([])
+          try advanceArguments()
         } else {
           let value = try type(of: self).objectFormat.value(for: item)
           if option == nil {
