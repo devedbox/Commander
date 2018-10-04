@@ -133,7 +133,7 @@ extension CommanderDecoder {
       internal let boolValue: Bool?
       
       /// Returns the unwrapped underlying value.
-      internal var value: Any? {
+      internal var unwrapped: Any? {
         return dictionaryValue ?? arrayValue ?? stringValue ?? boolValue
       }
       
@@ -203,11 +203,6 @@ public final class CommanderDecoder {
     var arguments: [[ObjectFormat.Value]] = []
     var option: String?
     var iterator = commandLineArgs.makeIterator()
-    defer {
-      if option != nil {
-        container[option!] = .init(boolValue: true)
-      }
-    }
     
     func advance(with key: String) {
       option.map { container[$0] = .init(boolValue: true) }
@@ -246,6 +241,7 @@ public final class CommanderDecoder {
       }
     }
     
+    option.map { container[$0] = .init(boolValue: true) }
     return container
   }
   
@@ -356,7 +352,7 @@ extension CommanderDecoder._Decoder {
       return storage.last
     }
     fileprivate var lastUnwrapped: Any? {
-      return top?.value
+      return top?.unwrapped
     }
     
     fileprivate mutating func push(_ value: CommanderDecoder.ObjectFormat.Value) {
@@ -488,7 +484,7 @@ extension CommanderDecoder._Decoder {
       
       guard let array = value.arrayValue else {
         throw CommanderDecoder.Error.decodingError(
-          .__typeMismatch(at: codingPath, expectation: [CommanderDecoder.ObjectFormat.Value].self, reality: type(of: value.value))
+          .__typeMismatch(at: codingPath, expectation: [CommanderDecoder.ObjectFormat.Value].self, reality: type(of: value.unwrapped))
         )
       }
       
@@ -614,7 +610,7 @@ extension CommanderDecoder._Decoder {
       
       guard let array = value.arrayValue else {
         throw CommanderDecoder.Error.decodingError(
-          .__typeMismatch(at: codingPath, expectation: [CommanderDecoder.ObjectFormat.Value].self, reality: type(of: value.value))
+          .__typeMismatch(at: codingPath, expectation: [CommanderDecoder.ObjectFormat.Value].self, reality: type(of: value.unwrapped))
         )
       }
       
