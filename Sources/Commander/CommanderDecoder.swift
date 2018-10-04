@@ -148,6 +148,19 @@ extension CommanderDecoder {
         self.stringValue = stringValue
         self.boolValue = boolValue
       }
+      
+      internal static func dictionary(_ dict: [String: Value]) -> Value {
+        return Value(dictionaryValue: dict)
+      }
+      internal static func array(_ array: [Value]) -> Value {
+        return Value(arrayValue: array)
+      }
+      internal static func string(_ string: String) -> Value {
+        return Value(stringValue: string)
+      }
+      internal static func bool(_ bool: Bool) -> Value {
+        return Value(boolValue: bool)
+      }
     }
     
     @available(*, unavailable)
@@ -170,7 +183,7 @@ extension CommanderDecoder {
               guard keyValuePairs.count == 2 else {
                 throw Error.invalidKeyValuePairs(pairs: keyValuePairs.map { String($0) })
               }
-              let value = Value(stringValue: String(keyValuePairs[1]))
+              let value: Value = .string(String(keyValuePairs[1]))
               return result.merging([String(keyValuePairs[0]): value]) { _ , new in new }
             })
           } else {
@@ -255,9 +268,7 @@ public final class CommanderDecoder {
     let container = try self.container(from: commandLineArgs)
     return try _Decoder(
       referencing: self,
-      wrapping: ObjectFormat.Value(
-        dictionaryValue: container
-      )
+      wrapping: .dictionary(container)
     ).decode(as: type)
   }
 }
