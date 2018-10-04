@@ -7,8 +7,14 @@
 
 import Foundation
 
+// MARK: -
+
 extension String {
-  fileprivate func prefixMatchs(_ pattern: String) -> Index? {
+  /// Perform the exact match with the given pattern and return the index where match ends.
+  ///
+  /// - Parameter pattern: The pattern to be matched.
+  /// - Returns: The ends index.
+  fileprivate func endsIndex(matchs pattern: String) -> Index? {
     var index = pattern.startIndex
     
     while index < pattern.endIndex, index < endIndex {
@@ -21,11 +27,86 @@ extension String {
     
     return index
   }
+  /// Returns a bool value indicates if the string is containing only one character.
+  public var isSingle: Bool {
+    return startIndex == index(before: endIndex)
+  }
+}
+
+extension Array where Element: RangeReplaceableCollection {
+  /// Appends the given element to the receiver's last collection element.
+  public mutating func lastAppend(_ element: Element.Element) {
+    guard var last = popLast() else {
+      return
+    }
+    
+    last.append(element)
+    append(last)
+  }
+}
+
+// MARK: swift-corelibs-foundation
+
+extension DecodingError {
+  /// Returns a `.typeMismatch` error describing the expected type.
+  ///
+  /// - parameter path: The path of `CodingKey`s taken to decode a value of this type.
+  /// - parameter expectation: The type expected to be encountered.
+  /// - parameter reality: The value that was encountered instead of the expected type.
+  /// - returns: A `DecodingError` with the appropriate path and debug description.
+  fileprivate static func __typeMismatch(at path: [CodingKey], expectation: Any.Type, reality: Any) -> DecodingError {
+    let description = "Expected to decode \(expectation) but found \(__typeDescription(of: reality)) instead."
+    return .typeMismatch(expectation, Context(codingPath: path, debugDescription: description))
+  }
+  
+  /// Returns a description of the type of `value` appropriate for an error message.
+  ///
+  /// - parameter value: The value whose type to describe.
+  /// - returns: A string describing `value`.
+  /// - precondition: `value` is one of the types below.
+  fileprivate static func __typeDescription(of value: Any?) -> String {
+    if value is NSNull || value == nil {
+      return "a null value"
+    } else if value is NSNumber /* FIXME: If swift-corelibs-foundation isn't updated to use NSNumber, this check will be necessary: || value is Int || value is Double */ {
+      return "a number"
+    } else if value is String {
+      return "a string/data"
+    } else if value is [Any] {
+      return "an array"
+    } else if value is [String : Any] {
+      return "a dictionary"
+    } else {
+      return "\(type(of: value))"
+    }
+  }
+}
+
+// MARK: - Error.
+
+extension CommanderDecoder {
+  public enum Error: CustomStringConvertible, Swift.Error {
+    case invalidKeyValuePairs(pairs: [String])
+    case decodingError(DecodingError)
+    
+    private var prefix: String {
+      return "CommanderDecoder Error: "
+    }
+    
+    public var description: String {
+      switch self {
+      case .invalidKeyValuePairs(let pairs):
+        return prefix + "Invalid key-value pairs given: \(pairs.joined(separator: " "))"
+      case .decodingError(let error):
+        return prefix + (error.errorDescription ?? "Decoding error: \(String(describing: error))")
+      }
+    }
+  }
 }
 
 // MARK: - OptionsFormat.
 
 extension CommanderDecoder {
+  /// The options parsing splitter format.
   public enum OptionsFormat {
     case format(String, short: String)
   }
@@ -34,18 +115,24 @@ extension CommanderDecoder {
 // MARK: - ObjectFormat.
 
 extension CommanderDecoder {
+  /// The object format of the value of options.
   internal enum ObjectFormat {
-    
+    /// Wrapped value type represents the available values in `CommanderDecoder`.
     internal struct Value {
       internal enum Error: String, Swift.Error {
         case jsonObjectFormatIsNotSupported = "Object format error: The JSON object format is not supported"
       }
       
+      /// Underlying dictionary value of `[String: Value]`.
       internal let dictionaryValue: [String: Value]?
+      /// Underlying array value of `[Value]`.
       internal let arrayValue: [Value]?
+      /// Underlying string value of `String`.
       internal let stringValue: String?
+      /// Underlying bool value of `Bool`.
       internal let boolValue: Bool?
       
+      /// Returns the unwrapped underlying value.
       internal var value: Any? {
         return dictionaryValue ?? arrayValue ?? stringValue ?? boolValue
       }
@@ -64,10 +151,12 @@ extension CommanderDecoder {
     }
     
     @available(*, unavailable)
-    case json
+    case json // TODO: The json format is not available for now...
+    /// Represents the flatten container without nested contaniners.
     case flatContainer(splitter: Character, keyValuePairsSplitter: Character)
     
-    internal func container(for string: String) throws -> Value {
+    /// Returns the wrapped value with the given string.
+    internal func value(for string: String) throws -> Value {
       var arrayContainer: [Value]? = nil
       var dictContainer: [String: Value]? = nil
       
@@ -79,7 +168,7 @@ extension CommanderDecoder {
             dictContainer = try? elements.reduce([:], { result, next -> [String: Value] in
               let keyValuePairs = next.split(separator: keyValuePairsSplitter)
               guard keyValuePairs.count == 2 else {
-                throw Error.invalidKeyValuePairs
+                throw Error.invalidKeyValuePairs(pairs: keyValuePairs.map { String($0) })
               }
               let value = Value(stringValue: String(keyValuePairs[1]))
               return result.merging([String(keyValuePairs[0]): value]) { _ , new in new }
@@ -101,13 +190,7 @@ extension CommanderDecoder {
 // MARK: - CommanderDecoder.
 
 public final class CommanderDecoder {
-  public enum Error: Swift.Error {
-    case emptyOptionsSymbolIsInvalid
-    case invalidKeyValuePairs
-  }
   
-  internal static var optionsSymbol: String = "--"
-  internal static var shortOptionsSymbol: String = "-"
   internal static var optionsFormat = OptionsFormat.format("--", short: "-")
   internal static var objectFormat = ObjectFormat.flatContainer(splitter: ",", keyValuePairsSplitter: "=")
   
@@ -117,45 +200,50 @@ public final class CommanderDecoder {
   
   internal func container(from commandLineArgs: [String]) throws -> [String: ObjectFormat.Value] {
     var container: [String: ObjectFormat.Value] = [:]
+    var arguments: [[ObjectFormat.Value]] = []
     var option: String?
     var iterator = commandLineArgs.makeIterator()
-    
-    while let item = iterator.next() {
-      if
-        let symbolIndex = item.prefixMatchs(CommanderDecoder.optionsSymbol),
-        let key = Optional.some(String(item[symbolIndex...]))
-      {
-        if option != nil {
-          container[option!] = .init(boolValue: true)
-        }
-        option = key
-      } else if
-        let symbolIndex = item.prefixMatchs(CommanderDecoder.shortOptionsSymbol),
-        let key = Optional.some(String(item[symbolIndex...]))
-      {
-        if key.count == 1 {
-          if option != nil {
-            container[option!] = .init(boolValue: true)
-          }
-          option = key
-        } else {
-          for char in key {
-            container[String(char)] = .init(boolValue: true)
-          }
-          option = nil
-        }
-      } else {
-        if option == nil {
-          // FIXME: Consider missing '--option' symbol or arguments.
-        } else {
-          container[option!] = try type(of: self).objectFormat.container(for: item)
-          option = nil
-        }
+    defer {
+      if option != nil {
+        container[option!] = .init(boolValue: true)
       }
     }
     
-    if option != nil {
-      container[option!] = .init(boolValue: true)
+    func advance(with key: String) {
+      option.map { container[$0] = .init(boolValue: true) }
+      option = key
+    }
+    
+    switch type(of: self).optionsFormat {
+    case .format(let symbol, short: let shortSymbol):
+      while let item = iterator.next() {
+        if
+          let symbolIndex = item.endsIndex(matchs: symbol),
+          let key = Optional.some(String(item[symbolIndex...]))
+        {
+          advance(with: key)
+          arguments.append([])
+        } else if
+          let symbolIndex = item.endsIndex(matchs: shortSymbol),
+          let key = Optional.some(String(item[symbolIndex...]))
+        {
+          if key.isSingle {
+            advance(with: key)
+          } else {
+            key.forEach { container[String($0)] = .init(boolValue: true) }
+            option = nil
+          }
+          arguments.append([])
+        } else {
+          let value = try type(of: self).objectFormat.value(for: item)
+          if option == nil {
+            arguments.lastAppend(value)
+          } else {
+            container[option!] = value
+            option = nil
+          }
+        }
+      }
     }
     
     return container
@@ -165,13 +253,6 @@ public final class CommanderDecoder {
     _ type: T.Type,
     from commandLineArgs: [String]) throws -> T
   {
-    guard
-      !CommanderDecoder.optionsSymbol.isEmpty,
-      !CommanderDecoder.shortOptionsSymbol.isEmpty
-    else {
-      throw Error.emptyOptionsSymbolIsInvalid
-    }
-    
     optionsDescriptions = T.optionKeys
     defer { optionsDescriptions = nil }
     
@@ -274,7 +355,7 @@ extension CommanderDecoder._Decoder {
     fileprivate var top: CommanderDecoder.ObjectFormat.Value? {
       return storage.last
     }
-    fileprivate var lastWrapped: Any? {
+    fileprivate var lastUnwrapped: Any? {
       return top?.value
     }
     
@@ -347,9 +428,8 @@ extension CommanderDecoder._Decoder {
       forKey key: Key) throws -> T where T : Decodable
     {
       guard let entry = container[key.stringValue] else {
-        throw DecodingError.keyNotFound(
-          key,
-          .init(codingPath: decoder.codingPath, debugDescription: "No value associated with key \(key).")
+        throw CommanderDecoder.Error.decodingError(
+          .keyNotFound(key, .init(codingPath: decoder.codingPath, debugDescription: "No value associated with key \(key)."))
         )
       }
       
@@ -370,12 +450,9 @@ extension CommanderDecoder._Decoder {
       defer { decoder.codingPath.removeLast() }
       
       guard let value = self.container[key.stringValue] else {
-        throw DecodingError.keyNotFound(
-          key,
-          .init(
-            codingPath: codingPath,
-            debugDescription: "Cannot get \(KeyedDecodingContainer<NestedKey>.self) -- no value found for key \(key)"
-          )
+        let desc = "Cannot get \(KeyedDecodingContainer<NestedKey>.self) -- no value found for key \(key)"
+        throw CommanderDecoder.Error.decodingError(
+          .keyNotFound(key, .init(codingPath: codingPath, debugDescription: desc))
         )
       }
       
@@ -403,19 +480,15 @@ extension CommanderDecoder._Decoder {
       defer { decoder.codingPath.removeLast() }
       
       guard let value = container[key.stringValue] else {
-        throw DecodingError.keyNotFound(
-          key,
-          .init(
-            codingPath: codingPath,
-            debugDescription: "Cannot get UnkeyedDecodingContainer -- no value found for key \(key)"
-          )
+        let desc = "Cannot get UnkeyedDecodingContainer -- no value found for key \(key)"
+        throw CommanderDecoder.Error.decodingError(
+          .keyNotFound(key, .init(codingPath: codingPath, debugDescription: desc))
         )
       }
       
       guard let array = value.arrayValue else {
-        throw DecodingError.typeMismatch(
-          [CommanderDecoder.ObjectFormat.Value].self,
-          .init(codingPath: codingPath, debugDescription: "")
+        throw CommanderDecoder.Error.decodingError(
+          .__typeMismatch(at: codingPath, expectation: [CommanderDecoder.ObjectFormat.Value].self, reality: type(of: value.value))
         )
       }
       
@@ -467,12 +540,9 @@ extension CommanderDecoder._Decoder {
     
     internal mutating func decodeNil() throws -> Bool {
       guard !self.isAtEnd else {
-        throw DecodingError.valueNotFound(
-          Any?.self,
-          .init(
-            codingPath: decoder.codingPath + [CommanderDecoder._Decoder._Key(index: currentIndex)],
-            debugDescription: "Unkeyed container is at end."
-          )
+        let codingPath = decoder.codingPath + [CommanderDecoder._Decoder._Key(index: currentIndex)]
+        throw CommanderDecoder.Error.decodingError(
+          .valueNotFound(Any?.self, .init(codingPath: codingPath, debugDescription: "Unkeyed container is at end."))
         )
       }
       
@@ -481,12 +551,9 @@ extension CommanderDecoder._Decoder {
     
     internal mutating func decode<T : Decodable>(_ type: T.Type) throws -> T {
       guard !self.isAtEnd else {
-        throw DecodingError.valueNotFound(
-          type,
-          .init(
-            codingPath: decoder.codingPath + [CommanderDecoder._Decoder._Key(index: currentIndex)],
-            debugDescription: "Unkeyed container is at end."
-          )
+        let codingPath = decoder.codingPath + [CommanderDecoder._Decoder._Key(index: currentIndex)]
+        throw CommanderDecoder.Error.decodingError(
+          .valueNotFound(type, .init(codingPath: codingPath, debugDescription: "Unkeyed container is at end."))
         )
       }
       
@@ -507,12 +574,8 @@ extension CommanderDecoder._Decoder {
       defer { decoder.codingPath.removeLast() }
       
       guard !self.isAtEnd else {
-        throw DecodingError.valueNotFound(
-          KeyedDecodingContainer<NestedKey>.self,
-          .init(
-            codingPath: codingPath,
-            debugDescription: "Cannot get nested keyed container -- unkeyed container is at end."
-          )
+        throw CommanderDecoder.Error.decodingError(
+          .valueNotFound(KeyedDecodingContainer<NestedKey>.self, .init(codingPath: codingPath, debugDescription: "Cannot get nested keyed container -- unkeyed container is at end."))
         )
       }
       
@@ -541,21 +604,17 @@ extension CommanderDecoder._Decoder {
       defer { decoder.codingPath.removeLast() }
       
       guard !self.isAtEnd else {
-        throw DecodingError.valueNotFound(
-          UnkeyedDecodingContainer.self,
-          DecodingError.Context(
-            codingPath: codingPath,
-            debugDescription: "Cannot get nested keyed container -- unkeyed container is at end."
-          )
+        let desc = "Cannot get nested keyed container -- unkeyed container is at end."
+        throw CommanderDecoder.Error.decodingError(
+          .valueNotFound(UnkeyedDecodingContainer.self, .init(codingPath: codingPath, debugDescription: desc))
         )
       }
       
       let value = self.container[currentIndex]
       
       guard let array = value.arrayValue else {
-        throw DecodingError.typeMismatch(
-          [CommanderDecoder.ObjectFormat.Value].self,
-          .init(codingPath: codingPath, debugDescription: "")
+        throw CommanderDecoder.Error.decodingError(
+          .__typeMismatch(at: codingPath, expectation: [CommanderDecoder.ObjectFormat.Value].self, reality: type(of: value.value))
         )
       }
       
@@ -568,12 +627,9 @@ extension CommanderDecoder._Decoder {
       defer { decoder.codingPath.removeLast() }
       
       guard !self.isAtEnd else {
-        throw DecodingError.valueNotFound(
-          Decoder.self,
-          DecodingError.Context(
-            codingPath: codingPath,
-            debugDescription: "Cannot get superDecoder() -- unkeyed container is at end."
-          )
+        let desc = "Cannot get superDecoder() -- unkeyed container is at end."
+        throw CommanderDecoder.Error.decodingError(
+          .valueNotFound(Decoder.self, .init(codingPath: codingPath, debugDescription: desc))
         )
       }
       
@@ -591,19 +647,16 @@ extension CommanderDecoder._Decoder {
 // MARK: - SingleValueDecodingContainer.
 
 extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
-  // MARK: SingleValueDecodingContainer Methods
   
   internal func decodeNil() -> Bool {
     return false
   }
   
   internal func decode(_ type: Bool.Type) throws -> Bool {
-    guard let value = storage.lastWrapped as? Bool else {
-      throw DecodingError.valueNotFound(
-        type,
-        .init(
-          codingPath: codingPath,
-          debugDescription: "Expected \(type) value but found null instead."
+    guard let value = storage.lastUnwrapped as? Bool else {
+      throw CommanderDecoder.Error.decodingError(
+        .valueNotFound(
+          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
         )
       )
     }
@@ -611,12 +664,10 @@ extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
   }
   
   internal func decode(_ type: Int.Type) throws -> Int {
-    guard let value = (storage.lastWrapped as? String).flatMap({ Int($0) }) else {
-      throw DecodingError.valueNotFound(
-        type,
-        .init(
-          codingPath: codingPath,
-          debugDescription: "Expected \(type) value but found null instead."
+    guard let value = (storage.lastUnwrapped as? String).flatMap({ Int($0) }) else {
+      throw CommanderDecoder.Error.decodingError(
+        .valueNotFound(
+          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
         )
       )
     }
@@ -624,12 +675,10 @@ extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
   }
   
   internal func decode(_ type: Int8.Type) throws -> Int8 {
-    guard let value = (storage.lastWrapped as? String).flatMap({ Int8($0) }) else {
-      throw DecodingError.valueNotFound(
-        type,
-        .init(
-          codingPath: codingPath,
-          debugDescription: "Expected \(type) value but found null instead."
+    guard let value = (storage.lastUnwrapped as? String).flatMap({ Int8($0) }) else {
+      throw CommanderDecoder.Error.decodingError(
+        .valueNotFound(
+          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
         )
       )
     }
@@ -637,12 +686,10 @@ extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
   }
   
   internal func decode(_ type: Int16.Type) throws -> Int16 {
-    guard let value = (storage.lastWrapped as? String).flatMap({ Int16($0) }) else {
-      throw DecodingError.valueNotFound(
-        type,
-        .init(
-          codingPath: codingPath,
-          debugDescription: "Expected \(type) value but found null instead."
+    guard let value = (storage.lastUnwrapped as? String).flatMap({ Int16($0) }) else {
+      throw CommanderDecoder.Error.decodingError(
+        .valueNotFound(
+          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
         )
       )
     }
@@ -650,12 +697,10 @@ extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
   }
   
   internal func decode(_ type: Int32.Type) throws -> Int32 {
-    guard let value = (storage.lastWrapped as? String).flatMap({ Int32($0) }) else {
-      throw DecodingError.valueNotFound(
-        type,
-        .init(
-          codingPath: codingPath,
-          debugDescription: "Expected \(type) value but found null instead."
+    guard let value = (storage.lastUnwrapped as? String).flatMap({ Int32($0) }) else {
+      throw CommanderDecoder.Error.decodingError(
+        .valueNotFound(
+          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
         )
       )
     }
@@ -663,12 +708,10 @@ extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
   }
   
   internal func decode(_ type: Int64.Type) throws -> Int64 {
-    guard let value = (storage.lastWrapped as? String).flatMap({ Int64($0) }) else {
-      throw DecodingError.valueNotFound(
-        type,
-        .init(
-          codingPath: codingPath,
-          debugDescription: "Expected \(type) value but found null instead."
+    guard let value = (storage.lastUnwrapped as? String).flatMap({ Int64($0) }) else {
+      throw CommanderDecoder.Error.decodingError(
+        .valueNotFound(
+          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
         )
       )
     }
@@ -676,12 +719,10 @@ extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
   }
   
   internal func decode(_ type: UInt.Type) throws -> UInt {
-    guard let value = (storage.lastWrapped as? String).flatMap({ UInt($0) }) else {
-      throw DecodingError.valueNotFound(
-        type,
-        .init(
-          codingPath: codingPath,
-          debugDescription: "Expected \(type) value but found null instead."
+    guard let value = (storage.lastUnwrapped as? String).flatMap({ UInt($0) }) else {
+      throw CommanderDecoder.Error.decodingError(
+        .valueNotFound(
+          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
         )
       )
     }
@@ -689,12 +730,10 @@ extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
   }
   
   internal func decode(_ type: UInt8.Type) throws -> UInt8 {
-    guard let value = (storage.lastWrapped as? String).flatMap({ UInt8($0) }) else {
-      throw DecodingError.valueNotFound(
-        type,
-        .init(
-          codingPath: codingPath,
-          debugDescription: "Expected \(type) value but found null instead."
+    guard let value = (storage.lastUnwrapped as? String).flatMap({ UInt8($0) }) else {
+      throw CommanderDecoder.Error.decodingError(
+        .valueNotFound(
+          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
         )
       )
     }
@@ -702,12 +741,10 @@ extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
   }
   
   internal func decode(_ type: UInt16.Type) throws -> UInt16 {
-    guard let value = (storage.lastWrapped as? String).flatMap({ UInt16($0) }) else {
-      throw DecodingError.valueNotFound(
-        type,
-        .init(
-          codingPath: codingPath,
-          debugDescription: "Expected \(type) value but found null instead."
+    guard let value = (storage.lastUnwrapped as? String).flatMap({ UInt16($0) }) else {
+      throw CommanderDecoder.Error.decodingError(
+        .valueNotFound(
+          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
         )
       )
     }
@@ -715,12 +752,10 @@ extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
   }
   
   internal func decode(_ type: UInt32.Type) throws -> UInt32 {
-    guard let value = (storage.lastWrapped as? String).flatMap({ UInt32($0) }) else {
-      throw DecodingError.valueNotFound(
-        type,
-        .init(
-          codingPath: codingPath,
-          debugDescription: "Expected \(type) value but found null instead."
+    guard let value = (storage.lastUnwrapped as? String).flatMap({ UInt32($0) }) else {
+      throw CommanderDecoder.Error.decodingError(
+        .valueNotFound(
+          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
         )
       )
     }
@@ -728,12 +763,10 @@ extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
   }
   
   internal func decode(_ type: UInt64.Type) throws -> UInt64 {
-    guard let value = (storage.lastWrapped as? String).flatMap({ UInt64($0) }) else {
-      throw DecodingError.valueNotFound(
-        type,
-        .init(
-          codingPath: codingPath,
-          debugDescription: "Expected \(type) value but found null instead."
+    guard let value = (storage.lastUnwrapped as? String).flatMap({ UInt64($0) }) else {
+      throw CommanderDecoder.Error.decodingError(
+        .valueNotFound(
+          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
         )
       )
     }
@@ -741,12 +774,10 @@ extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
   }
   
   internal func decode(_ type: Float.Type) throws -> Float {
-    guard let value = (storage.lastWrapped as? String).flatMap({ Float($0) }) else {
-      throw DecodingError.valueNotFound(
-        type,
-        .init(
-          codingPath: codingPath,
-          debugDescription: "Expected \(type) value but found null instead."
+    guard let value = (storage.lastUnwrapped as? String).flatMap({ Float($0) }) else {
+      throw CommanderDecoder.Error.decodingError(
+        .valueNotFound(
+          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
         )
       )
     }
@@ -754,12 +785,10 @@ extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
   }
   
   internal func decode(_ type: Double.Type) throws -> Double {
-    guard let value = (storage.lastWrapped as? String).flatMap({ Double($0) }) else {
-      throw DecodingError.valueNotFound(
-        type,
-        .init(
-          codingPath: codingPath,
-          debugDescription: "Expected \(type) value but found null instead."
+    guard let value = (storage.lastUnwrapped as? String).flatMap({ Double($0) }) else {
+      throw CommanderDecoder.Error.decodingError(
+        .valueNotFound(
+          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
         )
       )
     }
@@ -767,12 +796,10 @@ extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
   }
   
   internal func decode(_ type: String.Type) throws -> String {
-    guard let value = storage.lastWrapped as? String else {
-      throw DecodingError.valueNotFound(
-        type,
-        .init(
-          codingPath: codingPath,
-          debugDescription: "Expected \(type) value but found null instead."
+    guard let value = storage.lastUnwrapped as? String else {
+      throw CommanderDecoder.Error.decodingError(
+        .valueNotFound(
+          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
         )
       )
     }
@@ -780,15 +807,17 @@ extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
   }
   
   internal func decode<T : Decodable>(_ type: T.Type) throws -> T {
-    guard let _ = storage.lastWrapped else {
-      throw DecodingError.valueNotFound(
-        type,
-        .init(
-          codingPath: codingPath,
-          debugDescription: "Expected \(type) value but found null instead."
+    guard let _ = storage.lastUnwrapped else {
+      throw CommanderDecoder.Error.decodingError(
+        .valueNotFound(
+          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
         )
       )
     }
     return try T.init(from: self)
+  }
+  
+  private func _valueNotFoundDesc<T>(_ type: T, reality: Any?) -> String {
+    return "Expected \(type) value but found \(DecodingError.__typeDescription(of: reality)) instead."
   }
 }

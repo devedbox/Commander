@@ -40,7 +40,7 @@ class CommandLineDecoderTests: XCTestCase {
   ]
   
   func testDecodeInContainer() {
-    print(try! CommanderDecoder().container(from: ["-vabk"]))
+    print(try! CommanderDecoder().container(from: ["-vabk", "arg1", "-u", "arg2", "arg3"]))
     print(try! CommanderDecoder().container(from: ["-v"]))
     print(try! CommanderDecoder().container(from: ["-C", "../path"]))
   }
