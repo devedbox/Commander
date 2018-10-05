@@ -53,16 +53,11 @@ struct SimpleOption: OptionsRepresentable {
 
 class CommandLineDecoderTests: XCTestCase {
   static var allTests = [
+    ("testDecodeInContainer", testDecodeInContainer),
     ("testDecode", testDecode),
   ]
   
   func testDecodeInContainer() {
-    print(try! CommanderDecoder().container(from: ["-vabk", "arg1", "-u", "arg2", "arg3"]))
-    print(try! CommanderDecoder().container(from: ["-v"]))
-    print(try! CommanderDecoder().container(from: ["-C", "../path"]))
-  }
-  
-  func testDecodeArguments() {
     var value = try! CommanderDecoder().container(from: "-v args".components(separatedBy: " "))
     XCTAssertNotNil(value.dictionaryValue)
     XCTAssertNil(value.arrayValue)
@@ -97,6 +92,14 @@ class CommandLineDecoderTests: XCTestCase {
       _ = try CommanderDecoder().container(from: ["--option", "value", "extra", "-v"])
     } catch CommanderDecoder.Error.unrecognizedArguments(let args) {
       XCTAssertEqual(args as? [String], ["extra"])
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      _ = try CommanderDecoder().container(from: ["--option", "value", "extra1", "-v", "verbose", "extra2", "-t"])
+    } catch CommanderDecoder.Error.unrecognizedArguments(let args) {
+      XCTAssertEqual(args as? [String], ["extra1", "extra2"])
     } catch {
       XCTFail()
     }

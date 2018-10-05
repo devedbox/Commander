@@ -228,7 +228,7 @@ public final class CommanderDecoder {
       option = key
     }
     
-    func advanceArguments() throws {
+    func advanceArguments() {
       arguments.append([])
     }
     
@@ -240,7 +240,7 @@ public final class CommanderDecoder {
           let key = Optional.some(String(item[symbolIndex...]))
         {
           advance(with: key)
-          try advanceArguments()
+          advanceArguments()
         } else if
           let symbolIndex = item.endsIndex(matchs: shortSymbol),
           let key = Optional.some(String(item[symbolIndex...]))
@@ -252,7 +252,7 @@ public final class CommanderDecoder {
             key.forEach { container[String($0)] = .init(boolValue: true) }
             option = nil
           }
-          try advanceArguments()
+          advanceArguments()
         } else {
           let value = try type(of: self).objectFormat.value(for: item)
           if option == nil {
@@ -266,7 +266,6 @@ public final class CommanderDecoder {
     }
     
     option.map { container[$0] = .init(boolValue: true) }
-    
     
     let theArguments = arguments.filter({ !$0.isEmpty })
     if theArguments.count > 1 || (theArguments.count == 1 && arguments.last!.isEmpty) {
@@ -284,8 +283,6 @@ public final class CommanderDecoder {
     defer { optionsDescription = nil }
     
     let container = try self.container(from: commandLineArgs)
-    let decoder = _Decoder(referencing: self, wrapping: container)
-    let decoded = try decoder.decode(as: type)
     
     let unrecognizedOptions = container.dictionaryValue!.keys.filter { key in
       (type.CodingKeys.init(rawValue: key) ?? ((type.description.first {
@@ -298,6 +295,9 @@ public final class CommanderDecoder {
     guard unrecognizedOptions.isEmpty else {
       throw CommanderDecoder.Error.unrecognizedOptions(unrecognizedOptions)
     }
+    
+    let decoder = _Decoder(referencing: self, wrapping: container)
+    let decoded = try decoder.decode(as: type)
     
     return decoded
   }
