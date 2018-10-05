@@ -115,8 +115,8 @@
 				OBJ_13 /* Error.swift */,
 				OBJ_11 /* Commander.swift */,
 				DC0B9B9A216347F000C87253 /* CommanderDecoder.swift */,
-				OBJ_22 /* OptionsRepresentable.swift */,
 				DC0B9BA021648B0600C87253 /* OptionKeyDescription.swift */,
+				OBJ_22 /* OptionsRepresentable.swift */,
 				OBJ_18 /* CommandRepresentable.swift */,
 			);
 			name = Commander;
