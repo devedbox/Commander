@@ -11,5 +11,4 @@ import Commander
 Commander.commands = [
   SampleCommand.self
 ]
-try Commander().dispatch()
-exit(0)
+Commander().dispatch()

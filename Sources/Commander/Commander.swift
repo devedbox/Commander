@@ -5,6 +5,8 @@
 //  Created by devedbox on 2018/7/4.
 //
 
+import Foundation
+
 // MARK: - HelpCommand.
 
 /// The built-in help command for the commander.
@@ -57,7 +59,7 @@ public final class Commander {
   internal private(set) static var runningPath: String!
   public init() { }
   
-  public func dispatch() throws {
+  public func dispatch() -> Never {
     type(of: self).runningPath = CommandLine.arguments.first
     defer { type(of: self).runningPath = nil }
     
@@ -68,21 +70,32 @@ public final class Commander {
       $0.symbol == symbol
     }
     
-    if command == nil {
-      if
-        case .format(let optionsSymbol, short: let shortSymbol) = CommanderDecoder.optionsFormat,
-        let isOptionsSymbol = symbol?.hasPrefix(optionsSymbol),
-        let isShortSymbol = symbol?.hasPrefix(shortSymbol),
-        isOptionsSymbol || isShortSymbol
-      {
-        try HelpCommand.run(with: [symbol!] + commands)
-        dispatchSuccess()
-      } else {
-        throw Error.invalidCommandGiven
+    do {
+      if command == nil {
+        if
+          case .format(let optionsSymbol, short: let shortSymbol) = CommanderDecoder.optionsFormat,
+          let isOptionsSymbol = symbol?.hasPrefix(optionsSymbol),
+          let isShortSymbol = symbol?.hasPrefix(shortSymbol),
+          isOptionsSymbol || isShortSymbol
+        {
+          try HelpCommand.run(with: [symbol!] + commands)
+        } else {
+          if let commandSymbol = symbol {
+            throw Error.invalidCommand(command: commandSymbol)
+          } else {
+            throw Error.emptyCommand
+          }
+        }
       }
+      
+      try command?.run(with: [String](commands))
+      dispatchSuccess()
+    } catch {
+      let stderr = FileHandle.standardError
+      defer { stderr.closeFile() }
+      
+      "\(String(describing: error))\n".data(using: .utf8).map { stderr.write($0) }
+      dispatchFailure()
     }
-    
-    try command!.run(with: [String](commands))
-    dispatchSuccess()
   }
 }

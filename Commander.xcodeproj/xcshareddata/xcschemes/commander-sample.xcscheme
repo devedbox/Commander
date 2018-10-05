@@ -64,7 +64,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "--help"
+            argument = "help"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
