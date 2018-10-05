@@ -7,14 +7,19 @@
 
 // MARK: - HelpCommand.
 
+/// The built-in help command for the commander.
 internal struct HelpCommand: CommandRepresentable {
+  /// The options of the `HelpCommand`.
   public struct Options: OptionsRepresentable {
+    /// The coding keys of `Options`.
     public enum CodingKeys: String, CodingKey, StringRawRepresentable {
       case help
     }
+    /// Returns the description of the options.
     public static var description: [(Options.CodingKeys, OptionKeyDescription)] = [
       (.help, .short("h", usage: HelpCommand.usage))
     ]
+    
     public let help: Bool?
   }
   
