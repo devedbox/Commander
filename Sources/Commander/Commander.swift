@@ -50,6 +50,8 @@ internal struct HelpCommand: CommandRepresentable {
 // MARK: - Commander.
 
 public final class Commander {
+  /// A closure of `(Error) -> Void` to handle the stderror.
+  public static var errorHandler: ((Swift.Error) -> Void)?
   public static var commands: [AnyCommandRepresentable.Type] = []
   internal static var allCommands: [AnyCommandRepresentable.Type] {
     return [HelpCommand.self] + commands
@@ -91,10 +93,13 @@ public final class Commander {
       try command?.run(with: [String](commands))
       dispatchSuccess()
     } catch {
-      let stderr = FileHandle.standardError
-      defer { stderr.closeFile() }
+      if type(of: self).errorHandler?(error) == nil {
+        let stderr = FileHandle.standardError
+        defer { stderr.closeFile() }
+        
+        "\(String(describing: error))\n".data(using: .utf8).map { stderr.write($0) }
+      }
       
-      "\(String(describing: error))\n".data(using: .utf8).map { stderr.write($0) }
       dispatchFailure()
     }
   }
