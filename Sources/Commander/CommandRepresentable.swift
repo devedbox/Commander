@@ -17,8 +17,6 @@ public protocol AnyCommandRepresentable {
   static var symbol: String { get }
   /// The human-readable usage description of the commands.
   static var usage: String { get }
-  /// The type of the options of the command.
-  static var optionsType: OptionsRepresentable.Type { get }
   
   /// Run the commands with command line arguments.
   ///
@@ -42,10 +40,6 @@ public protocol CommandRepresentable: AnyCommandRepresentable {
 // MARK: -
 
 extension CommandRepresentable {
-  /// The options type of the `CommandRepresentable`.
-  public static var optionsType: OptionsRepresentable.Type {
-    return Options.self
-  }
   /// Run the command with command line arguments.
   public static func run(with commandLineArgs: [String]) throws {
     let options = try Options.decoded(from: commandLineArgs)

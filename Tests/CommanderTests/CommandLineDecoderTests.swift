@@ -11,9 +11,7 @@ import XCTest
 // MARK: - Mocks.
 
 struct SimpleOption: OptionsRepresentable {
-  static var optionKeys: [(CodingKey, OptionKeyDescription)] = []
-  
-  public enum CodingKeys: String, CodingKey {
+  public enum CodingKeys: String, CodingKey, StringRawRepresentable {
     case target
     case verbose
     case path
@@ -25,6 +23,9 @@ struct SimpleOption: OptionsRepresentable {
     let value: String
     let location: UInt8
   }
+  
+  static var description: [(SimpleOption.CodingKeys, OptionKeyDescription)] = []
+  
   let target: String
   let verbose: Bool
   let path: Path
@@ -45,8 +46,14 @@ class CommandLineDecoderTests: XCTestCase {
     print(try! CommanderDecoder().container(from: ["-C", "../path"]))
   }
   
+  func testDecodeArguments() {
+    var value = try! CommanderDecoder().container(from: "-v args".components(separatedBy: " "))
+    XCTAssertNotNil(value.dictionaryValue)
+    XCTAssertEqual(value.dictionaryValue?["v"] as? CommanderDecoder.ObjectFormat.Value, "args")
+  }
+  
   func testDecode() {
-    let commands = ["--target", "sampleTarget", "--verbose", "--path", "value=This is a path,location=12", "--config-path", "../path", "--locs", "1,2,3,4,5,6,7,8,9,0"]
+    let commands = ["--target", "sampleTarget", "sasa", "--verbose", "--path", "value=This is a path,location=12", "--config-path", "../path", "--locs", "1,2,3,4,5,6,7,8,9,0", "--1","--2", "--3"]
     let option = try! CommanderDecoder().decode(SimpleOption.self, from: commands)
     print(option)
   }

@@ -8,14 +8,14 @@
 import Commander
 
 public struct SampleCommand: CommandRepresentable {
-  public struct Options: OptionsRepresentable, Decodable {
-    public enum CodingKeys: String, CodingKey {
+  public struct Options: OptionsRepresentable {
+    public enum CodingKeys: String, CodingKey, StringRawRepresentable {
       case verbose = "verbose"
       case stringValue
     }
     
-    public static let optionKeys: [(CodingKey, OptionKeyDescription)] = [
-      (CodingKeys.verbose, .short("v", usage: ""))
+    public static let description: [Description] = [
+      (.verbose, .short("v", usage: ""))
     ]
     
     public var verbose: Bool = false

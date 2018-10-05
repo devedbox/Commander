@@ -88,9 +88,10 @@ extension CommanderDecoder {
     case decodingError(DecodingError)
     case invalidKeyValuePairs(pairs: [String])
     case unrecognizedArguments([Any])
+    case unrecognizedOptions([String])
     
     private var prefix: String {
-      return "CommanderDecoder Error: "
+      return "Commander Decoder Error: "
     }
     
     public var description: String {
@@ -101,6 +102,8 @@ extension CommanderDecoder {
         return prefix + "Invalid key-value pairs given: \(pairs.joined(separator: " "))"
       case .unrecognizedArguments(let args):
         return prefix + "Unrecognized arguments '\(args.map { String(describing: $0) }.joined(separator: " "))'"
+      case .unrecognizedOptions(let options):
+        return prefix + "Unrecognized options '\(options.joined(separator: " "))'"
       }
     }
   }
@@ -210,11 +213,11 @@ public final class CommanderDecoder {
   internal static var optionsFormat = OptionsFormat.format("--", short: "-")
   internal static var objectFormat = ObjectFormat.flatContainer(splitter: ",", keyValuePairsSplitter: "=")
   
-  internal var optionsDescriptions: [(CodingKey, OptionKeyDescription)]!
+  internal var optionsDescription: [(CodingKey, OptionKeyDescription)]!
   
   public init() { }
   
-  internal func container(from commandLineArgs: [String]) throws -> [String: ObjectFormat.Value] {
+  internal func container(from commandLineArgs: [String]) throws -> ObjectFormat.Value {
     var container: [String: ObjectFormat.Value] = [:]
     var arguments: [[ObjectFormat.Value]] = []
     var option: String?
@@ -227,9 +230,6 @@ public final class CommanderDecoder {
     
     func advanceArguments() throws {
       arguments.append([])
-      guard arguments.filter({ !$0.isEmpty }).count <= 1 else {
-        throw CommanderDecoder.Error.unrecognizedArguments(arguments.first!.map { $0.stringValue! })
-      }
     }
     
     switch type(of: self).optionsFormat {
@@ -265,21 +265,40 @@ public final class CommanderDecoder {
     }
     
     option.map { container[$0] = .init(boolValue: true) }
-    return container
+    
+    
+    let theArguments = arguments.filter({ !$0.isEmpty })
+    if theArguments.count > 1 || (theArguments.count == 1 && arguments.last!.isEmpty) {
+      throw CommanderDecoder.Error.unrecognizedArguments(theArguments.flatMap { $0.map { $0.unwrapped! } })
+    }
+    
+    return ObjectFormat.Value(dictionaryValue: container, arrayValue: theArguments.last)
   }
   
   public func decode<T: OptionsRepresentable>(
     _ type: T.Type,
     from commandLineArgs: [String]) throws -> T
   {
-    optionsDescriptions = T.optionKeys
-    defer { optionsDescriptions = nil }
+    optionsDescription = T.description.map { ($0.0 as CodingKey, $0.1) }
+    defer { optionsDescription = nil }
     
     let container = try self.container(from: commandLineArgs)
-    return try _Decoder(
-      referencing: self,
-      wrapping: .dictionary(container)
-    ).decode(as: type)
+    let decoder = _Decoder(referencing: self, wrapping: container)
+    let decoded = try decoder.decode(as: type)
+    
+    let unrecognizedOptions = container.dictionaryValue!.keys.filter { key in
+      (type.CodingKeys.init(rawValue: key) ?? ((type.description.first {
+        $0.1.shortSymbol == key
+      }?.0.stringValue).flatMap {
+        type.CodingKeys.init(rawValue: $0)
+      })) == nil
+    }
+    
+    guard unrecognizedOptions.isEmpty else {
+      throw CommanderDecoder.Error.unrecognizedOptions(unrecognizedOptions)
+    }
+    
+    return decoded
   }
 }
 
@@ -292,7 +311,7 @@ extension CommanderDecoder {
     fileprivate var container: _KeyedContainer
     internal var userInfo: [CodingUserInfoKey: Any] = [:]
     
-    init(
+    internal init(
       referencing commanderDecoder: CommanderDecoder,
       wrapping value: ObjectFormat.Value,
       at codingPath: [CodingKey] = [])
@@ -352,7 +371,7 @@ extension CommanderDecoder._Decoder {
     }
     
     fileprivate subscript(key: String) -> CommanderDecoder.ObjectFormat.Value? {
-      let value = storage.dictionaryValue?[key] ?? (decoder.optionsDescriptions?.first {
+      let value = storage.dictionaryValue?[key] ?? (decoder.optionsDescription?.first {
         $0.0.stringValue == key
       }?.1).flatMap {
         $0.shortSymbol.flatMap {
