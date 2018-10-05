@@ -8,6 +8,22 @@
 import XCTest
 @testable import Commander
 
+// MARK: - TestsSupports.
+
+extension CommanderDecoder.ObjectFormat.Value {
+  public subscript(key: String) -> Any? {
+    return dictionaryValue?[key]?.unwrapped
+  }
+  
+  public func keyedNestedArray(key: String) -> [Any] {
+    return dictionaryValue?[key]?.arrayValue?.compactMap { $0.unwrapped } ?? []
+  }
+  
+  public var unwrappedArray: [Any] {
+    return arrayValue?.compactMap { $0.unwrapped } ?? []
+  }
+}
+
 // MARK: - Mocks.
 
 struct SimpleOption: OptionsRepresentable {
@@ -49,7 +65,41 @@ class CommandLineDecoderTests: XCTestCase {
   func testDecodeArguments() {
     var value = try! CommanderDecoder().container(from: "-v args".components(separatedBy: " "))
     XCTAssertNotNil(value.dictionaryValue)
-    XCTAssertEqual(value.dictionaryValue?["v"] as? CommanderDecoder.ObjectFormat.Value, "args")
+    XCTAssertNil(value.arrayValue)
+    XCTAssertNil(value.boolValue)
+    XCTAssertNil(value.stringValue)
+    XCTAssertEqual(value["v"] as? String?, "args")
+    
+    value = try! CommanderDecoder().container(from: ["--option1", "value1", "-v", "-t", "-ab"])
+    XCTAssertNotNil(value.dictionaryValue)
+    XCTAssertEqual(value["option1"] as? String?, "value1")
+    XCTAssertEqual(value["v"] as? Bool?, true)
+    XCTAssertEqual(value["t"] as? Bool?, true)
+    XCTAssertEqual(value["a"] as? Bool?, true)
+    XCTAssertEqual(value["b"] as? Bool?, true)
+    
+    value = try! CommanderDecoder().container(from: ["-o", "value1", "-vtab"])
+    XCTAssertNotNil(value.dictionaryValue)
+    XCTAssertEqual(value["o"] as? String?, "value1")
+    XCTAssertEqual(value["v"] as? Bool?, true)
+    XCTAssertEqual(value["t"] as? Bool?, true)
+    XCTAssertEqual(value["a"] as? Bool?, true)
+    XCTAssertEqual(value["b"] as? Bool?, true)
+    
+    value = try! CommanderDecoder().container(from: ["--option", "key1,key2,key3"])
+    XCTAssertNotNil(value.dictionaryValue)
+    XCTAssertEqual(value.keyedNestedArray(key: "option") as? [String], ["key1", "key2", "key3"])
+    value = try! CommanderDecoder().container(from: ["-o", "key1,key2,key3"])
+    XCTAssertNotNil(value.dictionaryValue)
+    XCTAssertEqual(value.keyedNestedArray(key: "o") as? [String], ["key1", "key2", "key3"])
+    
+    do {
+      _ = try CommanderDecoder().container(from: ["--option", "value", "extra", "-v"])
+    } catch CommanderDecoder.Error.unrecognizedArguments(let args) {
+      XCTAssertEqual(args as? [String], ["extra"])
+    } catch {
+      XCTFail()
+    }
   }
   
   func testDecode() {

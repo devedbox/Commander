@@ -223,7 +223,7 @@ public final class CommanderDecoder {
     var option: String?
     var iterator = commandLineArgs.makeIterator()
     
-    func advance(with key: String) {
+    func advance(with key: String?) {
       option.map { container[$0] = .init(boolValue: true) }
       option = key
     }
@@ -245,6 +245,7 @@ public final class CommanderDecoder {
           let symbolIndex = item.endsIndex(matchs: shortSymbol),
           let key = Optional.some(String(item[symbolIndex...]))
         {
+          advance(with: nil)
           if key.isSingle {
             advance(with: key)
           } else {
