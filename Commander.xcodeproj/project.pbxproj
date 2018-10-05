@@ -25,6 +25,7 @@
 		DC0B9B9D2163B56B00C87253 /* CommandLineDecoderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0B9B9C2163B56B00C87253 /* CommandLineDecoderTests.swift */; };
 		DC0B9B9F21647ABA00C87253 /* SampleCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0B9B9E21647ABA00C87253 /* SampleCommand.swift */; };
 		DC0B9BA121648B0600C87253 /* OptionKeyDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0B9BA021648B0600C87253 /* OptionKeyDescription.swift */; };
+		DC0B9BA32167457600C87253 /* misc.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0B9BA22167457500C87253 /* misc.swift */; };
 		OBJ_42 /* Commander.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_11 /* Commander.swift */; };
 		OBJ_43 /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_13 /* Error.swift */; };
 		OBJ_46 /* CommandRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_18 /* CommandRepresentable.swift */; };
@@ -69,6 +70,7 @@
 		DC0B9B9C2163B56B00C87253 /* CommandLineDecoderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandLineDecoderTests.swift; sourceTree = "<group>"; };
 		DC0B9B9E21647ABA00C87253 /* SampleCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleCommand.swift; sourceTree = "<group>"; };
 		DC0B9BA021648B0600C87253 /* OptionKeyDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionKeyDescription.swift; sourceTree = "<group>"; };
+		DC0B9BA22167457500C87253 /* misc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = misc.swift; sourceTree = "<group>"; };
 		OBJ_11 /* Commander.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Commander.swift; sourceTree = "<group>"; };
 		OBJ_13 /* Error.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Error.swift; sourceTree = "<group>"; };
 		OBJ_18 /* CommandRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandRepresentable.swift; sourceTree = "<group>"; };
@@ -109,6 +111,7 @@
 		OBJ_10 /* Commander */ = {
 			isa = PBXGroup;
 			children = (
+				DC0B9BA22167457500C87253 /* misc.swift */,
 				OBJ_13 /* Error.swift */,
 				OBJ_11 /* Commander.swift */,
 				DC0B9B9A216347F000C87253 /* CommanderDecoder.swift */,
@@ -282,6 +285,7 @@
 			files = (
 				OBJ_42 /* Commander.swift in Sources */,
 				DC0B9BA121648B0600C87253 /* OptionKeyDescription.swift in Sources */,
+				DC0B9BA32167457600C87253 /* misc.swift in Sources */,
 				OBJ_43 /* Error.swift in Sources */,
 				OBJ_46 /* CommandRepresentable.swift in Sources */,
 				DC0B9B9B216347F000C87253 /* CommanderDecoder.swift in Sources */,
