@@ -13,6 +13,8 @@ import Foundation
 internal struct HelpCommand: CommandRepresentable {
   /// The options of the `HelpCommand`.
   public struct Options: OptionsRepresentable {
+    /// Type alias for resolve string arguments.
+    public typealias ArgumentsResolver = AnyArgumentsResolver<String>
     /// The coding keys of `Options`.
     public enum CodingKeys: String, CodingKey, StringRawRepresentable {
       case help
@@ -29,21 +31,25 @@ internal struct HelpCommand: CommandRepresentable {
   public static var usage: String = "Prints the help message of the command"
   
   public static func main(_ options: Options) throws {
-    let prefix = "Available commands for \(Commander.runningPath.split(separator: "/").last!):"
-    let template = String(
-      repeating: " ",
-      count: Commander.allCommands.reduce(0) { max($0, $1.symbol.count) }
-    )
-    let commands = Commander.allCommands.map { command -> String in
-      var fixedSymbol = template
-      fixedSymbol.replaceSubrange(
-        command.symbol.startIndex..<command.symbol.endIndex,
-        with: command.symbol
+    if options.arguments.isEmpty {
+      let prefix = "Available commands for \(Commander.runningPath.split(separator: "/").last!):"
+      let template = String(
+        repeating: " ",
+        count: Commander.allCommands.reduce(0) { max($0, $1.symbol.count) }
       )
-      return fixedSymbol + "  " + command.usage
-    }.joined(separator: "\n  ")
-    
-    print(prefix, commands, separator: "\n  ", terminator: "\n")
+      let commands = Commander.allCommands.map { command -> String in
+        var fixedSymbol = template
+        fixedSymbol.replaceSubrange(
+          command.symbol.startIndex..<command.symbol.endIndex,
+          with: command.symbol
+        )
+        return fixedSymbol + "  " + command.usage
+        }.joined(separator: "\n  ")
+      
+      print(prefix, commands, separator: "\n  ", terminator: "\n")
+    } else {
+      print(options.arguments)
+    }
   }
 }
 

@@ -9,6 +9,7 @@ import Commander
 
 public struct SampleCommand: CommandRepresentable {
   public struct Options: OptionsRepresentable {
+    public typealias ArgumentsResolver = AnyArgumentsResolver<String>
     public enum CodingKeys: String, CodingKey, StringRawRepresentable {
       case verbose = "verbose"
       case stringValue = "string-value"
@@ -27,5 +28,6 @@ public struct SampleCommand: CommandRepresentable {
   
   public static func main(_ options: Options) throws {
     print(options)
+    print("arguments: \(options.arguments)")
   }
 }

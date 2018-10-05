@@ -35,7 +35,7 @@ struct SimpleOption: OptionsRepresentable {
     case locs
   }
   
-  struct Path: Decodable {
+  struct Path: Decodable, Hashable {
     let value: String
     let location: UInt8
   }
@@ -49,18 +49,46 @@ struct SimpleOption: OptionsRepresentable {
   let locs: [UInt8]
 }
 
+struct ArgumentsOptions: OptionsRepresentable {
+  typealias ArgumentsResolver = AnyArgumentsResolver<String>
+  enum CodingKeys: String, CodingKey, StringRawRepresentable {
+    case bool
+  }
+  static var description: [(CodingKeys, OptionKeyDescription)] = []
+  
+  let bool: Bool
+}
+
+struct ComplexArgumentsOptions: OptionsRepresentable {
+  typealias ArgumentsResolver = AnyArgumentsResolver<String>
+  enum CodingKeys: String, CodingKey, StringRawRepresentable {
+    case bool
+    case string
+    case int
+  }
+  static var description: [(CodingKeys, OptionKeyDescription)] = [
+    (.bool, .short("b", usage: "")),
+    (.string, .short("S", usage: "")),
+    (.int, .short("i", usage: "")),
+  ]
+  
+  let bool: Bool
+  let string: String
+  let int: Int
+}
+
 // MARK: - CommandLineDecoderTests.
 
 class CommandLineDecoderTests: XCTestCase {
   static var allTests = [
     ("testDecodeInContainer", testDecodeInContainer),
-    ("testDecode", testDecode),
+    ("testDecodeSimpleOptions", testDecodeSimpleOptions),
   ]
   
   func testDecodeInContainer() {
     var value = try! CommanderDecoder().container(from: "-v args".components(separatedBy: " "))
     XCTAssertNotNil(value.dictionaryValue)
-    XCTAssertNil(value.arrayValue)
+    XCTAssertNotNil(value.arrayValue)
     XCTAssertNil(value.boolValue)
     XCTAssertNil(value.stringValue)
     XCTAssertEqual(value["v"] as? String?, "args")
@@ -87,27 +115,82 @@ class CommandLineDecoderTests: XCTestCase {
     value = try! CommanderDecoder().container(from: ["-o", "key1,key2,key3"])
     XCTAssertNotNil(value.dictionaryValue)
     XCTAssertEqual(value.keyedNestedArray(key: "o") as? [String], ["key1", "key2", "key3"])
-    
+  }
+  
+  func testDecodeSimpleOptions() {
+    let commands = [
+      "--target", "target",
+      "--verbose",
+      "--path", "value=This is a path,location=12",
+      "--config-path", "../path",
+      "--locs", "1,2,3,4,5,6,7,8,9,0"
+    ]
     do {
-      _ = try CommanderDecoder().container(from: ["--option", "value", "extra", "-v"])
-    } catch CommanderDecoder.Error.unrecognizedArguments(let args) {
-      XCTAssertEqual(args as? [String], ["extra"])
-    } catch {
-      XCTFail()
-    }
-    
-    do {
-      _ = try CommanderDecoder().container(from: ["--option", "value", "extra1", "-v", "verbose", "extra2", "-t"])
-    } catch CommanderDecoder.Error.unrecognizedArguments(let args) {
-      XCTAssertEqual(args as? [String], ["extra1", "extra2"])
+      let option = try CommanderDecoder().decode(SimpleOption.self, from: commands)
+      XCTAssertEqual(option.target, "target")
+      XCTAssertEqual(option.verbose, true)
+      XCTAssertEqual(option.path.value, "This is a path")
+      XCTAssertEqual(option.path.location, 12)
+      XCTAssertEqual(option.configPath, "../path")
+      XCTAssertEqual(Set(option.locs), [1,2,3,4,5,6,7,8,9,0])
     } catch {
       XCTFail()
     }
   }
   
-  func testDecode() {
-    let commands = ["--target", "sampleTarget", "sasa", "--verbose", "--path", "value=This is a path,location=12", "--config-path", "../path", "--locs", "1,2,3,4,5,6,7,8,9,0", "--1","--2", "--3"]
-    let option = try! CommanderDecoder().decode(SimpleOption.self, from: commands)
-    print(option)
+  func testDecodeArgumentsOptions() {
+    let options = try! CommanderDecoder().decode(ArgumentsOptions.self, from: ["--bool", "boolValue", "args1", "args2"])
+    XCTAssertEqual(options.arguments, ["boolValue", "args1", "args2"])
+    
+    do {
+      _ = try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-b", "Bool", "-S", "String", "-i", "5"])
+      XCTFail()
+    } catch CommanderDecoder.Error.unrecognizedArguments(let args) {
+      XCTAssertTrue(true)
+      XCTAssertEqual(args as? [String], ["Bool"])
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      _ = try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-b", "Bool", "-S", "String", "InvalidString", "-i", "5"])
+      XCTFail()
+    } catch CommanderDecoder.Error.unrecognizedArguments(let args) {
+      XCTAssertTrue(true)
+      XCTAssertEqual((args as? [String]).map { Set($0) }, ["Bool", "InvalidString"])
+    } catch {
+      XCTFail()
+    }
+  }
+  
+  func testDecodeErrors() {
+    do {
+      _ = try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-b", "Bool", "-S", "String", "-i", "5"])
+      XCTFail()
+    } catch CommanderDecoder.Error.unrecognizedArguments(_) {
+      XCTAssertTrue(true)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      _ = try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-b", "-S", "String", "-i", "Int"])
+      XCTFail()
+    } catch CommanderDecoder.Error.decodingError(DecodingError.valueNotFound(let type, _)) {
+      XCTAssertTrue(true)
+      XCTAssertTrue(type is Int.Type)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      _ = try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-S", "String", "-i", "Int"])
+      XCTFail()
+    } catch CommanderDecoder.Error.decodingError(DecodingError.keyNotFound(let key, _)) {
+      XCTAssertTrue(true)
+      XCTAssertEqual(key.stringValue, ComplexArgumentsOptions.CodingKeys.bool.stringValue)
+    } catch {
+      XCTFail()
+    }
   }
 }

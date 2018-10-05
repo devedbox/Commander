@@ -54,7 +54,7 @@ extension DecodingError {
   /// - parameter expectation: The type expected to be encountered.
   /// - parameter reality: The value that was encountered instead of the expected type.
   /// - returns: A `DecodingError` with the appropriate path and debug description.
-  fileprivate static func __typeMismatch(at path: [CodingKey], expectation: Any.Type, reality: Any) -> DecodingError {
+  fileprivate static func __typeMismatch(at path: [CodingKey], expectation: Any.Type, reality: Any?) -> DecodingError {
     let description = "Expected to decode \(expectation) but found \(__typeDescription(of: reality)) instead."
     return .typeMismatch(expectation, Context(codingPath: path, debugDescription: description))
   }
@@ -89,6 +89,7 @@ extension CommanderDecoder {
     case invalidKeyValuePairs(pairs: [String])
     case unrecognizedArguments([Any])
     case unrecognizedOptions([String])
+    case unresolvableArguments
     
     private var prefix: String {
       return "Commander Decoder Error: "
@@ -104,6 +105,8 @@ extension CommanderDecoder {
         return prefix + "Unrecognized arguments '\(args.map { String(describing: $0) }.joined(separator: " "))'"
       case .unrecognizedOptions(let options):
         return prefix + "Unrecognized options '\(options.joined(separator: " "))'"
+      case .unresolvableArguments:
+        return prefix + "The arguments can not be resolved"
       }
     }
   }
@@ -120,6 +123,32 @@ extension CommanderDecoder {
 
 // MARK: - ObjectFormat.
 
+fileprivate extension Dictionary where Value == CommanderDecoder.ObjectFormat.Value {
+  fileprivate var unwrapped: Any? {
+    return mapValues { $0.unwrapped }
+  }
+}
+
+fileprivate extension Dictionary where Key == String, Value == [CommanderDecoder.ObjectFormat.Value] {
+  fileprivate var lastKeyedArguments: (key: Key, value: Value)? {
+    return self.first { $0.key.hasSuffix("-\(count-1)") }
+  }
+  
+  fileprivate var lastArguments: Value? {
+    return lastKeyedArguments?.1
+  }
+  
+  fileprivate mutating func lastAppendEmptyContainer(for key: String) {
+    self["\(key)-\(count)"] = []
+  }
+}
+
+fileprivate extension Array where Element == CommanderDecoder.ObjectFormat.Value {
+  fileprivate var unwrapped: Any? {
+    return compactMap { $0.unwrapped }
+  }
+}
+
 extension CommanderDecoder {
   /// The object format of the value of options.
   internal enum ObjectFormat {
@@ -130,17 +159,17 @@ extension CommanderDecoder {
       }
       
       /// Underlying dictionary value of `[String: Value]`.
-      internal let dictionaryValue: [String: Value]?
+      internal var dictionaryValue: [String: Value]?
       /// Underlying array value of `[Value]`.
-      internal let arrayValue: [Value]?
+      internal var arrayValue: [Value]?
       /// Underlying string value of `String`.
       internal let stringValue: String?
       /// Underlying bool value of `Bool`.
-      internal let boolValue: Bool?
+      internal var boolValue: Bool?
       
       /// Returns the unwrapped underlying value.
       internal var unwrapped: Any? {
-        return dictionaryValue ?? arrayValue ?? stringValue ?? boolValue
+        return dictionaryValue?.unwrapped ?? arrayValue?.unwrapped ?? stringValue ?? boolValue
       }
       
       internal init(
@@ -214,33 +243,30 @@ public final class CommanderDecoder {
   internal static var objectFormat = ObjectFormat.flatContainer(splitter: ",", keyValuePairsSplitter: "=")
   
   internal var optionsDescription: [(CodingKey, OptionKeyDescription)]!
+  private(set) var codingArguments: [String: [ObjectFormat.Value]]!
   
   public init() { }
   
   internal func container(from commandLineArgs: [String]) throws -> ObjectFormat.Value {
     var container: [String: ObjectFormat.Value] = [:]
-    var arguments: [[ObjectFormat.Value]] = []
+    var arguments: [String: [ObjectFormat.Value]] = ["command-0":[]]
     var option: String?
-    var iterator = commandLineArgs.makeIterator()
     
     func advance(with key: String?) {
       option.map { container[$0] = .init(boolValue: true) }
       option = key
     }
     
-    func advanceArguments() {
-      arguments.append([])
-    }
-    
     switch type(of: self).optionsFormat {
     case .format(let symbol, short: let shortSymbol):
-      while let item = iterator.next() {
+      var index = commandLineArgs.startIndex
+      while index < commandLineArgs.endIndex, let item = Optional.some(commandLineArgs[index]) {
         if
           let symbolIndex = item.endsIndex(matchs: symbol),
           let key = Optional.some(String(item[symbolIndex...]))
         {
           advance(with: key)
-          advanceArguments()
+          arguments.lastAppendEmptyContainer(for: key)
         } else if
           let symbolIndex = item.endsIndex(matchs: shortSymbol),
           let key = Optional.some(String(item[symbolIndex...]))
@@ -252,27 +278,32 @@ public final class CommanderDecoder {
             key.forEach { container[String($0)] = .init(boolValue: true) }
             option = nil
           }
-          advanceArguments()
+          arguments.lastAppendEmptyContainer(for: key)
         } else {
-          let value = try type(of: self).objectFormat.value(for: item)
+          var value = try type(of: self).objectFormat.value(for: item)
+          value.boolValue = true
           if option == nil {
-            arguments.lastAppend(value)
+            var last = arguments.lastKeyedArguments
+            last?.value.append(value)
+            last.map { arguments[$0.key] = $0.value }
           } else {
             container[option!] = value
             option = nil
           }
         }
+        
+        commandLineArgs.formIndex(after: &index)
       }
     }
     
     option.map { container[$0] = .init(boolValue: true) }
     
-    let theArguments = arguments.filter({ !$0.isEmpty })
-    if theArguments.count > 1 || (theArguments.count == 1 && arguments.last!.isEmpty) {
-      throw CommanderDecoder.Error.unrecognizedArguments(theArguments.flatMap { $0.map { $0.unwrapped! } })
-    }
-    
-    return ObjectFormat.Value(dictionaryValue: container, arrayValue: theArguments.last)
+    return ObjectFormat.Value(
+      dictionaryValue: container,
+      arrayValue: [.dictionary(arguments.mapValues {
+        ObjectFormat.Value.array($0)
+      })]
+    )
   }
   
   public func decode<T: OptionsRepresentable>(
@@ -282,9 +313,10 @@ public final class CommanderDecoder {
     optionsDescription = T.description.map { ($0.0 as CodingKey, $0.1) }
     defer { optionsDescription = nil }
     
-    let container = try self.container(from: commandLineArgs)
+    var container = try self.container(from: commandLineArgs)
+    codingArguments = container.arrayValue?.first?.dictionaryValue?.mapValues { $0.arrayValue! }
     
-    let unrecognizedOptions = container.dictionaryValue!.keys.filter { key in
+    let unrecognizedOptions = container.dictionaryValue?.keys.filter { key in
       (type.CodingKeys.init(rawValue: key) ?? ((type.description.first {
         $0.1.shortSymbol.map { String($0) } == key
       }?.0.stringValue).flatMap {
@@ -292,14 +324,43 @@ public final class CommanderDecoder {
       })) == nil
     }
     
-    guard unrecognizedOptions.isEmpty else {
-      throw CommanderDecoder.Error.unrecognizedOptions(unrecognizedOptions)
+    guard unrecognizedOptions?.isEmpty ?? true else {
+      throw CommanderDecoder.Error.unrecognizedOptions(unrecognizedOptions!)
     }
     
     let decoder = _Decoder(referencing: self, wrapping: container)
-    let decoded = try decoder.decode(as: type)
+    var decoded = try decoder.decode(as: type)
+    
+    let validArguments = codingArguments.filter { !$0.value.isEmpty }
+    
+    if
+      let isLastArgumentsEmpty = codingArguments.lastArguments?.isEmpty,
+      isLastArgumentsEmpty,
+      !validArguments.isEmpty
+    {
+      throw CommanderDecoder.Error.unrecognizedArguments(Array(validArguments.values.flatMap { $0 }).compactMap { $0.unwrapped })
+    } else {
+      if !validArguments.isEmpty {
+        container.arrayValue = Array(validArguments.values).last
+        if let args = container.arrayValue, !args.isEmpty {
+          decoder.container = .init(container, referencing: self)
+          decoder.storage = .init()
+          decoder.storage.push(container)
+          decoded.arguments = try decoder.decode(as: [T.ArgumentsResolver.Arguments].self)
+        }
+      }
+    }
     
     return decoded
+  }
+  
+  private func spitArgument(for key: CodingKey, with value: ObjectFormat.Value) {
+    var arguments = codingArguments.first { arg in
+      arg.key.hasPrefix(key.stringValue) ||
+      shortKey(for: key, in: optionsDescription!).map { arg.key.hasPrefix(String($0)) } ?? false
+    }
+    arguments?.value.insert(value, at: 0)
+    arguments.map { codingArguments[$0.key] = $0.value }
   }
 }
 
@@ -324,7 +385,12 @@ extension CommanderDecoder {
     
     func container<Key>(keyedBy type: Key.Type) throws -> KeyedDecodingContainer<Key> where Key : CodingKey {
       guard let top = storage.top?.dictionaryValue else {
-        throw DecodingError.typeMismatch([String: ObjectFormat.Value].self, .init(codingPath: codingPath, debugDescription: ""))
+        throw CommanderDecoder.Error.decodingError(
+          .__typeMismatch(
+            at: codingPath,
+            expectation: [String: ObjectFormat.Value].self,
+            reality: storage.lastUnwrapped)
+        )
       }
       
       return KeyedDecodingContainer<Key>(
@@ -340,7 +406,12 @@ extension CommanderDecoder {
     
     func unkeyedContainer() throws -> UnkeyedDecodingContainer {
       guard let top = storage.top?.arrayValue else {
-        throw DecodingError.typeMismatch([ObjectFormat.Value].self, .init(codingPath: codingPath, debugDescription: ""))
+        throw CommanderDecoder.Error.decodingError(
+          .__typeMismatch(
+            at: codingPath,
+            expectation: [String: ObjectFormat.Value].self,
+            reality: storage.lastUnwrapped)
+        )
       }
       
       return _UnkeyedDecodingContainer(referencing: self, wrapping: top)
@@ -690,7 +761,20 @@ extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
   }
   
   internal func decode(_ type: Bool.Type) throws -> Bool {
-    guard let value = storage.lastUnwrapped as? Bool else {
+    let unwrapped = storage.lastUnwrapped
+    if !(unwrapped is Bool?) {
+      let value: CommanderDecoder.ObjectFormat.Value
+      if let dict = storage.top?.dictionaryValue, !dict.isEmpty {
+        value = .dictionary(dict)
+      } else if let array = storage.top?.arrayValue, !array.isEmpty {
+        value = .array(array)
+      } else {
+        value = .init(stringValue: storage.top?.stringValue)
+      }
+      container.decoder.spitArgument(for: codingPath.last!, with: value)
+    }
+    
+    guard let value = storage.top?.boolValue else {
       throw CommanderDecoder.Error.decodingError(
         .valueNotFound(
           type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
