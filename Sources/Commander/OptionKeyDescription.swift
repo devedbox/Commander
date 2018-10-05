@@ -11,7 +11,7 @@
 /// symbol of the Options and usage description of the Options.
 public struct OptionKeyDescription {
   /// Optional short symbol of the `OptionKeyDescription`.
-  public let shortSymbol: String?
+  public let shortSymbol: Character?
   /// Required usage description of the `OptionKeyDescription`.
   public let usage: String
   
@@ -22,7 +22,7 @@ public struct OptionKeyDescription {
   ///
   /// - Returns: The instance of `OptionKeyDescription` with short symbol and usage.
   public static func short(
-    _ shortSymbol: String,
+    _ shortSymbol: Character,
     usage: String) -> OptionKeyDescription
   {
     return OptionKeyDescription(

@@ -289,7 +289,7 @@ public final class CommanderDecoder {
     
     let unrecognizedOptions = container.dictionaryValue!.keys.filter { key in
       (type.CodingKeys.init(rawValue: key) ?? ((type.description.first {
-        $0.1.shortSymbol == key
+        $0.1.shortSymbol.map { String($0) } == key
       }?.0.stringValue).flatMap {
         type.CodingKeys.init(rawValue: $0)
       })) == nil
@@ -376,7 +376,7 @@ extension CommanderDecoder._Decoder {
         $0.0.stringValue == key
       }?.1).flatMap {
         $0.shortSymbol.flatMap {
-          storage.dictionaryValue?[$0]
+          storage.dictionaryValue?[String($0)]
         }
       }
       return value

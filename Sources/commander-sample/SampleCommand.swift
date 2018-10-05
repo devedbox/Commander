@@ -11,7 +11,7 @@ public struct SampleCommand: CommandRepresentable {
   public struct Options: OptionsRepresentable {
     public enum CodingKeys: String, CodingKey, StringRawRepresentable {
       case verbose = "verbose"
-      case stringValue
+      case stringValue = "string-value"
     }
     
     public static let description: [Description] = [
@@ -19,7 +19,7 @@ public struct SampleCommand: CommandRepresentable {
     ]
     
     public var verbose: Bool = false
-    public let stringValue: String?
+    public var stringValue: String = ""
   }
   
   public static let symbol: String = "sample"
