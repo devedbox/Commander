@@ -9,13 +9,13 @@ import Foundation
 
 // MARK: -
 
-extension String {
+internal extension String {
   /// Perform the exact match with the given pattern and return the index where match ends.
   ///
   /// - Parameter pattern: The pattern to be matched.
   /// - Returns: The ends index.
-  fileprivate func endsIndex(matchs pattern: String) -> Index? {
-    guard !isEmpty else {
+  internal func endsIndex(matchs pattern: String) -> Index? {
+    guard !isEmpty, endIndex >= pattern.endIndex else {
       return nil
     }
     
@@ -31,7 +31,7 @@ extension String {
     return index
   }
   /// Returns a bool value indicates if the string is containing only one character.
-  public var isSingle: Bool {
+  internal var isSingle: Bool {
     return startIndex == index(before: endIndex)
   }
 }
@@ -216,7 +216,7 @@ extension CommanderDecoder {
         if string.contains(splitter) {
           let elements = string.split(separator: splitter)
           if string.contains(keyValuePairsSplitter) {
-            dictContainer = try? elements.reduce([:], { result, next -> [String: Value] in
+            dictContainer = try elements.reduce([:], { result, next -> [String: Value] in
               let keyValuePairs = next.split(separator: keyValuePairsSplitter)
               guard keyValuePairs.count == 2 else {
                 throw Error.invalidKeyValuePairs(pairs: keyValuePairs.map { String($0) })
@@ -391,20 +391,14 @@ extension CommanderDecoder {
     func container<Key>(keyedBy type: Key.Type) throws -> KeyedDecodingContainer<Key> where Key : CodingKey {
       guard let top = storage.top?.dictionaryValue else {
         throw CommanderDecoder.Error.decodingError(
-          .__typeMismatch(
-            at: codingPath,
-            expectation: [String: ObjectFormat.Value].self,
-            reality: storage.lastUnwrapped)
+          .__typeMismatch(at: codingPath, expectation: [String: Any].self, reality: nil)
         )
       }
       
       return KeyedDecodingContainer<Key>(
         _KeyedDecodingContainer(
           referencing: self,
-          wrapping: _Decoder._KeyedContainer(
-            .init(dictionaryValue: top),
-            referencing: container.decoder
-          )
+          wrapping: _Decoder._KeyedContainer( .init(dictionaryValue: top), referencing: container.decoder)
         )
       )
     }
@@ -412,10 +406,7 @@ extension CommanderDecoder {
     func unkeyedContainer() throws -> UnkeyedDecodingContainer {
       guard let top = storage.top?.arrayValue else {
         throw CommanderDecoder.Error.decodingError(
-          .__typeMismatch(
-            at: codingPath,
-            expectation: [String: ObjectFormat.Value].self,
-            reality: storage.lastUnwrapped)
+          .__typeMismatch(at: codingPath, expectation: [Any].self, reality: nil)
         )
       }
       
@@ -570,9 +561,8 @@ extension CommanderDecoder._Decoder {
       }
       
       guard let dictionary = value.dictionaryValue else {
-        throw DecodingError.typeMismatch(
-          [String: CommanderDecoder.ObjectFormat.Value].self,
-          .init(codingPath: codingPath, debugDescription: "")
+        throw CommanderDecoder.Error.decodingError(
+          .__typeMismatch(at: codingPath, expectation: [String: Any].self, reality: value.unwrapped)
         )
       }
       
@@ -601,7 +591,7 @@ extension CommanderDecoder._Decoder {
       
       guard let array = value.arrayValue else {
         throw CommanderDecoder.Error.decodingError(
-          .__typeMismatch(at: codingPath, expectation: [CommanderDecoder.ObjectFormat.Value].self, reality: type(of: value.unwrapped))
+          .__typeMismatch(at: codingPath, expectation: [Any].self, reality: type(of: value.unwrapped))
         )
       }
       
@@ -695,9 +685,8 @@ extension CommanderDecoder._Decoder {
       let value = self.container[currentIndex]
       
       guard let dictionary = value.dictionaryValue else {
-        throw DecodingError.typeMismatch(
-          [String: CommanderDecoder.ObjectFormat.Value].self,
-          .init(codingPath: codingPath, debugDescription: "")
+        throw CommanderDecoder.Error.decodingError(
+          .__typeMismatch(at: codingPath, expectation: [String: Any].self, reality: value.unwrapped)
         )
       }
       
@@ -727,7 +716,7 @@ extension CommanderDecoder._Decoder {
       
       guard let array = value.arrayValue else {
         throw CommanderDecoder.Error.decodingError(
-          .__typeMismatch(at: codingPath, expectation: [CommanderDecoder.ObjectFormat.Value].self, reality: type(of: value.unwrapped))
+          .__typeMismatch(at: codingPath, expectation: [Any].self, reality: type(of: value.unwrapped))
         )
       }
       
