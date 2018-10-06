@@ -257,7 +257,9 @@ class CommanderDecoderTests: XCTestCase {
       "--float", "11",
       "--double", "12",
       "--string", "string",
-      "--int-array", "1,2,3",
+      "--int-array", "1",
+      "--int-array", "2",
+      "--int-array", "3",
       "--int8-array", "1,2,3",
       "--int16-array", "1,2,3",
       "--int32-array", "1,2,3",
@@ -267,7 +269,9 @@ class CommanderDecoderTests: XCTestCase {
       "--uint16-array", "1,2,3",
       "--uint32-array", "1,2,3",
       "--uint64-array", "1,2,3",
-      "--float-array", "1,2,3",
+      "--float-array", "1",
+      "--float-array", "2",
+      "--float-array", "3",
       "--double-array", "1,2,3",
       "--string-array", "1,2,3",
       "--int-dict", "1=1,2=2,3=3",
@@ -390,6 +394,7 @@ class CommanderDecoderTests: XCTestCase {
     XCTAssertNoThrow(try CommanderDecoder().decode(KeyedOptions.self, from: ["--dict", "key1=val1,key2=val2"]))
     do {
       _ = try CommanderDecoder().decode(KeyedOptions.self, from: ["--dict", "key1=val1=3,key2=val2"])
+      XCTFail()
     } catch CommanderDecoder.Error.invalidKeyValuePairs(pairs: let pairs) {
       XCTAssertEqual(Set(pairs), ["key1", "val1", "3"])
       XCTAssertFalse(CommanderDecoder.Error.invalidKeyValuePairs(pairs: pairs).description.isEmpty)
@@ -398,7 +403,18 @@ class CommanderDecoderTests: XCTestCase {
     }
     
     do {
+      _ = try CommanderDecoder().decode(KeyedOptions.self, from: ["--dict", "key1=val1,key2=val2", "--dict", "key1=val1,key2=val2"])
+      XCTFail()
+    } catch CommanderDecoder.Error.decodingError(DecodingError.typeMismatch(let type, let ctx)) {
+      XCTAssertTrue(type is [String: Any].Type)
+      XCTAssertFalse(CommanderDecoder.Error.decodingError(DecodingError.typeMismatch(type, ctx)).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
       _ = try CommanderDecoder().decode(KeyedOptions.self, from: ["--dict", "key1=val1,key2=val2", "-d"])
+      XCTFail()
     } catch CommanderDecoder.Error.unrecognizedOptions(let options) {
       XCTAssertEqual(Set(options), ["d"])
       XCTAssertFalse(CommanderDecoder.Error.unrecognizedOptions(options).description.isEmpty)
@@ -412,6 +428,36 @@ class CommanderDecoderTests: XCTestCase {
     } catch CommanderDecoder.Error.unrecognizedArguments( let args) {
       XCTAssertTrue(true)
       XCTAssertFalse(CommanderDecoder.Error.unrecognizedArguments(args).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      _ = try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-b", "-S", "String", "--string", "String", "-i", "5"])
+      XCTFail()
+    } catch CommanderDecoder.Error.decodingError(DecodingError.typeMismatch(let type, let ctx)) {
+      XCTAssertTrue(type is String.Type)
+      XCTAssertFalse(CommanderDecoder.Error.decodingError(DecodingError.typeMismatch(type, ctx)).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      _ = try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-b", "--string", "String", "--string", "String", "-i", "5"])
+      XCTFail()
+    } catch CommanderDecoder.Error.decodingError(DecodingError.typeMismatch(let type, let ctx)) {
+      XCTAssertTrue(type is String.Type)
+      XCTAssertFalse(CommanderDecoder.Error.decodingError(DecodingError.typeMismatch(type, ctx)).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      _ = try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-b", "-S", "String", "-S", "String", "-i", "5"])
+      XCTFail()
+    } catch CommanderDecoder.Error.decodingError(DecodingError.typeMismatch(let type, let ctx)) {
+      XCTAssertTrue(type is String.Type)
+      XCTAssertFalse(CommanderDecoder.Error.decodingError(DecodingError.typeMismatch(type, ctx)).description.isEmpty)
     } catch {
       XCTFail()
     }

@@ -91,9 +91,7 @@ extension OptionsRepresentable {
   }
   /// Returns the options description list.
   public static var description: [(CodingKey, OptionKeyDescription)] {
-    return description.map {
-      (CommanderDecoder._Decoder._Key(stringValue: $0.0.stringValue)!, $0.1)
-    }
+    return description.map { ($0.0 as CodingKey, $0.1) }
   }
   /// Returns the type of the argument.
   public static var argumentType: Decodable.Type {

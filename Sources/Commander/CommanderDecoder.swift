@@ -260,6 +260,25 @@ public final class CommanderDecoder {
       option = key
     }
     
+    func set(value: ObjectFormat.Value, for key: String) {
+      var optionKey = key
+      if key.isSingle, let symbolKey = optionsDescription?.first(where: { $0.1.shortSymbol == key.first })?.0.stringValue {
+        optionKey = symbolKey
+      }
+      
+      if var optionValue = container[optionKey] { // Consider an array.
+        if var array = optionValue.arrayValue {
+          array.append(value)
+          optionValue.arrayValue = array
+          container[optionKey] = optionValue
+        } else {
+          container[optionKey] = .array([optionValue, value])
+        }
+      } else {
+        container[optionKey] = value
+      }
+    }
+    
     switch type(of: self).optionsFormat {
     case .format(let symbol, short: let shortSymbol):
       var index = commandLineArgs.startIndex
@@ -290,7 +309,7 @@ public final class CommanderDecoder {
             last?.value.append(value)
             last.map { arguments[$0.key] = $0.value }
           } else {
-            container[option!] = value
+            set(value: value, for: option!)
             option = nil
           }
         }
@@ -752,7 +771,7 @@ extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
   
   private func unwrap<T: Decodable & _StringInitable>(as type: T.Type) throws -> T {
     var unwrapped = storage.lastUnwrapped
-    if T.self == String.self {
+    if T.self == String.self, unwrapped is Bool? {
       unwrapped = storage.top?.stringValue
     }
     
