@@ -42,7 +42,9 @@ internal struct HelpCommand: CommandRepresentable {
   internal static func run(with commandLineArgs: [String]) throws {
     switch CommanderDecoder.optionsFormat {
     case .format(let symbol, short: let shortSymbol):
-      let options = commandLineArgs.filter { $0.hasPrefix(symbol) || $0.hasPrefix(shortSymbol) }
+      let options = commandLineArgs.filter {
+        ($0.hasPrefix(symbol) || $0.hasPrefix(shortSymbol)) && ($0 != "--help" && $0 != "-h")
+      }
       if !options.isEmpty {
         throw CommanderDecoder.Error.unrecognizedOptions(options.map {
           let index = $0.endsIndex(matchs: symbol) ?? $0.endsIndex(matchs: shortSymbol)
@@ -80,7 +82,7 @@ internal struct HelpCommand: CommandRepresentable {
       Commands:
       
       """
-      let sample = String(repeating: " ",count: Commander.allCommands.reduce(0) { max($0, $1.symbol.count) })
+      let sample = String(repeating: " ", count: Commander.allCommands.reduce(0) { max($0, $1.symbol.count) })
       let commands = Commander.allCommands.map { command -> String in
         var fixedSymbol = sample
         fixedSymbol.replaceSubrange(command.symbol.startIndex..<command.symbol.endIndex, with: command.symbol)
@@ -88,6 +90,7 @@ internal struct HelpCommand: CommandRepresentable {
       }.joined(separator: "\n\(intents(1))")
       
       print(prefix, commands, "\nDescriptions:", separator: "\n  ", terminator: "\n\n", to: &stdout)
+      
       var options = Options(help: nil, intents: 1)
       options.arguments = Commander.commands.map { $0.symbol }
       try self.main(options)
@@ -184,6 +187,8 @@ public final class Commander {
   /// Creates a commander instance.
   public init() { }
   
+  /// Decoding the current command line arguments of `CommandLine.arguments` as the current command's
+  /// options type and dispatch the command with the decoded options.
   public func dispatch() -> Never {
     type(of: self).runningPath = CommandLine.arguments.first
     defer { type(of: self).runningPath = nil }
