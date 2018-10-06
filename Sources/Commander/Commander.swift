@@ -89,9 +89,9 @@ public final class Commander {
           try HelpCommand.run(with: [symbol!] + commands)
         } else {
           if let commandSymbol = symbol {
-            throw Error.invalidCommand(command: commandSymbol)
+            throw CommanderError.invalidCommand(command: commandSymbol)
           } else {
-            throw Error.emptyCommand
+            throw CommanderError.emptyCommand
           }
         }
       }

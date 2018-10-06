@@ -5,7 +5,7 @@
 //  Created by devedbox on 2018/7/4.
 //
 
-public enum Error: Swift.Error, CustomStringConvertible {
+public enum CommanderError: Swift.Error, CustomStringConvertible {
   case invalidCommand(command: String)
   case emptyCommand
   
