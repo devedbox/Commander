@@ -33,6 +33,6 @@ let package = Package(
       dependencies: ["Commander"]),
     .testTarget(
       name: "CommanderTests",
-      dependencies: ["Commander"], "commander_sample"),
+      dependencies: ["Commander"]),
     ]
 )
