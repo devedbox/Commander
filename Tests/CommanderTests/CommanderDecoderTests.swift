@@ -337,7 +337,10 @@ class CommanderDecoderTests: XCTestCase {
       "--verbose",
       "--path", "value=This is a path,location=12",
       "--config-path", "../path",
-      "--locs", "1,2,3,4,5,6,7,8,9,0"
+      "--locs", "1,2,3,4,5,6,7",
+      "--locs", "8",
+      "--locs", "9",
+      "--locs", "0",
     ]
     do {
       var option = try CommanderDecoder().decode(SimpleOption.self, from: commands)

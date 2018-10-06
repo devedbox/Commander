@@ -5,8 +5,6 @@
 //  Created by devedbox on 2018/10/2.
 //
 
-import Foundation
-
 // MARK: -
 
 internal extension String {
@@ -68,11 +66,11 @@ extension DecodingError {
   /// - returns: A string describing `value`.
   /// - precondition: `value` is one of the types below.
   fileprivate static func __typeDescription(of value: Any?) -> String {
-    if value is NSNull || value == nil {
+    if /* value is NSNull || */ value == nil {
       return "a null value"
-    } else if value is NSNumber /* FIXME: If swift-corelibs-foundation isn't updated to use NSNumber, this check will be necessary: || value is Int || value is Double */ {
+    }/* else if value is NSNumber /* FIXME: If swift-corelibs-foundation isn't updated to use NSNumber, this check will be necessary: || value is Int || value is Double */ {
       return "a number"
-    } else if value is String {
+    } */else if value is String {
       return "a string/data"
     } else if value is [Any] {
       return "an array"
@@ -255,11 +253,6 @@ public final class CommanderDecoder {
     var arguments: [String: [ObjectFormat.Value]] = ["command-0":[]]
     var option: String?
     
-    func advance(with key: String?) {
-      option.map { container[$0] = .init(boolValue: true) }
-      option = key
-    }
-    
     func set(value: ObjectFormat.Value, for key: String) {
       var optionKey = key
       if key.isSingle, let symbolKey = optionsDescription?.first(where: { $0.1.shortSymbol == key.first })?.0.stringValue {
@@ -277,6 +270,11 @@ public final class CommanderDecoder {
       } else {
         container[optionKey] = value
       }
+    }
+    
+    func advance(with key: String?) {
+      option.map { set(value: .bool(true), for: $0) }
+      option = key
     }
     
     switch type(of: self).optionsFormat {
@@ -297,7 +295,7 @@ public final class CommanderDecoder {
           if key.isSingle {
             advance(with: key)
           } else {
-            key.forEach { container[String($0)] = .init(boolValue: true) }
+            key.forEach { set(value: .bool(true), for: String($0)) }
             option = nil
           }
           arguments.lastAppendEmptyContainer(for: key)
@@ -341,11 +339,7 @@ public final class CommanderDecoder {
     defer { codingArguments = nil }
     
     let unrecognizedOptions = container.dictionaryValue?.keys.filter { key in
-      (type.CodingKeys.init(rawValue: key) ?? ((type.description.first {
-        $0.1.shortSymbol.map { String($0) } == key
-      }?.0.stringValue).flatMap {
-        type.CodingKeys.init(rawValue: $0)
-      })) == nil
+      type.CodingKeys.init(rawValue: key) == nil
     }
     
     guard unrecognizedOptions?.isEmpty ?? true else {
@@ -458,14 +452,7 @@ extension CommanderDecoder._Decoder {
     }
     
     fileprivate subscript(key: String) -> CommanderDecoder.ObjectFormat.Value? {
-      let value = storage.dictionaryValue?[key] ?? (decoder.optionsDescription?.first {
-        $0.0.stringValue == key
-      }?.1).flatMap {
-        $0.shortSymbol.flatMap {
-          storage.dictionaryValue?[String($0)]
-        }
-      }
-      return value
+      return storage.dictionaryValue?[key]
     }
   }
 }
