@@ -37,7 +37,19 @@ internal struct HelpCommand: CommandRepresentable {
   /// The command symbol.
   internal static var symbol: String = "help"
   /// The usage of the command.
-  internal static var usage: String = "Prints the help message of the command"
+  internal static var usage: String = "Prints the help message of the command. Usage: [[--help|-h][help COMMAND][COMMAND --help][COMMAND -h]]"
+  /// Returns a bool value indicates if the given options raw value is 'help' option.
+  internal static func isHelpOptions(of keys: [String]) -> Bool {
+    if
+      keys.count == 1,
+      let key = keys.last,
+      key == Options.CodingKeys.help.rawValue || key == Options.shortSymbol(for: .help)
+    {
+      return true
+    }
+    
+    return false
+  }
   /// Run the command with command line arguments.
   internal static func run(with commandLineArgs: [String]) throws {
     switch CommanderDecoder.optionsFormat {
@@ -239,6 +251,22 @@ public final class Commander {
       }
     }
     
-    try command?.run(with: [String](commands))
+    do {
+      try command?.run(with: [String](commands))
+    } catch CommanderDecoder.Error.unrecognizedOptions(let optionsRawVals) {
+      if
+        HelpCommand.isHelpOptions(of: optionsRawVals),
+        let command = symbol,
+        !HelpCommand.isHelpOptions(of: [command])
+      {
+        var options = HelpCommand.Options(help: nil, intents: nil)
+        options.arguments = [command]
+        try HelpCommand.main(options)
+      } else {
+        throw CommanderDecoder.Error.unrecognizedOptions(optionsRawVals)
+      }
+    } catch {
+      throw error
+    }
   }
 }
