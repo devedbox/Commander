@@ -13,6 +13,8 @@ import Foundation
 /// This protocol represents type-erased command types without associated types can be used as
 /// argument rather than generic constraints.
 public protocol AnyCommandRepresentable {
+  /// Returns the options type of the command.
+  static var optionsDescriber: OptionsDescribable.Type { get }
   /// The command symbol also name of the command.
   static var symbol: String { get }
   /// The human-readable usage description of the commands.
@@ -40,6 +42,10 @@ public protocol CommandRepresentable: AnyCommandRepresentable {
 // MARK: -
 
 extension CommandRepresentable {
+  /// Returns the options type of the command.
+  public static var optionsDescriber: OptionsDescribable.Type {
+    return Options.self
+  }
   /// Run the command with command line arguments.
   public static func run(with commandLineArgs: [String]) throws {
     let options = try Options.decoded(from: commandLineArgs)

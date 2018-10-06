@@ -9,6 +9,7 @@ import Foundation
 import Commander
 
 Commander.commands = [
-  SampleCommand.self
+  SampleCommand.self,
+  NoArgsCommand.self
 ]
 Commander().dispatch()

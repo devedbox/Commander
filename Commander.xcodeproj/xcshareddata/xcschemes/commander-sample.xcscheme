@@ -72,8 +72,12 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "verbose"
+            argument = "set-args"
             isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "verbose"
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "sample"

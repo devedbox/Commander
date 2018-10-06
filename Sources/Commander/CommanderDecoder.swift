@@ -351,7 +351,7 @@ public final class CommanderDecoder {
           decoder.container = .init(container, referencing: self)
           decoder.storage = .init()
           decoder.storage.push(container)
-          decoded.arguments = try decoder.decode(as: [T.ArgumentsResolver.Arguments].self)
+          decoded.arguments = try decoder.decode(as: [T.ArgumentsResolver.Argument].self)
         }
       }
     }
@@ -477,7 +477,7 @@ extension CommanderDecoder._Decoder {
 // MARK: - _Key.
 
 extension CommanderDecoder._Decoder {
-  fileprivate struct _Key: CodingKey {
+  internal struct _Key: CodingKey {
     var stringValue: String
     var intValue: Int?
     
