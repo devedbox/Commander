@@ -12,4 +12,5 @@ Commander.commands = [
   SampleCommand.self,
   NoArgsCommand.self
 ]
+Commander.usage = "The sample usage command of 'Commander'"
 Commander().dispatch()

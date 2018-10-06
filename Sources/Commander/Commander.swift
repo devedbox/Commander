@@ -18,49 +18,79 @@ extension FileHandle: TextOutputStream {
 /// The built-in help command for the commander.
 internal struct HelpCommand: CommandRepresentable {
   /// The options of the `HelpCommand`.
-  public struct Options: OptionsRepresentable {
+  internal struct Options: OptionsRepresentable {
     /// Type alias for resolve string arguments.
-    public typealias ArgumentsResolver = AnyArgumentsResolver<String>
+    internal typealias ArgumentsResolver = AnyArgumentsResolver<String>
     /// The coding keys of `Options`.
-    public enum CodingKeys: String, CodingKey, StringRawRepresentable {
+    internal enum CodingKeys: String, CodingKey, StringRawRepresentable {
       case help
+      case intents
     }
     /// Returns the description of the options.
-    public static var description: [(Options.CodingKeys, OptionKeyDescription)] = [
+    internal static var description: [(Options.CodingKeys, OptionKeyDescription)] = [
       (.help, .short("h", usage: HelpCommand.usage))
     ]
     
-    public let help: Bool?
+    internal let help: Bool?
+    internal let intents: Int?
   }
-  
-  public static var symbol: String = "help"
-  public static var usage: String = "Prints the help message of the command"
-  
-  public static func main(_ options: Options) throws {
+  /// The command symbol.
+  internal static var symbol: String = "help"
+  /// The usage of the command.
+  internal static var usage: String = "Prints the help message of the command"
+  /// Run the command with command line arguments.
+  internal static func run(with commandLineArgs: [String]) throws {
+    switch CommanderDecoder.optionsFormat {
+    case .format(let symbol, short: let shortSymbol):
+      let options = commandLineArgs.filter { $0.hasPrefix(symbol) || $0.hasPrefix(shortSymbol) }
+      if !options.isEmpty {
+        throw CommanderDecoder.Error.unrecognizedOptions(options.map {
+          let index = $0.endsIndex(matchs: symbol) ?? $0.endsIndex(matchs: shortSymbol)
+          return String($0[index!...])
+        })
+      }
+    }
+    
+    let options = try Options.decoded(from: commandLineArgs)
+    try self.main(options)
+  }
+  /// The main function of the command.
+  internal static func main(_ options: Options) throws {
     var stdout = FileHandle.standardOutput
     defer { stdout.closeFile() }
     
     func intents(_ level: Int) -> String {
-      return String(repeating: " ", count: 2 * level)
+      return String(repeating: " ", count: 2 * (level + (options.intents ?? 0)))
     }
     
     func returns(_ level: Int) -> String {
-      return String(repeating: "\n", count: level)
+      return String(repeating: "\n", count: max(0, (level - (options.intents ?? 0))))
     }
     
+    let path = Commander.runningPath.split(separator: "/").last!
+    
     if options.arguments.isEmpty {
-      let prefix = "Available commands for \(Commander.runningPath.split(separator: "/").last!):"
-      let template = String(
-        repeating: " ",
-        count: Commander.allCommands.reduce(0) { max($0, $1.symbol.count) }
-      )
-      let commands = Commander.allCommands.map { command -> String in
-        var fixedSymbol = template
-        fixedSymbol.replaceSubrange(command.symbol.startIndex..<command.symbol.endIndex, with: command.symbol)
-        return fixedSymbol + "  " + command.usage
-      }.joined(separator: "\n  ")
+      let prefix = """
+      Usage:
+      \(returns(0))
+      \(intents(1))$ \(path) COMMAND
+      \(returns(0))
+      \(intents(2))\(Commander.usage)
+      \(returns(0))
+      Commands:
       
-      print(prefix, commands, separator: "\n  ", terminator: "\n", to: &stdout)
+      """
+      let sample = String(repeating: " ",count: Commander.allCommands.reduce(0) { max($0, $1.symbol.count) })
+      let commands = Commander.allCommands.map { command -> String in
+        var fixedSymbol = sample
+        fixedSymbol.replaceSubrange(command.symbol.startIndex..<command.symbol.endIndex, with: command.symbol)
+        return fixedSymbol + intents(1) + command.usage
+      }.joined(separator: "\n\(intents(1))")
+      
+      print(prefix, commands, "\nDescriptions:", separator: "\n  ", terminator: "\n\n", to: &stdout)
+      var options = Options(help: nil, intents: 1)
+      options.arguments = Commander.commands.map { $0.symbol }
+      try self.main(options)
     } else {
       var unrecognizedCommand = [String]()
       let commands = options.arguments.compactMap { arg -> AnyCommandRepresentable.Type? in
@@ -76,21 +106,19 @@ internal struct HelpCommand: CommandRepresentable {
         throw CommanderError.helpUnrecognizedCommands(commands: unrecognizedCommand)
       }
       
-      let path = Commander.runningPath.split(separator: "/").last!
       let commandSymbols = options.arguments
       
       var sample = String(repeating: " ", count: path.count + 1 + commandSymbols.reduce(0) { max($0, $1.count) })
       let commandsOutputs = commands.map { cmd -> String in
-        let options = cmd.optionsDescriber.description.isEmpty ? "" : "\(intents(1))[OPTIONS]"
-        let arguments = cmd.optionsDescriber.isArgumentsResolvable ? " [ARGUMENTS]" : ""
+        let optionsOutput = cmd.optionsDescriber.description.isEmpty ? "" : " [OPTIONS]"
+        let argumentsOutput = cmd.optionsDescriber.isArgumentsResolvable ? " [ARGUMENTS]" : ""
         var symbol = sample
         let contents = "\(path) \(cmd.symbol)"
         symbol.replaceSubrange(contents.startIndex..<contents.endIndex, with: contents)
         return """
-        Usage of '\(cmd.symbol)':
+        \(intents(0))Usage of '\(cmd.symbol)':
         \(returns(0))
-        \(intents(1))$ \(symbol)\(options)\(arguments)
-        \(returns(0))
+        \(intents(1))$ \(symbol)\(optionsOutput)\(argumentsOutput)\(returns(1))
         \(intents(2))\(cmd.usage)
         \(returns(0))
         \(intents(1))Options:
@@ -142,13 +170,18 @@ internal struct HelpCommand: CommandRepresentable {
 public final class Commander {
   /// A closure of `(Error) -> Void` to handle the stderror.
   public static var errorHandler: ((Swift.Error) -> Void)?
+  /// The usage description of the commander.
+  public static var usage: String = ""
+  /// The registered available commands of the commander.
   public static var commands: [AnyCommandRepresentable.Type] = []
+  /// Returns all commands of commander with registered commands along with built-in commands.
   internal static var allCommands: [AnyCommandRepresentable.Type] {
     return [HelpCommand.self] + commands
   }
   
   /// The name of the current running commander.
   internal /* private(set) */ static var runningPath: String!
+  /// Creates a commander instance.
   public init() { }
   
   public func dispatch() -> Never {
