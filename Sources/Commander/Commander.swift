@@ -43,7 +43,7 @@ internal struct HelpCommand: CommandRepresentable {
     switch CommanderDecoder.optionsFormat {
     case .format(let symbol, short: let shortSymbol):
       let options = commandLineArgs.filter {
-        ($0.hasPrefix(symbol) || $0.hasPrefix(shortSymbol)) && ($0 != "--help" && $0 != "-h")
+        $0.hasPrefix(symbol) || $0.hasPrefix(shortSymbol)
       }
       if !options.isEmpty {
         throw CommanderDecoder.Error.unrecognizedOptions(options.map {
@@ -59,7 +59,6 @@ internal struct HelpCommand: CommandRepresentable {
   /// The main function of the command.
   internal static func main(_ options: Options) throws {
     var stdout = FileHandle.standardOutput
-    defer { stdout.closeFile() }
     
     func intents(_ level: Int) -> String {
       return String(repeating: " ", count: 2 * (level + (options.intents ?? 0)))
@@ -183,53 +182,63 @@ public final class Commander {
   }
   
   /// The name of the current running commander.
-  internal /* private(set) */ static var runningPath: String!
+  internal private(set) static var runningPath: String!
   /// Creates a commander instance.
   public init() { }
   
   /// Decoding the current command line arguments of `CommandLine.arguments` as the current command's
   /// options type and dispatch the command with the decoded options.
   public func dispatch() -> Never {
-    type(of: self).runningPath = CommandLine.arguments.first
+    do {
+      try dispatch(with: CommandLine.arguments)
+    } catch {
+      if type(of: self).errorHandler?(error) == nil {
+        var stderr = FileHandle.standardError
+        
+        print(String(describing: error), to: &stderr)
+      }
+      dispatchFailure()
+    }
+    dispatchSuccess()
+  }
+  
+  internal func dispatch(with commandLineArgs: [String]) throws {
+    type(of: self).runningPath = commandLineArgs.first
     defer { type(of: self).runningPath = nil }
     
-    var commands = CommandLine.arguments.dropFirst()
+    var commands = commandLineArgs.dropFirst()
     let symbol = commands.popFirst()
     
     let command = type(of: self).allCommands.first {
       $0.symbol == symbol
     }
     
-    do {
-      if command == nil {
+    if command == nil {
+      if
+        case .format(let optionsSymbol, short: let shortSymbol) = CommanderDecoder.optionsFormat,
+        let isOptionsSymbol = symbol?.hasPrefix(optionsSymbol),
+        let isShortSymbol = symbol?.hasPrefix(shortSymbol),
+        isOptionsSymbol || isShortSymbol
+      {
         if
-          case .format(let optionsSymbol, short: let shortSymbol) = CommanderDecoder.optionsFormat,
-          let isOptionsSymbol = symbol?.hasPrefix(optionsSymbol),
-          let isShortSymbol = symbol?.hasPrefix(shortSymbol),
-          isOptionsSymbol || isShortSymbol
+          commands.isEmpty,
+          let options = symbol,
+          options == "\(optionsSymbol)\(HelpCommand.Options.CodingKeys.help.rawValue)"
+       || options == "\(shortSymbol)\(HelpCommand.Options.shortSymbol(for: .help)!)"
         {
-          try HelpCommand.run(with: [symbol!] + commands)
+          try HelpCommand.main(.init(help: nil, intents: nil))
         } else {
-          if let commandSymbol = symbol {
-            throw CommanderError.invalidCommand(command: commandSymbol)
-          } else {
-            throw CommanderError.emptyCommand
-          }
+          try HelpCommand.run(with: [symbol!] + commands)
+        }
+      } else {
+        if let commandSymbol = symbol {
+          throw CommanderError.invalidCommand(command: commandSymbol)
+        } else {
+          throw CommanderError.emptyCommand
         }
       }
-      
-      try command?.run(with: [String](commands))
-    } catch {
-      if type(of: self).errorHandler?(error) == nil {
-        let stderr = FileHandle.standardError
-        defer { stderr.closeFile() }
-        
-        "\(String(describing: error))\n".data(using: .utf8).map { stderr.write($0) }
-      }
-      
-      dispatchFailure()
     }
     
-    dispatchSuccess()
+    try command?.run(with: [String](commands))
   }
 }

@@ -85,6 +85,10 @@ internal func shortKey(for key: CodingKey, in keys: [(CodingKey, OptionKeyDescri
 // MARK: -
 
 extension OptionsRepresentable {
+  /// Returns the short symbol of the options if any.
+  public static func shortSymbol(for key: CodingKeys) -> String? {
+    return shortKey(for: key, in: description)
+  }
   /// Returns the options description list.
   public static var description: [(CodingKey, OptionKeyDescription)] {
     return description.map {
