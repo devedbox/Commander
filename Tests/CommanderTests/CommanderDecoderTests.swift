@@ -1,5 +1,5 @@
 //
-//  CommandLineDecoderTests.swift
+//  CommanderDecoderTests.swift
 //  CommanderTests
 //
 //  Created by devedbox on 2018/10/2.
@@ -40,7 +40,9 @@ struct SimpleOption: OptionsRepresentable {
     let location: UInt8
   }
   
-  static var description: [(SimpleOption.CodingKeys, OptionKeyDescription)] = []
+  static var description: [(SimpleOption.CodingKeys, OptionKeyDescription)] = [
+    (.target, .usage("The target of the options")),
+  ]
   
   let target: String
   let verbose: Bool
@@ -77,9 +79,9 @@ struct ComplexArgumentsOptions: OptionsRepresentable {
   let int: Int
 }
 
-// MARK: - CommandLineDecoderTests.
+// MARK: - CommanderDecoderTests.
 
-class CommandLineDecoderTests: XCTestCase {
+class CommanderDecoderTests: XCTestCase {
   static var allTests = [
     ("testDecodeInContainer", testDecodeInContainer),
     ("testDecodeSimpleOptions", testDecodeSimpleOptions),
@@ -126,15 +128,23 @@ class CommandLineDecoderTests: XCTestCase {
       "--locs", "1,2,3,4,5,6,7,8,9,0"
     ]
     do {
-      let option = try CommanderDecoder().decode(SimpleOption.self, from: commands)
+      var option = try CommanderDecoder().decode(SimpleOption.self, from: commands)
       XCTAssertEqual(option.target, "target")
       XCTAssertEqual(option.verbose, true)
       XCTAssertEqual(option.path.value, "This is a path")
       XCTAssertEqual(option.path.location, 12)
       XCTAssertEqual(option.configPath, "../path")
       XCTAssertEqual(Set(option.locs), [1,2,3,4,5,6,7,8,9,0])
+      option.arguments = []
+      XCTAssertTrue(option.arguments.isEmpty)
     } catch {
       XCTFail()
+    }
+    
+    do {
+      _ = try CommanderDecoder().decode(SimpleOption.self, from: commands + ["argument"])
+    } catch Commander {
+      <#statements#>
     }
   }
   
@@ -176,7 +186,7 @@ class CommandLineDecoderTests: XCTestCase {
     do {
       _ = try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-b", "-S", "String", "-i", "Int"])
       XCTFail()
-    } catch CommanderDecoder.Error.decodingError(DecodingError.valueNotFound(let type, _)) {
+    } catch CommanderDecoder.Error.decodingError(DecodingError.typeMismatch(let type, _)) {
       XCTAssertTrue(true)
       XCTAssertTrue(type is Int.Type)
     } catch {
@@ -189,6 +199,16 @@ class CommandLineDecoderTests: XCTestCase {
     } catch CommanderDecoder.Error.decodingError(DecodingError.keyNotFound(let key, _)) {
       XCTAssertTrue(true)
       XCTAssertEqual(key.stringValue, ComplexArgumentsOptions.CodingKeys.bool.stringValue)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      _ = try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-b", "-S", "-i", "5"])
+      XCTFail()
+    } catch CommanderDecoder.Error.decodingError(DecodingError.valueNotFound(let type, _)) {
+      XCTAssertTrue(true)
+      XCTAssertTrue(type is String.Type)
     } catch {
       XCTFail()
     }

@@ -22,10 +22,11 @@
 
 /* Begin PBXBuildFile section */
 		DC0B9B9B216347F000C87253 /* CommanderDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0B9B9A216347F000C87253 /* CommanderDecoder.swift */; };
-		DC0B9B9D2163B56B00C87253 /* CommandLineDecoderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0B9B9C2163B56B00C87253 /* CommandLineDecoderTests.swift */; };
+		DC0B9B9D2163B56B00C87253 /* CommanderDecoderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0B9B9C2163B56B00C87253 /* CommanderDecoderTests.swift */; };
 		DC0B9B9F21647ABA00C87253 /* SampleCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0B9B9E21647ABA00C87253 /* SampleCommand.swift */; };
 		DC0B9BA121648B0600C87253 /* OptionKeyDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0B9BA021648B0600C87253 /* OptionKeyDescription.swift */; };
 		DC0B9BA32167457600C87253 /* misc.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0B9BA22167457500C87253 /* misc.swift */; };
+		DC0B9BA5216882D200C87253 /* CommandTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0B9BA4216882D100C87253 /* CommandTests.swift */; };
 		OBJ_42 /* Commander.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_11 /* Commander.swift */; };
 		OBJ_43 /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_13 /* Error.swift */; };
 		OBJ_46 /* CommandRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_18 /* CommandRepresentable.swift */; };
@@ -67,10 +68,11 @@
 		"Commander::CommanderTests::Product" /* CommanderTests.xctest */ = {isa = PBXFileReference; lastKnownFileType = file; path = CommanderTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		"Commander::commander-sample::Product" /* commander-sample */ = {isa = PBXFileReference; lastKnownFileType = text; path = "commander-sample"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC0B9B9A216347F000C87253 /* CommanderDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommanderDecoder.swift; sourceTree = "<group>"; };
-		DC0B9B9C2163B56B00C87253 /* CommandLineDecoderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandLineDecoderTests.swift; sourceTree = "<group>"; };
+		DC0B9B9C2163B56B00C87253 /* CommanderDecoderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommanderDecoderTests.swift; sourceTree = "<group>"; };
 		DC0B9B9E21647ABA00C87253 /* SampleCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleCommand.swift; sourceTree = "<group>"; };
 		DC0B9BA021648B0600C87253 /* OptionKeyDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionKeyDescription.swift; sourceTree = "<group>"; };
 		DC0B9BA22167457500C87253 /* misc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = misc.swift; sourceTree = "<group>"; };
+		DC0B9BA4216882D100C87253 /* CommandTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandTests.swift; sourceTree = "<group>"; };
 		OBJ_11 /* Commander.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Commander.swift; sourceTree = "<group>"; };
 		OBJ_13 /* Error.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Error.swift; sourceTree = "<group>"; };
 		OBJ_18 /* CommandRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandRepresentable.swift; sourceTree = "<group>"; };
@@ -135,7 +137,8 @@
 			isa = PBXGroup;
 			children = (
 				OBJ_30 /* CommanderTests.swift */,
-				DC0B9B9C2163B56B00C87253 /* CommandLineDecoderTests.swift */,
+				DC0B9BA4216882D100C87253 /* CommandTests.swift */,
+				DC0B9B9C2163B56B00C87253 /* CommanderDecoderTests.swift */,
 				OBJ_32 /* XCTestManifests.swift */,
 			);
 			name = CommanderTests;
@@ -307,7 +310,8 @@
 			files = (
 				OBJ_72 /* CommanderTests.swift in Sources */,
 				OBJ_74 /* XCTestManifests.swift in Sources */,
-				DC0B9B9D2163B56B00C87253 /* CommandLineDecoderTests.swift in Sources */,
+				DC0B9B9D2163B56B00C87253 /* CommanderDecoderTests.swift in Sources */,
+				DC0B9BA5216882D200C87253 /* CommandTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

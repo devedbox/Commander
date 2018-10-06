@@ -64,7 +64,7 @@ public final class Commander {
   }
   
   /// The name of the current running commander.
-  internal private(set) static var runningPath: String!
+  internal /* private(set) */ static var runningPath: String!
   public init() { }
   
   public func dispatch() -> Never {
@@ -97,7 +97,6 @@ public final class Commander {
       }
       
       try command?.run(with: [String](commands))
-      dispatchSuccess()
     } catch {
       if type(of: self).errorHandler?(error) == nil {
         let stderr = FileHandle.standardError
@@ -108,5 +107,7 @@ public final class Commander {
       
       dispatchFailure()
     }
+    
+    dispatchSuccess()
   }
 }

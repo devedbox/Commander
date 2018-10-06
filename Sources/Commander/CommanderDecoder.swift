@@ -15,13 +15,16 @@ extension String {
   /// - Parameter pattern: The pattern to be matched.
   /// - Returns: The ends index.
   fileprivate func endsIndex(matchs pattern: String) -> Index? {
+    guard !isEmpty else {
+      return nil
+    }
+    
     var index = pattern.startIndex
     
     while index < pattern.endIndex, index < endIndex {
       if pattern[index] != self[index] {
         return nil
       }
-      
       pattern.formIndex(after: &index)
     }
     
@@ -242,8 +245,8 @@ public final class CommanderDecoder {
   internal static var optionsFormat = OptionsFormat.format("--", short: "-")
   internal static var objectFormat = ObjectFormat.flatContainer(splitter: ",", keyValuePairsSplitter: "=")
   
-  internal var optionsDescription: [(CodingKey, OptionKeyDescription)]!
-  private(set) var codingArguments: [String: [ObjectFormat.Value]]!
+  internal private(set) var optionsDescription: [(CodingKey, OptionKeyDescription)]!
+  internal private(set) var codingArguments: [String: [ObjectFormat.Value]]!
   
   public init() { }
   
@@ -314,7 +317,9 @@ public final class CommanderDecoder {
     defer { optionsDescription = nil }
     
     var container = try self.container(from: commandLineArgs)
+    
     codingArguments = container.arrayValue?.first?.dictionaryValue?.mapValues { $0.arrayValue! }
+    defer { codingArguments = nil }
     
     let unrecognizedOptions = container.dictionaryValue?.keys.filter { key in
       (type.CodingKeys.init(rawValue: key) ?? ((type.description.first {
@@ -756,182 +761,126 @@ extension CommanderDecoder._Decoder {
 
 extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
   
+  private func unwrap<T: Decodable & _StringInitable>(as type: T.Type) throws -> T {
+    var unwrapped = storage.lastUnwrapped
+    if T.self == String.self {
+      unwrapped = storage.top?.stringValue
+    }
+    
+    if T.self == Bool.self {
+      if !(unwrapped is Bool?) {
+        var value: CommanderDecoder.ObjectFormat.Value?
+        if let dict = storage.top?.dictionaryValue, !dict.isEmpty {
+          value = .dictionary(dict)
+        } else if let array = storage.top?.arrayValue, !array.isEmpty {
+          value = .array(array)
+        } else if let string = storage.top?.stringValue, !string.isEmpty {
+          value = .init(stringValue: storage.top?.stringValue)
+        }
+        if value != nil {
+          container.decoder.spitArgument(for: codingPath.last!, with: value!)
+        }
+      }
+      
+      guard let value = storage.top?.boolValue else {
+        if unwrapped != nil {
+          throw CommanderDecoder.Error.decodingError(
+            .__typeMismatch(at: codingPath, expectation: type, reality: unwrapped)
+          )
+        } else {
+          throw CommanderDecoder.Error.decodingError(
+            .valueNotFound(
+              type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: unwrapped))
+            )
+          )
+        }
+      }
+      
+      return value as! T
+    } else {
+      guard let value = (storage.lastUnwrapped as? String).flatMap({ T.init($0) }) else {
+        if unwrapped != nil {
+          throw CommanderDecoder.Error.decodingError(
+            .__typeMismatch(at: codingPath, expectation: type, reality: unwrapped)
+          )
+        } else {
+          throw CommanderDecoder.Error.decodingError(
+            .valueNotFound(
+              type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: unwrapped))
+            )
+          )
+        }
+      }
+      return value
+    }
+  }
+  
   internal func decodeNil() -> Bool {
     return false
   }
   
   internal func decode(_ type: Bool.Type) throws -> Bool {
-    let unwrapped = storage.lastUnwrapped
-    if !(unwrapped is Bool?) {
-      let value: CommanderDecoder.ObjectFormat.Value
-      if let dict = storage.top?.dictionaryValue, !dict.isEmpty {
-        value = .dictionary(dict)
-      } else if let array = storage.top?.arrayValue, !array.isEmpty {
-        value = .array(array)
-      } else {
-        value = .init(stringValue: storage.top?.stringValue)
-      }
-      container.decoder.spitArgument(for: codingPath.last!, with: value)
-    }
-    
-    guard let value = storage.top?.boolValue else {
-      throw CommanderDecoder.Error.decodingError(
-        .valueNotFound(
-          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
-        )
-      )
-    }
-    return value
+    return try unwrap(as: type)
   }
   
   internal func decode(_ type: Int.Type) throws -> Int {
-    guard let value = (storage.lastUnwrapped as? String).flatMap({ Int($0) }) else {
-      throw CommanderDecoder.Error.decodingError(
-        .valueNotFound(
-          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
-        )
-      )
-    }
-    return value
+    return try unwrap(as: type)
   }
   
   internal func decode(_ type: Int8.Type) throws -> Int8 {
-    guard let value = (storage.lastUnwrapped as? String).flatMap({ Int8($0) }) else {
-      throw CommanderDecoder.Error.decodingError(
-        .valueNotFound(
-          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
-        )
-      )
-    }
-    return value
+    return try unwrap(as: type)
   }
   
   internal func decode(_ type: Int16.Type) throws -> Int16 {
-    guard let value = (storage.lastUnwrapped as? String).flatMap({ Int16($0) }) else {
-      throw CommanderDecoder.Error.decodingError(
-        .valueNotFound(
-          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
-        )
-      )
-    }
-    return value
+    return try unwrap(as: type)
   }
   
   internal func decode(_ type: Int32.Type) throws -> Int32 {
-    guard let value = (storage.lastUnwrapped as? String).flatMap({ Int32($0) }) else {
-      throw CommanderDecoder.Error.decodingError(
-        .valueNotFound(
-          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
-        )
-      )
-    }
-    return value
+    return try unwrap(as: type)
   }
   
   internal func decode(_ type: Int64.Type) throws -> Int64 {
-    guard let value = (storage.lastUnwrapped as? String).flatMap({ Int64($0) }) else {
-      throw CommanderDecoder.Error.decodingError(
-        .valueNotFound(
-          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
-        )
-      )
-    }
-    return value
+    return try unwrap(as: type)
   }
   
   internal func decode(_ type: UInt.Type) throws -> UInt {
-    guard let value = (storage.lastUnwrapped as? String).flatMap({ UInt($0) }) else {
-      throw CommanderDecoder.Error.decodingError(
-        .valueNotFound(
-          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
-        )
-      )
-    }
-    return value
+    return try unwrap(as: type)
   }
   
   internal func decode(_ type: UInt8.Type) throws -> UInt8 {
-    guard let value = (storage.lastUnwrapped as? String).flatMap({ UInt8($0) }) else {
-      throw CommanderDecoder.Error.decodingError(
-        .valueNotFound(
-          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
-        )
-      )
-    }
-    return value
+    return try unwrap(as: type)
   }
   
   internal func decode(_ type: UInt16.Type) throws -> UInt16 {
-    guard let value = (storage.lastUnwrapped as? String).flatMap({ UInt16($0) }) else {
-      throw CommanderDecoder.Error.decodingError(
-        .valueNotFound(
-          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
-        )
-      )
-    }
-    return value
+    return try unwrap(as: type)
   }
   
   internal func decode(_ type: UInt32.Type) throws -> UInt32 {
-    guard let value = (storage.lastUnwrapped as? String).flatMap({ UInt32($0) }) else {
-      throw CommanderDecoder.Error.decodingError(
-        .valueNotFound(
-          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
-        )
-      )
-    }
-    return value
+    return try unwrap(as: type)
   }
   
   internal func decode(_ type: UInt64.Type) throws -> UInt64 {
-    guard let value = (storage.lastUnwrapped as? String).flatMap({ UInt64($0) }) else {
-      throw CommanderDecoder.Error.decodingError(
-        .valueNotFound(
-          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
-        )
-      )
-    }
-    return value
+    return try unwrap(as: type)
   }
   
   internal func decode(_ type: Float.Type) throws -> Float {
-    guard let value = (storage.lastUnwrapped as? String).flatMap({ Float($0) }) else {
-      throw CommanderDecoder.Error.decodingError(
-        .valueNotFound(
-          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
-        )
-      )
-    }
-    return value
+    return try unwrap(as: type)
   }
   
   internal func decode(_ type: Double.Type) throws -> Double {
-    guard let value = (storage.lastUnwrapped as? String).flatMap({ Double($0) }) else {
-      throw CommanderDecoder.Error.decodingError(
-        .valueNotFound(
-          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
-        )
-      )
-    }
-    return value
+    return try unwrap(as: type)
   }
   
   internal func decode(_ type: String.Type) throws -> String {
-    guard let value = storage.lastUnwrapped as? String else {
-      throw CommanderDecoder.Error.decodingError(
-        .valueNotFound(
-          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
-        )
-      )
-    }
-    return value
+    return try unwrap(as: type)
   }
   
   internal func decode<T : Decodable>(_ type: T.Type) throws -> T {
-    guard let _ = storage.lastUnwrapped else {
+    let unwrapped = storage.lastUnwrapped
+    guard let _ = unwrapped else {
       throw CommanderDecoder.Error.decodingError(
         .valueNotFound(
-          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: storage.lastUnwrapped))
+          type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: unwrapped))
         )
       )
     }
@@ -942,3 +891,21 @@ extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
     return "Expected \(type) value but found \(DecodingError.__typeDescription(of: reality)) instead."
   }
 }
+
+private protocol _StringInitable {
+  init?(_ string: String)
+}
+extension Bool  : _StringInitable { }
+extension Int   : _StringInitable { }
+extension Int8  : _StringInitable { }
+extension Int16 : _StringInitable { }
+extension Int32 : _StringInitable { }
+extension Int64 : _StringInitable { }
+extension UInt  : _StringInitable { }
+extension UInt8 : _StringInitable { }
+extension UInt16: _StringInitable { }
+extension UInt32: _StringInitable { }
+extension UInt64: _StringInitable { }
+extension Float : _StringInitable { }
+extension Double: _StringInitable { }
+extension String: _StringInitable { }
