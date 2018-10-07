@@ -131,7 +131,7 @@ struct SimpleOption: OptionsRepresentable {
     case locs
   }
   
-  struct Path: Decodable, Hashable {
+  struct Path: Codable, Hashable {
     let value: String
     let location: UInt8
   }
@@ -140,6 +140,7 @@ struct SimpleOption: OptionsRepresentable {
   
   static var descriptions: [SimpleOption.CodingKeys: OptionDescription] = [
     .target: .usage("The target of the options"),
+    .path: .default(value: Path(value: "default", location: 0), usage: "")
   ]
   
   let target: String
@@ -174,7 +175,7 @@ struct ComplexArgumentsOptions: OptionsRepresentable {
   ]
   static var descriptions: [ComplexArgumentsOptions.CodingKeys: OptionDescription] = [:]
   
-  let bool: Bool
+  let bool: Bool?
   let string: String
   let int: Int
 }
@@ -189,6 +190,25 @@ struct KeyedOptions: OptionsRepresentable {
     .dict: .usage(""),
   ]
   
+  let dict: [String: String]
+}
+
+struct DefaultValueOptions: OptionsRepresentable {
+  enum CodingKeys: String, CodingKeysRepresentable {
+    case string
+    case bool
+    case dict
+  }
+  static var keys: [CodingKeys : Character] = [
+    :
+  ]
+  static var descriptions: [CodingKeys: OptionDescription] = [
+    .string: .default(value: "default", usage: ""),
+    .dict: .default(value: ["key": "value"], usage: "")
+  ]
+  
+  let string: String?
+  let bool: Bool?
   let dict: [String: String]
 }
 
@@ -431,6 +451,8 @@ class CommanderDecoderTests: XCTestCase {
       XCTFail()
     }
     
+    XCTAssertNoThrow(try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-S", "String", "-i", "5"]))
+    
     do {
       _ = try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-b", "Bool", "-S", "String", "-i", "5"])
       XCTFail()
@@ -483,11 +505,11 @@ class CommanderDecoderTests: XCTestCase {
     }
     
     do {
-      _ = try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-S", "String", "-i", "Int"])
+      _ = try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-b", "-i", "Int"])
       XCTFail()
     } catch CommanderDecoder.Error.decodingError(DecodingError.keyNotFound(let key, let ctx)) {
       XCTAssertTrue(true)
-      XCTAssertEqual(key.stringValue, ComplexArgumentsOptions.CodingKeys.bool.stringValue)
+      XCTAssertEqual(key.stringValue, ComplexArgumentsOptions.CodingKeys.string.stringValue)
       XCTAssertFalse(CommanderDecoder.Error.decodingError(DecodingError.keyNotFound(key, ctx)).description.isEmpty)
     } catch {
       XCTFail()
@@ -503,5 +525,23 @@ class CommanderDecoderTests: XCTestCase {
     } catch {
       XCTFail()
     }
+  }
+  
+  func testDefaultValueOptionsDecode() {
+    var options = try! CommanderDecoder().decode(DefaultValueOptions.self, from: [])
+    XCTAssertNil(options.bool)
+    XCTAssertNotNil(options.dict)
+    XCTAssertEqual(options.string, "default")
+
+    options = try! CommanderDecoder().decode(DefaultValueOptions.self, from: ["--string", "string"])
+    XCTAssertNil(options.bool)
+    XCTAssertNotNil(options.dict)
+    XCTAssertEqual(options.string, "string")
+
+    options = try! CommanderDecoder().decode(DefaultValueOptions.self, from: ["--string", "string", "--dict", "k=v"])
+    XCTAssertNil(options.bool)
+    XCTAssertNotNil(options.dict)
+    XCTAssertEqual(options.string, "string")
+    XCTAssertEqual(options.dict, ["k": "v"])
   }
 }

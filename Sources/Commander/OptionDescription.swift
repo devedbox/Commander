@@ -12,7 +12,7 @@
 public struct OptionDescription {
   /// Optional short symbol of the `OptionKeyDescription`.
   // public let shortSymbol: Character?
-  public let defaultValue: Any?
+  public let defaultValue: Encodable?
   /// Required usage description of the `OptionKeyDescription`.
   public let usage: String
   
@@ -23,7 +23,7 @@ public struct OptionDescription {
   ///
   /// - Returns: The instance of `OptionDescription` with short symbol and usage.
   public static func `default`(
-    value: Any?,
+    value: Encodable?,
     usage: String) -> OptionDescription
   {
     return OptionDescription(

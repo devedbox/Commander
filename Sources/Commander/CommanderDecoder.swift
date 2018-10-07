@@ -5,6 +5,8 @@
 //  Created by devedbox on 2018/10/2.
 //
 
+import Foundation
+
 // MARK: -
 
 internal extension String {
@@ -150,6 +152,19 @@ fileprivate extension Array where Element == CommanderDecoder.ObjectFormat.Value
   }
 }
 
+extension Encodable {
+  fileprivate var wrapped: CommanderDecoder.ObjectFormat.Value? {
+    if
+      let jsonData = try? JSONEncoder().encode(self),
+      let jsonObject = try? JSONSerialization.jsonObject(with: jsonData, options: [])
+    {
+      return .value(jsonObject)
+    }
+    
+    return nil
+  }
+}
+
 extension CommanderDecoder {
   /// The object format of the value of options.
   internal enum ObjectFormat {
@@ -185,6 +200,23 @@ extension CommanderDecoder {
         self.boolValue = boolValue
       }
       
+      internal static func value(_ value: Any?) -> Value? {
+        if let value = value {
+          if let dict = value as? [String: Encodable] {
+            return .dictionary(dict.mapValues { Value.value($0) ?? .init() })
+          } else if let array = value as? [Encodable] {
+            return .array(array.map { Value.value($0) ?? .init() })
+          } else if let string = value as? String {
+            return .string(string)
+          } else if let bool = value as? Bool {
+            return .bool(bool)
+          } else if let encodable = value as? Encodable {
+            return encodable.wrapped
+          }
+        }
+        return nil
+      }
+      
       internal static func dictionary(_ dict: [String: Value]) -> Value {
         return Value(dictionaryValue: dict)
       }
@@ -211,7 +243,7 @@ extension CommanderDecoder {
       
       switch self {
       case .flatContainer(splitter: let splitter, keyValuePairsSplitter: let keyValuePairsSplitter):
-        if string.contains(splitter) {
+        if string.contains(splitter) || string.contains(keyValuePairsSplitter) {
           let elements = string.split(separator: splitter)
           if string.contains(keyValuePairsSplitter) {
             dictContainer = try elements.reduce([:], { result, next -> [String: Value] in
@@ -461,7 +493,7 @@ extension CommanderDecoder._Decoder {
     }
     
     fileprivate subscript(key: String) -> CommanderDecoder.ObjectFormat.Value? {
-      return storage.dictionaryValue?[key]
+      return storage.dictionaryValue?[key] ?? .value(decoder.optionsDescription[key]?.defaultValue)
     }
   }
 }
@@ -539,7 +571,7 @@ extension CommanderDecoder._Decoder {
     }
     
     internal func decodeNil(forKey key: Key) throws -> Bool {
-      return false
+      return container[key.stringValue]?.unwrapped == nil
     }
     
     internal func decode<T>(
@@ -664,7 +696,12 @@ extension CommanderDecoder._Decoder {
         )
       }
       
-      return false
+      if container[currentIndex].unwrapped == nil {
+        currentIndex += 1
+        return true
+      } else {
+        return false
+      }
     }
     
     internal mutating func decode<T : Decodable>(_ type: T.Type) throws -> T {
@@ -820,6 +857,10 @@ extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
   }
   
   internal func decodeNil() -> Bool {
+    if let top = storage.top {
+      return top.unwrapped == nil
+    }
+    
     return false
   }
   
