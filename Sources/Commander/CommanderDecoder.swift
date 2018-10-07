@@ -56,9 +56,9 @@ internal extension String {
   }
 }
 
-extension Array where Element: RangeReplaceableCollection {
+internal extension Array where Element: RangeReplaceableCollection {
   /// Appends the given element to the receiver's last collection element.
-  public mutating func lastAppend(_ element: Element.Element) {
+  internal mutating func lastAppend(_ element: Element.Element) {
     guard var last = popLast() else {
       return
     }
@@ -68,7 +68,7 @@ extension Array where Element: RangeReplaceableCollection {
   }
 }
 
-extension BidirectionalCollection {
+internal extension BidirectionalCollection {
   /// Returns a bool value indicates if the collection is containing only one element.
   internal var isSingle: Bool {
     return startIndex == index(before: endIndex)
@@ -77,7 +77,7 @@ extension BidirectionalCollection {
 
 // MARK: swift-corelibs-foundation
 
-extension DecodingError {
+internal extension DecodingError {
   /// Returns a `.typeMismatch` error describing the expected type.
   ///
   /// - parameter path: The path of `CodingKey`s taken to decode a value of this type.
@@ -179,7 +179,7 @@ fileprivate extension Array where Element == CommanderDecoder.ObjectFormat.Value
   }
 }
 
-extension Encodable {
+fileprivate extension Encodable {
   fileprivate var wrapped: CommanderDecoder.ObjectFormat.Value? {
     if
       let jsonData = try? JSONEncoder().encode(self),
