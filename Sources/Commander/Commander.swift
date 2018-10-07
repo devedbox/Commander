@@ -209,7 +209,7 @@ internal struct HelpCommand: CommandRepresentable {
 
 public final class Commander {
   /// A closure of `(Error) -> Void` to handle the stderror.
-  public static var errorHandler: ((Swift.Error) -> Void)?
+  public static var errorHandler: ((Swift.Error) -> Swift.Void)?
   /// The usage description of the commander.
   public static var usage: String = ""
   /// The registered available commands of the commander.
