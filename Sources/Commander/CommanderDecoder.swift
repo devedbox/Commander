@@ -48,6 +48,13 @@ extension Array where Element: RangeReplaceableCollection {
   }
 }
 
+extension BidirectionalCollection {
+  /// Returns a bool value indicates if the collection is containing only one element.
+  internal var isSingle: Bool {
+    return startIndex == index(before: endIndex)
+  }
+}
+
 // MARK: swift-corelibs-foundation
 
 extension DecodingError {
@@ -185,7 +192,21 @@ extension CommanderDecoder {
       
       /// Returns the unwrapped underlying value.
       internal var unwrapped: Any? {
-        return dictionaryValue?.unwrapped ?? arrayValue?.unwrapped ?? stringValue ?? boolValue
+        return dictionaryValue?.unwrapped ?? singleArrayString?.stringValue ?? arrayValue ?? stringValue ?? boolValue
+      }
+      
+      internal var singleArrayString: Value? {
+        if
+          let array = arrayValue,
+          array.isSingle,
+          let string = stringValue,
+          let singleString = array.last?.stringValue,
+          singleString == string
+        { // Consider single-element array is a wrap of contained string.
+          return .init(arrayValue: arrayValue, stringValue: string)
+        } else {
+          return nil
+        }
       }
       
       internal init(
@@ -202,16 +223,20 @@ extension CommanderDecoder {
       
       internal static func value(_ value: Any?) -> Value? {
         if let value = value {
-          if let dict = value as? [String: Encodable] {
+          if let dict = value as? [String: Any] {
             return .dictionary(dict.mapValues { Value.value($0) ?? .init() })
-          } else if let array = value as? [Encodable] {
+          } else if let array = value as? [Any] {
             return .array(array.map { Value.value($0) ?? .init() })
           } else if let string = value as? String {
-            return .string(string)
+            return .init(stringValue: string, boolValue: true)
+          } else if let string = value as? _StringStorable {
+            return .init(stringValue: string._stored, boolValue: true)
           } else if let bool = value as? Bool {
             return .bool(bool)
           } else if let encodable = value as? Encodable {
             return encodable.wrapped
+          } else if value is NSNull {
+            return .init()
           }
         }
         return nil
@@ -257,9 +282,10 @@ extension CommanderDecoder {
           } else {
             arrayContainer = elements.map { Value(stringValue: String($0)) }
           }
+        } else { // Consider an array with single element.
+          arrayContainer = [Value(stringValue: string)]
         }
         break
-        
       case .json:
         throw Value.Error.jsonObjectFormatIsNotSupported
       }
@@ -415,8 +441,6 @@ public final class CommanderDecoder {
     var arguments = codingArguments.first { arg in
       arg.key.hasPrefix(key.stringValue) ||
       (codingKeys[key.stringValue]).map { arg.key.hasPrefix(String($0)) } ?? false
-      // codingKeys.key(for: key).map { arg.key.hasPrefix(String($0)) } ?? false
-      // shortKey(for: key, in: optionsDescription!).map { arg.key.hasPrefix(String($0)) } ?? false
     }
     arguments?.value.insert(value, at: 0)
     arguments.map { codingArguments[$0.key] = $0.value }
@@ -452,7 +476,7 @@ extension CommanderDecoder {
       return KeyedDecodingContainer<Key>(
         _KeyedDecodingContainer(
           referencing: self,
-          wrapping: _Decoder._KeyedContainer( .init(dictionaryValue: top), referencing: container.decoder)
+          wrapping: _Decoder._KeyedContainer(.init(dictionaryValue: top), referencing: container.decoder)
         )
       )
     }
@@ -813,6 +837,8 @@ extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
         var value: CommanderDecoder.ObjectFormat.Value?
         if let dict = storage.top?.dictionaryValue, !dict.isEmpty {
           value = .dictionary(dict)
+        } else if let singleArrarString = storage.top?.singleArrayString {
+          value = singleArrarString
         } else if let array = storage.top?.arrayValue, !array.isEmpty {
           value = .array(array)
         } else if let string = storage.top?.stringValue, !string.isEmpty {
@@ -839,7 +865,7 @@ extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
       
       return value as! T
     } else {
-      guard let value = (storage.lastUnwrapped as? String).flatMap({ T.init($0) }) else {
+      guard let value = (unwrapped as? String).flatMap({ T.init($0) }) else {
         if unwrapped != nil {
           throw CommanderDecoder.Error.decodingError(
             .__typeMismatch(at: codingPath, expectation: type, reality: unwrapped)
@@ -940,17 +966,40 @@ extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
 private protocol _StringInitable {
   init?(_ string: String)
 }
+
+private protocol _StringStorable {
+  var _stored: String { get }
+}
+
+extension _StringStorable {
+  fileprivate var _stored: String {
+    return "\(self)"
+  }
+}
+
 extension Bool  : _StringInitable { }
-extension Int   : _StringInitable { }
-extension Int8  : _StringInitable { }
-extension Int16 : _StringInitable { }
-extension Int32 : _StringInitable { }
-extension Int64 : _StringInitable { }
-extension UInt  : _StringInitable { }
-extension UInt8 : _StringInitable { }
-extension UInt16: _StringInitable { }
-extension UInt32: _StringInitable { }
-extension UInt64: _StringInitable { }
-extension Float : _StringInitable { }
-extension Double: _StringInitable { }
-extension String: _StringInitable { }
+extension Int   : _StringInitable, _StringStorable { }
+extension Int8  : _StringInitable, _StringStorable { }
+extension Int16 : _StringInitable, _StringStorable { }
+extension Int32 : _StringInitable, _StringStorable { }
+extension Int64 : _StringInitable, _StringStorable { }
+extension UInt  : _StringInitable, _StringStorable { }
+extension UInt8 : _StringInitable, _StringStorable { }
+extension UInt16: _StringInitable, _StringStorable { }
+extension UInt32: _StringInitable, _StringStorable { }
+extension UInt64: _StringInitable, _StringStorable { }
+extension Float : _StringInitable, _StringStorable { }
+extension Double: _StringInitable, _StringStorable { }
+extension String: _StringInitable, _StringStorable { }
+extension NSNumber: _StringStorable { }
+
+extension Optional: _StringStorable where Wrapped: _StringInitable & _StringStorable {
+  fileprivate var _stored: String {
+    switch self {
+    case .none:
+      return ""
+    case .some(let val):
+      return val._stored
+    }
+  }
+}

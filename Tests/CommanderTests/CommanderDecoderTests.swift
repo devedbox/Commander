@@ -140,12 +140,13 @@ struct SimpleOption: OptionsRepresentable {
   
   static var descriptions: [SimpleOption.CodingKeys: OptionDescription] = [
     .target: .usage("The target of the options"),
-    .path: .default(value: Path(value: "default", location: 0), usage: "")
+    .path: .default(value: Path(value: "default", location: 0), usage: ""),
+    .locs: .default(value: [1, 2, 3], usage: "")
   ]
   
-  let target: String
-  let verbose: Bool
   let path: Path
+  let target: [String]
+  let verbose: Bool
   let configPath: String
   let locs: [UInt8]
 }
@@ -157,6 +158,28 @@ struct ArgumentsOptions: OptionsRepresentable {
   }
   static var keys: [ArgumentsOptions.CodingKeys : Character] = [:]
   static var descriptions: [ArgumentsOptions.CodingKeys: OptionDescription] = [:]
+  
+  let bool: Bool
+}
+
+struct DictArgumentsOptions: OptionsRepresentable {
+  typealias ArgumentsResolver = AnyArgumentsResolver<[String: String]>
+  enum CodingKeys: String, CodingKeysRepresentable {
+    case bool
+  }
+  static var keys: [CodingKeys : Character] = [:]
+  static var descriptions: [CodingKeys: OptionDescription] = [:]
+  
+  let bool: Bool
+}
+
+struct ArrayArgumentsOptions: OptionsRepresentable {
+  typealias ArgumentsResolver = AnyArgumentsResolver<[UInt32]>
+  enum CodingKeys: String, CodingKeysRepresentable {
+    case bool
+  }
+  static var keys: [CodingKeys : Character] = [:]
+  static var descriptions: [CodingKeys: OptionDescription] = [:]
   
   let bool: Bool
 }
@@ -358,11 +381,26 @@ class CommanderDecoderTests: XCTestCase {
   }
   
   func testDecodeSimpleOptions() {
-    let commands = [
+    var commands = [
       "--target", "target",
       "--verbose",
-      "--path", "value=This is a path,location=12",
-      "--config-path", "../path",
+      "--config-path", "../path"
+    ]
+    do {
+      var option = try CommanderDecoder().decode(SimpleOption.self, from: commands)
+      XCTAssertEqual(option.target, ["target"])
+      XCTAssertEqual(option.verbose, true)
+      XCTAssertEqual(option.path.value, "default")
+      XCTAssertEqual(option.path.location, 0)
+      XCTAssertEqual(option.configPath, "../path")
+      XCTAssertEqual(Set(option.locs), [1,2,3])
+      option.arguments = []
+      XCTAssertTrue(option.arguments.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    commands += [
       "--locs", "1,2,3,4,5,6,7",
       "--locs", "8",
       "--locs", "9",
@@ -370,7 +408,24 @@ class CommanderDecoderTests: XCTestCase {
     ]
     do {
       var option = try CommanderDecoder().decode(SimpleOption.self, from: commands)
-      XCTAssertEqual(option.target, "target")
+      XCTAssertEqual(option.target, ["target"])
+      XCTAssertEqual(option.verbose, true)
+      XCTAssertEqual(option.path.value, "default")
+      XCTAssertEqual(option.path.location, 0)
+      XCTAssertEqual(option.configPath, "../path")
+      XCTAssertEqual(Set(option.locs), [1,2,3,4,5,6,7,8,9,0])
+      option.arguments = []
+      XCTAssertTrue(option.arguments.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    commands += [
+      "--path", "value=This is a path,location=12",
+    ]
+    do {
+      var option = try CommanderDecoder().decode(SimpleOption.self, from: commands)
+      XCTAssertEqual(option.target, ["target"])
       XCTAssertEqual(option.verbose, true)
       XCTAssertEqual(option.path.value, "This is a path")
       XCTAssertEqual(option.path.location, 12)
@@ -393,9 +448,18 @@ class CommanderDecoderTests: XCTestCase {
   }
   
   func testDecodeArgumentsOptions() {
-    let options = try! CommanderDecoder().decode(ArgumentsOptions.self, from: ["--bool", "boolValue", "args1", "args2"])
-    XCTAssertEqual(options.arguments, ["boolValue", "args1", "args2"])
-    
+    do {
+      let options = try! CommanderDecoder().decode(ArgumentsOptions.self, from: ["--bool", "boolValue", "args1", "args2"])
+      XCTAssertEqual(options.arguments, ["boolValue", "args1", "args2"])
+    }
+    do {
+      let options = try! CommanderDecoder().decode(DictArgumentsOptions.self, from: ["--bool", "key1=val1", "key2=val2", "key3=val3"])
+      XCTAssertEqual(options.arguments.set, [["key1": "val1"], ["key2": "val2"], ["key3": "val3"]])
+    }
+    do {
+      let options = try! CommanderDecoder().decode(ArrayArgumentsOptions.self, from: ["--bool", "1", "2", "3"])
+      XCTAssertEqual(options.arguments.set, [[UInt32(1)], [UInt32(2)], [UInt32(3)]])
+    }
     do {
       _ = try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-b", "Bool", "-S", "String", "-i", "5"])
       XCTFail()
