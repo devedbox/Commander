@@ -621,6 +621,12 @@ class CommanderDecoderTests: XCTestCase {
     XCTAssertNil(options.bool)
     XCTAssertNotNil(options.dict)
     XCTAssertEqual(options.string, "string")
+    
+    options = try! CommanderDecoder().decode(DefaultValueOptions.self, from: ["--dict", "k=v"])
+    XCTAssertNil(options.bool)
+    XCTAssertNotNil(options.dict)
+    XCTAssertEqual(options.dict, ["k": "v"])
+    XCTAssertEqual(options.string, "default")
 
     options = try! CommanderDecoder().decode(DefaultValueOptions.self, from: ["--string", "string", "--dict", "k=v"])
     XCTAssertNil(options.bool)
