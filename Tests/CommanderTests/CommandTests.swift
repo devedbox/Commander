@@ -12,11 +12,12 @@ var sharedOptions: TestsCommand.Options = .init(target: "")
 
 struct TestsCommand: CommandRepresentable {
   struct Options: OptionsRepresentable {
-    enum CodingKeys: String, CodingKey, StringRawRepresentable {
+    enum CodingKeys: String, CodingKeysRepresentable {
       case target
     }
-    static var description: [(TestsCommand.Options.CodingKeys, OptionKeyDescription)] = [
-      (.target, .usage("The target of the test command"))
+    static var keys: [TestsCommand.Options.CodingKeys : Character] = [:]
+    static var descriptions: [TestsCommand.Options.CodingKeys: OptionDescription] = [
+      .target: .usage("The target of the test command")
     ]
     let target: String
   }
@@ -32,11 +33,14 @@ struct TestsCommand: CommandRepresentable {
 struct TestsArgsCommand: CommandRepresentable {
   struct Options: OptionsRepresentable {
     typealias ArgumentsResolver = AnyArgumentsResolver<[String: UInt8]>
-    enum CodingKeys: String, CodingKey, StringRawRepresentable {
+    enum CodingKeys: String, CodingKeysRepresentable {
       case target
     }
-    static var description: [(Options.CodingKeys, OptionKeyDescription)] = [
-      (.target, .short("T", usage: "The target of the test command"))
+    static var keys: [TestsArgsCommand.Options.CodingKeys : Character] = [
+      .target: "T"
+    ]
+    static var descriptions: [Options.CodingKeys: OptionDescription] = [
+      .target: .usage("The target of the test command")
     ]
     let target: String
   }

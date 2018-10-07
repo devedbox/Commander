@@ -243,7 +243,8 @@ public final class CommanderDecoder {
   internal static var optionsFormat = OptionsFormat.format("--", short: "-")
   internal static var objectFormat = ObjectFormat.flatContainer(splitter: ",", keyValuePairsSplitter: "=")
   
-  internal private(set) var optionsDescription: [(CodingKey, OptionKeyDescription)]!
+  internal private(set) var codingKeys: [String: Character] = [:]
+  internal private(set) var optionsDescription: [String: OptionDescription] = [:]
   internal private(set) var codingArguments: [String: [ObjectFormat.Value]]!
   
   public init() { }
@@ -255,7 +256,10 @@ public final class CommanderDecoder {
     
     func set(value: ObjectFormat.Value, for key: String) {
       var optionKey = key
-      if key.isSingle, let symbolKey = optionsDescription?.first(where: { $0.1.shortSymbol == key.first })?.0.stringValue {
+      if
+        key.isSingle,
+        let symbolKey = codingKeys.first(where: { $0.value == key.first })?.key
+      {
         optionKey = symbolKey
       }
       
@@ -330,8 +334,11 @@ public final class CommanderDecoder {
     _ type: T.Type,
     from commandLineArgs: [String]) throws -> T
   {
-    optionsDescription = T.description.map { ($0.0 as CodingKey, $0.1) }
-    defer { optionsDescription = nil }
+    optionsDescription = T.descriptions.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value }
+    defer { optionsDescription = [:] }
+    
+    codingKeys = T.keys.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value }
+    defer { codingKeys = [:] }
     
     var container = try self.container(from: commandLineArgs)
     
@@ -375,7 +382,9 @@ public final class CommanderDecoder {
   private func spitArgument(for key: CodingKey, with value: ObjectFormat.Value) {
     var arguments = codingArguments.first { arg in
       arg.key.hasPrefix(key.stringValue) ||
-      shortKey(for: key, in: optionsDescription!).map { arg.key.hasPrefix(String($0)) } ?? false
+      (codingKeys[key.stringValue]).map { arg.key.hasPrefix(String($0)) } ?? false
+      // codingKeys.key(for: key).map { arg.key.hasPrefix(String($0)) } ?? false
+      // shortKey(for: key, in: optionsDescription!).map { arg.key.hasPrefix(String($0)) } ?? false
     }
     arguments?.value.insert(value, at: 0)
     arguments.map { codingArguments[$0.key] = $0.value }

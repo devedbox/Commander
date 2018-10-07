@@ -33,8 +33,10 @@ public struct Void: Decodable {
 // MARK: - OptionsDescribable.
 
 public protocol OptionsDescribable: Decodable {
+  /// The short keys of the options' coding keys.
+  static var keys: [AnyHashable: Character] { get }
   /// Returns the options description list.
-  static var description: [(CodingKey, OptionKeyDescription)] { get }
+  static var descriptions: [AnyHashable: OptionDescription] { get }
   /// Returns the type of the argument.
   static var argumentType: Decodable.Type { get }
 }
@@ -46,19 +48,24 @@ extension OptionsDescribable {
   }
 }
 
+// MARK: - CodingKeysRepresentable.
+
+public protocol CodingKeysRepresentable: CodingKey, StringRawRepresentable, Hashable { }
+
 // MARK: - OptionsRepresentable.
 
 /// A protocol represents the conforming types can be the options of a command of `CommandRepresentable`.
 /// The conforming types must be decodable.
 public protocol OptionsRepresentable: OptionsDescribable, Hashable {
   /// The coding key type of `CodingKey & StringRawRepresentable` for decoding.
-  associatedtype CodingKeys: CodingKey & StringRawRepresentable
+  associatedtype CodingKeys: CodingKeysRepresentable
   /// The arguments resolver of the options.
   associatedtype ArgumentsResolver: ArgumentsResolvable = AnyArgumentsResolver<Void>
-  /// The description of `(CodingKeys, OptionKeyDescription)` of `OptionsReoresentable`.
-  typealias Description = (CodingKeys, OptionKeyDescription)
+  /// The short keys of the options' coding keys.
+  static var keys: [CodingKeys: Character] { get }
   /// The extends option keys for the `Options`.
-  static var description: [Description] { get }
+  static var descriptions: [CodingKeys: OptionDescription] { get }
+  /// The arguments of the options if arguments can be resolved.
   var arguments: [ArgumentsResolver.Argument] { get set }
   /// Decode the options from the given command line arguments.
   ///
@@ -73,25 +80,16 @@ internal struct AnyOptions<T: OptionsRepresentable>: Hashable {
 
 internal var _ArgumentsStorage: [AnyHashable: Any] = [:]
 
-/// Get the short key of the coding key if any.
-internal func shortKey(for key: CodingKey, in keys: [(CodingKey, OptionKeyDescription)]) -> String? {
-  return keys.first {
-    $0.0.stringValue == key.stringValue
-  }?.1.shortSymbol.map {
-    String($0)
-  }
-}
-
 // MARK: -
 
 extension OptionsRepresentable {
-  /// Returns the short symbol of the options if any.
-  public static func shortSymbol(for key: CodingKeys) -> String? {
-    return shortKey(for: key, in: description)
+  /// The short keys of the options' coding keys.
+  public static var keys: [AnyHashable: Character] {
+    return keys.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value }
   }
   /// Returns the options description list.
-  public static var description: [(CodingKey, OptionKeyDescription)] {
-    return description.map { ($0.0 as CodingKey, $0.1) }
+  public static var descriptions: [AnyHashable: OptionDescription] {
+    return descriptions.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value }
   }
   /// Returns the type of the argument.
   public static var argumentType: Decodable.Type {

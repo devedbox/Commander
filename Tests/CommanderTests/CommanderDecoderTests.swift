@@ -34,7 +34,7 @@ extension Array where Element: Hashable {
 
 struct PrimaryOptions: OptionsRepresentable {
   
-  public enum CodingKeys: String, CodingKey, StringRawRepresentable {
+  public enum CodingKeys: String, CodingKeysRepresentable {
     case bool
     case int
     case int8
@@ -77,7 +77,8 @@ struct PrimaryOptions: OptionsRepresentable {
     case stringDict = "string-dict"
   }
   
-  static var description: [(CodingKeys, OptionKeyDescription)] = []
+  static var keys: [PrimaryOptions.CodingKeys : Character] = [:]
+  static var descriptions: [PrimaryOptions.CodingKeys: OptionDescription] = [:]
   
   let bool: Bool
   let int: Int
@@ -122,7 +123,7 @@ struct PrimaryOptions: OptionsRepresentable {
 }
 
 struct SimpleOption: OptionsRepresentable {
-  public enum CodingKeys: String, CodingKey, StringRawRepresentable {
+  public enum CodingKeys: String, CodingKeysRepresentable {
     case target
     case verbose
     case path
@@ -135,8 +136,10 @@ struct SimpleOption: OptionsRepresentable {
     let location: UInt8
   }
   
-  static var description: [(SimpleOption.CodingKeys, OptionKeyDescription)] = [
-    (.target, .usage("The target of the options")),
+  static var keys: [SimpleOption.CodingKeys : Character] = [:]
+  
+  static var descriptions: [SimpleOption.CodingKeys: OptionDescription] = [
+    .target: .usage("The target of the options"),
   ]
   
   let target: String
@@ -148,26 +151,28 @@ struct SimpleOption: OptionsRepresentable {
 
 struct ArgumentsOptions: OptionsRepresentable {
   typealias ArgumentsResolver = AnyArgumentsResolver<String>
-  enum CodingKeys: String, CodingKey, StringRawRepresentable {
+  enum CodingKeys: String, CodingKeysRepresentable {
     case bool
   }
-  static var description: [(CodingKeys, OptionKeyDescription)] = []
+  static var keys: [ArgumentsOptions.CodingKeys : Character] = [:]
+  static var descriptions: [ArgumentsOptions.CodingKeys: OptionDescription] = [:]
   
   let bool: Bool
 }
 
 struct ComplexArgumentsOptions: OptionsRepresentable {
   typealias ArgumentsResolver = AnyArgumentsResolver<String>
-  enum CodingKeys: String, CodingKey, StringRawRepresentable {
+  enum CodingKeys: String, CodingKeysRepresentable {
     case bool
     case string
     case int
   }
-  static var description: [(CodingKeys, OptionKeyDescription)] = [
-    (.bool, .short("b", usage: "")),
-    (.string, .short("S", usage: "")),
-    (.int, .short("i", usage: "")),
+  static var keys: [ComplexArgumentsOptions.CodingKeys : Character] = [
+    .bool: "b",
+    .string: "S",
+    .int: "i"
   ]
+  static var descriptions: [ComplexArgumentsOptions.CodingKeys: OptionDescription] = [:]
   
   let bool: Bool
   let string: String
@@ -176,11 +181,12 @@ struct ComplexArgumentsOptions: OptionsRepresentable {
 
 struct KeyedOptions: OptionsRepresentable {
   typealias ArgumentsResolver = AnyArgumentsResolver<String>
-  enum CodingKeys: String, CodingKey, StringRawRepresentable {
+  enum CodingKeys: String, CodingKeysRepresentable {
     case dict
   }
-  static var description: [(CodingKeys, OptionKeyDescription)] = [
-    (.dict, .usage("")),
+  static var keys: [KeyedOptions.CodingKeys : Character] = [:]
+  static var descriptions: [KeyedOptions.CodingKeys: OptionDescription] = [
+    .dict: .usage(""),
   ]
   
   let dict: [String: String]

@@ -22,13 +22,16 @@ internal struct HelpCommand: CommandRepresentable {
     /// Type alias for resolve string arguments.
     internal typealias ArgumentsResolver = AnyArgumentsResolver<String>
     /// The coding keys of `Options`.
-    internal enum CodingKeys: String, CodingKey, StringRawRepresentable {
+    internal enum CodingKeys: String, CodingKeysRepresentable {
       case help
       case intents
     }
+    internal static let keys: [Options.CodingKeys: Character] = [
+      .help: "h"
+    ]
     /// Returns the description of the options.
-    internal static var description: [(Options.CodingKeys, OptionKeyDescription)] = [
-      (.help, .short("h", usage: HelpCommand.usage))
+    internal static var descriptions: [Options.CodingKeys: OptionDescription] = [
+      .help: .usage(HelpCommand.usage)
     ]
     
     internal let help: Bool?
@@ -43,7 +46,8 @@ internal struct HelpCommand: CommandRepresentable {
     if
       keys.count == 1,
       let key = keys.last,
-      key == Options.CodingKeys.help.rawValue || key == Options.shortSymbol(for: .help)
+      key == Options.CodingKeys.help.rawValue
+   || key == (Options.keys[.help]).map { String($0) }
     {
       return true
     }
@@ -124,7 +128,7 @@ internal struct HelpCommand: CommandRepresentable {
       
       var sample = String(repeating: " ", count: path.count + 1 + commandSymbols.reduce(0) { max($0, $1.count) })
       let commandsOutputs = commands.map { cmd -> String in
-        let optionsOutput = cmd.optionsDescriber.description.isEmpty ? "" : " [OPTIONS]"
+        let optionsOutput = cmd.optionsDescriber.descriptions.isEmpty ? "" : " [OPTIONS]"
         let argumentsOutput = cmd.optionsDescriber.isArgumentsResolvable ? " [ARGUMENTS]" : ""
         var symbol = sample
         let contents = "\(path) \(cmd.symbol)"
@@ -141,18 +145,20 @@ internal struct HelpCommand: CommandRepresentable {
       }
       
       sample = String(repeating: " ", count: commands.map {
-        ("[\(String(describing: $0.optionsDescriber.argumentType))]", $0.optionsDescriber.description)
+        ("[\(String(describing: $0.optionsDescriber.argumentType))]", ($0.optionsDescriber.descriptions, $0.optionsDescriber.keys))
       }.reduce(0) {
-        max(max($0, $1.0.count), $1.1.reduce(0) {
-          max($0, (($1.1.shortSymbol.map { "-\($0), " } ?? "") + "--\($1.0.stringValue)").count)
+        let keys = $1.1.1
+        return max(max($0, $1.0.count), $1.1.0.reduce(0) {
+          max($0, ((keys[$1.key].map { "-\($0), "  } ?? "") + "--\($1.key)").count)
         })
       })
       
       let outputs = commands.enumerated().map { index, command -> String in
         let prefix = commandsOutputs[index]
-        let options = command.optionsDescriber.description.map { desc -> String in
+        let keys = command.optionsDescriber.keys
+        let options = command.optionsDescriber.descriptions.map { desc -> String in
           var fixedSymbol = sample
-          let symbol = (desc.1.shortSymbol.map { "-\($0), " } ?? "") + "--\(desc.0.stringValue)"
+          let symbol = (keys[desc.key].map { "-\($0), " } ?? "") + "--\(desc.key)"
           fixedSymbol.replaceSubrange(symbol.startIndex..<symbol.endIndex, with: symbol)
           return intents(2) + fixedSymbol + intents(1) + desc.1.usage
           }.joined(separator: "\n")
@@ -236,7 +242,7 @@ public final class Commander {
           commands.isEmpty,
           let options = symbol,
           options == "\(optionsSymbol)\(HelpCommand.Options.CodingKeys.help.rawValue)"
-       || options == "\(shortSymbol)\(HelpCommand.Options.shortSymbol(for: .help)!)"
+       || options == "\(shortSymbol)\(HelpCommand.Options.keys[.help]!)"
         {
           try HelpCommand.main(.init(help: nil, intents: nil))
         } else {
