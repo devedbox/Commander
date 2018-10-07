@@ -208,17 +208,23 @@ struct ComplexArgumentsOptions: OptionsRepresentable {
   typealias ArgumentsResolver = AnyArgumentsResolver<String>
   enum CodingKeys: String, CodingKeysRepresentable {
     case bool
+    case verbose
     case string
     case int
   }
   static var keys: [ComplexArgumentsOptions.CodingKeys : Character] = [
     .bool: "b",
+    .verbose: "v",
     .string: "S",
     .int: "i"
   ]
-  static var descriptions: [ComplexArgumentsOptions.CodingKeys: OptionDescription] = [:]
+  static var descriptions: [ComplexArgumentsOptions.CodingKeys: OptionDescription] = [
+    .bool: .default(value: false, usage: ""),
+    .verbose: .default(value: false, usage: "")
+  ]
   
-  let bool: Bool?
+  let bool: Bool
+  let verbose: Bool
   let string: String
   let int: Int
 }
@@ -490,6 +496,12 @@ class CommanderDecoderTests: XCTestCase {
     } catch {
       XCTFail()
     }
+    
+    XCTAssertNoThrow(try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-b", "-S", "String", "-i", "5"]))
+    XCTAssertNoThrow(try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-b", "-S", "String", "-i", "5", "-v"]))
+    XCTAssertNoThrow(try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-S", "String", "-i", "5", "-v", "-b"]))
+    XCTAssertNoThrow(try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-S", "String", "-i", "5", "-vb"]))
+    XCTAssertNoThrow(try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-S", "String", "-i", "5", "-bv"]))
     
     do {
       _ = try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-b", "Bool", "-S", "String", "InvalidString", "-i", "5"])

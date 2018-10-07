@@ -398,7 +398,7 @@ public final class CommanderDecoder {
       }
     }
     
-    option.map { container[$0] = .init(boolValue: true) }
+    option.map { set(value: .init(boolValue: true), for: $0) }
     
     return ObjectFormat.Value(
       dictionaryValue: container,
