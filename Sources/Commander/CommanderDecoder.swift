@@ -52,6 +52,9 @@ internal extension String {
   }
   /// Returns a bool value indicates if the string is containing only one character.
   internal var isSingle: Bool {
+    guard !isEmpty else {
+      return false
+    }
     return startIndex == index(before: endIndex)
   }
 }
@@ -85,7 +88,7 @@ internal extension DecodingError {
   /// - parameter reality: The value that was encountered instead of the expected type.
   /// - returns: A `DecodingError` with the appropriate path and debug description.
   fileprivate static func __typeMismatch(at path: [CodingKey], expectation: Any.Type, reality: Any?) -> DecodingError {
-    let description = "Expected to decode \(expectation) but found \(__typeDescription(of: reality)) instead"
+    let description = "Expected to decode '\(expectation)' but found \(__typeDescription(of: reality)) instead"
     return .typeMismatch(expectation, Context(codingPath: path, debugDescription: description))
   }
   
@@ -109,6 +112,16 @@ internal extension DecodingError {
       return "\(type(of: value))"
     }
   }
+  /// Returns the descriptions of coding paths.
+  ///
+  /// - Parameter codingPath: The coding path consists of keys to be described.
+  fileprivate static func __codingPathDescription(of codingPath: [CodingKey]) -> String? {
+    guard !codingPath.isEmpty else {
+      return nil
+    }
+    
+    return "Decoding paths: '\(codingPath.map { $0.description }.joined(separator: " -> "))'."
+  }
 }
 
 // MARK: - Error.
@@ -126,13 +139,13 @@ extension CommanderDecoder {
       case .decodingError(let error):
         switch error {
         case .dataCorrupted(let ctx):
-          return "Data corrupted decoding error: \(ctx.debugDescription)."
+          return "Data corrupted decoding error: \(ctx.debugDescription). \(DecodingError.__codingPathDescription(of: ctx.codingPath) ?? "")"
         case .keyNotFound(_, let ctx):
-          return "Key not found decoding error: \(ctx.debugDescription)."
+          return "Key not found decoding error: \(ctx.debugDescription). \(DecodingError.__codingPathDescription(of: ctx.codingPath) ?? "")"
         case .typeMismatch(_, let ctx):
-          return "Type mismatch decoding error: \(ctx.debugDescription)."
+          return "Type mismatch decoding error: \(ctx.debugDescription). \(DecodingError.__codingPathDescription(of: ctx.codingPath) ?? "")"
         case .valueNotFound(_, let ctx):
-          return "Value not found decoding error: \(ctx.debugDescription)."
+          return "Value not found decoding error: \(ctx.debugDescription). \(DecodingError.__codingPathDescription(of: ctx.codingPath) ?? "")"
         }
       case .invalidKeyValuePairs(let pairs):
         return "Invalid key-value pairs given: \(pairs.joined(separator: " "))."
@@ -629,7 +642,7 @@ extension CommanderDecoder._Decoder {
     {
       guard let entry = container[key.stringValue] else {
         throw CommanderDecoder.Error.decodingError(
-          .keyNotFound(key, .init(codingPath: decoder.codingPath, debugDescription: "No value associated with key \(key)"))
+          .keyNotFound(key, .init(codingPath: decoder.codingPath, debugDescription: "No value associated with key '\(key)'"))
         )
       }
       
@@ -650,7 +663,7 @@ extension CommanderDecoder._Decoder {
       defer { decoder.codingPath.removeLast() }
       
       guard let value = self.container[key.stringValue] else {
-        let desc = "Cannot get \(KeyedDecodingContainer<NestedKey>.self) -- no value found for key \(key)"
+        let desc = "Cannot get \(KeyedDecodingContainer<NestedKey>.self) -- no value found for key '\(key)'"
         throw CommanderDecoder.Error.decodingError(
           .keyNotFound(key, .init(codingPath: codingPath, debugDescription: desc))
         )
@@ -679,7 +692,7 @@ extension CommanderDecoder._Decoder {
       defer { decoder.codingPath.removeLast() }
       
       guard let value = container[key.stringValue] else {
-        let desc = "Cannot get UnkeyedDecodingContainer -- no value found for key \(key)"
+        let desc = "Cannot get UnkeyedDecodingContainer -- no value found for key '\(key)'"
         throw CommanderDecoder.Error.decodingError(
           .keyNotFound(key, .init(codingPath: codingPath, debugDescription: desc))
         )

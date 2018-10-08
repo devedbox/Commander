@@ -96,7 +96,7 @@ extension CodingKeysRepresentable {
   /// initializer. This initializer works with any type, and uses the custom
   /// `description` property for types that conform to `CustomStringConvertible`.
   public var description: String {
-    return "'\(stringValue + (intValue.map { " Index - \($0)" } ?? ""))'"
+    return stringValue + (intValue.map { " Index - \($0)" } ?? "")
   }
 }
 
