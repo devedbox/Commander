@@ -72,6 +72,12 @@ extension OptionsDescribable {
 
 public protocol CodingKeysRepresentable: CodingKey, StringRawRepresentable, Hashable { }
 
+extension CodingKeysRepresentable {
+  public var description: String {
+    return "'\(stringValue + (intValue.map { " Index - \($0)" } ?? ""))'"
+  }
+}
+
 // MARK: - OptionsRepresentable.
 
 /// A protocol represents the conforming types can be the options of a command of `CommandRepresentable`.

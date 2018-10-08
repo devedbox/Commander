@@ -33,11 +33,11 @@ public enum CommanderError: Swift.Error, CustomStringConvertible {
   public var description: String {
     switch self {
     case .invalidCommand(command: let command):
-      return "Commander Error: Invalid command given: '\(command)'. See 'help' for more information"
+      return "Invalid command given error: '\(command)'. See 'help' for more information."
     case .emptyCommand:
-      return "Commander Error: None of command is given. See 'help' for more information"
+      return "None of command is given. See 'help' for more information."
     case .helpUnrecognizedCommands(commands: let commands):
-      return "Commander Error: Unrecognized command: '\(commands.joined(separator: " "))'"
+      return "Unrecognized command error: '\(commands.joined(separator: " "))'."
     }
   }
 }

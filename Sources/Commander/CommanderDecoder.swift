@@ -85,7 +85,7 @@ internal extension DecodingError {
   /// - parameter reality: The value that was encountered instead of the expected type.
   /// - returns: A `DecodingError` with the appropriate path and debug description.
   fileprivate static func __typeMismatch(at path: [CodingKey], expectation: Any.Type, reality: Any?) -> DecodingError {
-    let description = "Expected to decode \(expectation) but found \(__typeDescription(of: reality)) instead."
+    let description = "Expected to decode \(expectation) but found \(__typeDescription(of: reality)) instead"
     return .typeMismatch(expectation, Context(codingPath: path, debugDescription: description))
   }
   
@@ -121,22 +121,27 @@ extension CommanderDecoder {
     case unrecognizedOptions([String])
     case unresolvableArguments
     
-    private var prefix: String {
-      return "Commander Decoder Error: "
-    }
-    
     public var description: String {
       switch self {
       case .decodingError(let error):
-        return (error.errorDescription ?? "Commander decoding error: \(String(describing: error))")
+        switch error {
+        case .dataCorrupted(let ctx):
+          return "Data corrupted decoding error: \(ctx.debugDescription)."
+        case .keyNotFound(_, let ctx):
+          return "Key not found decoding error: \(ctx.debugDescription)."
+        case .typeMismatch(_, let ctx):
+          return "Type mismatch decoding error: \(ctx.debugDescription)."
+        case .valueNotFound(_, let ctx):
+          return "Value not found decoding error: \(ctx.debugDescription)."
+        }
       case .invalidKeyValuePairs(let pairs):
-        return prefix + "Invalid key-value pairs given: \(pairs.joined(separator: " "))"
+        return "Invalid key-value pairs given: \(pairs.joined(separator: " "))."
       case .unrecognizedArguments(let args):
-        return prefix + "Unrecognized arguments '\(args.map { String(describing: $0) }.joined(separator: " "))'"
+        return "Unrecognized arguments '\(args.map { String(describing: $0) }.joined(separator: " "))'."
       case .unrecognizedOptions(let options):
-        return prefix + "Unrecognized options '\(options.joined(separator: " "))'"
+        return "Unrecognized options '\(options.joined(separator: " "))'."
       case .unresolvableArguments:
-        return prefix + "The arguments can not be resolved"
+        return "The arguments can not be resolved."
       }
     }
   }
@@ -624,7 +629,7 @@ extension CommanderDecoder._Decoder {
     {
       guard let entry = container[key.stringValue] else {
         throw CommanderDecoder.Error.decodingError(
-          .keyNotFound(key, .init(codingPath: decoder.codingPath, debugDescription: "No value associated with key \(key)."))
+          .keyNotFound(key, .init(codingPath: decoder.codingPath, debugDescription: "No value associated with key \(key)"))
         )
       }
       
@@ -736,7 +741,7 @@ extension CommanderDecoder._Decoder {
       guard !self.isAtEnd else {
         let codingPath = decoder.codingPath + [CommanderDecoder._Decoder._Key(index: currentIndex)]
         throw CommanderDecoder.Error.decodingError(
-          .valueNotFound(Any?.self, .init(codingPath: codingPath, debugDescription: "Unkeyed container is at end."))
+          .valueNotFound(Any?.self, .init(codingPath: codingPath, debugDescription: "Unkeyed container is at end"))
         )
       }
       
@@ -752,7 +757,7 @@ extension CommanderDecoder._Decoder {
       guard !self.isAtEnd else {
         let codingPath = decoder.codingPath + [CommanderDecoder._Decoder._Key(index: currentIndex)]
         throw CommanderDecoder.Error.decodingError(
-          .valueNotFound(type, .init(codingPath: codingPath, debugDescription: "Unkeyed container is at end."))
+          .valueNotFound(type, .init(codingPath: codingPath, debugDescription: "Unkeyed container is at end"))
         )
       }
       
@@ -774,7 +779,7 @@ extension CommanderDecoder._Decoder {
       
       guard !self.isAtEnd else {
         throw CommanderDecoder.Error.decodingError(
-          .valueNotFound(KeyedDecodingContainer<NestedKey>.self, .init(codingPath: codingPath, debugDescription: "Cannot get nested keyed container -- unkeyed container is at end."))
+          .valueNotFound(KeyedDecodingContainer<NestedKey>.self, .init(codingPath: codingPath, debugDescription: "Cannot get nested keyed container -- unkeyed container is at end"))
         )
       }
       
@@ -802,7 +807,7 @@ extension CommanderDecoder._Decoder {
       defer { decoder.codingPath.removeLast() }
       
       guard !self.isAtEnd else {
-        let desc = "Cannot get nested keyed container -- unkeyed container is at end."
+        let desc = "Cannot get nested keyed container -- unkeyed container is at end"
         throw CommanderDecoder.Error.decodingError(
           .valueNotFound(UnkeyedDecodingContainer.self, .init(codingPath: codingPath, debugDescription: desc))
         )
@@ -825,7 +830,7 @@ extension CommanderDecoder._Decoder {
       defer { decoder.codingPath.removeLast() }
       
       guard !self.isAtEnd else {
-        let desc = "Cannot get superDecoder() -- unkeyed container is at end."
+        let desc = "Cannot get superDecoder() -- unkeyed container is at end"
         throw CommanderDecoder.Error.decodingError(
           .valueNotFound(Decoder.self, .init(codingPath: codingPath, debugDescription: desc))
         )
@@ -979,7 +984,7 @@ extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
   }
   
   private func _valueNotFoundDesc<T>(_ type: T, reality: Any?) -> String {
-    return "Expected \(type) value but found \(DecodingError.__typeDescription(of: reality)) instead."
+    return "Expected \(type) value but found \(DecodingError.__typeDescription(of: reality)) instead"
   }
 }
 
