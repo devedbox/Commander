@@ -312,7 +312,22 @@ class CommanderDecoderTests: XCTestCase {
     XCTAssertNil(value.stringValue)
     XCTAssertEqual(value["v"] as? String?, "args")
     
+    value = try! CommanderDecoder().container(from: "-v=args".components(separatedBy: " "))
+    XCTAssertNotNil(value.dictionaryValue)
+    XCTAssertNotNil(value.arrayValue)
+    XCTAssertNil(value.boolValue)
+    XCTAssertNil(value.stringValue)
+    XCTAssertEqual(value["v"] as? String?, "args")
+    
     value = try! CommanderDecoder().container(from: ["--option1", "value1", "-v", "-t", "-ab"])
+    XCTAssertNotNil(value.dictionaryValue)
+    XCTAssertEqual(value["option1"] as? String?, "value1")
+    XCTAssertEqual(value["v"] as? Bool?, true)
+    XCTAssertEqual(value["t"] as? Bool?, true)
+    XCTAssertEqual(value["a"] as? Bool?, true)
+    XCTAssertEqual(value["b"] as? Bool?, true)
+    
+    value = try! CommanderDecoder().container(from: ["--option1=value1", "-v", "-t", "-ab"])
     XCTAssertNotNil(value.dictionaryValue)
     XCTAssertEqual(value["option1"] as? String?, "value1")
     XCTAssertEqual(value["v"] as? Bool?, true)
@@ -328,10 +343,25 @@ class CommanderDecoderTests: XCTestCase {
     XCTAssertEqual(value["a"] as? Bool?, true)
     XCTAssertEqual(value["b"] as? Bool?, true)
     
+    value = try! CommanderDecoder().container(from: ["-o=value1", "-vtab"])
+    XCTAssertNotNil(value.dictionaryValue)
+    XCTAssertEqual(value["o"] as? String?, "value1")
+    XCTAssertEqual(value["v"] as? Bool?, true)
+    XCTAssertEqual(value["t"] as? Bool?, true)
+    XCTAssertEqual(value["a"] as? Bool?, true)
+    XCTAssertEqual(value["b"] as? Bool?, true)
+    
     value = try! CommanderDecoder().container(from: ["--option", "key1,key2,key3"])
     XCTAssertNotNil(value.dictionaryValue)
     XCTAssertEqual(value.keyedNestedArray(key: "option") as? [String], ["key1", "key2", "key3"])
+    value = try! CommanderDecoder().container(from: ["--option=key1,key2,key3"])
+    XCTAssertNotNil(value.dictionaryValue)
+    XCTAssertEqual(value.keyedNestedArray(key: "option") as? [String], ["key1", "key2", "key3"])
+    
     value = try! CommanderDecoder().container(from: ["-o", "key1,key2,key3"])
+    XCTAssertNotNil(value.dictionaryValue)
+    XCTAssertEqual(value.keyedNestedArray(key: "o") as? [String], ["key1", "key2", "key3"])
+    value = try! CommanderDecoder().container(from: ["-o=key1,key2,key3"])
     XCTAssertNotNil(value.dictionaryValue)
     XCTAssertEqual(value.keyedNestedArray(key: "o") as? [String], ["key1", "key2", "key3"])
   }
@@ -498,8 +528,14 @@ class CommanderDecoderTests: XCTestCase {
       var options = try! CommanderDecoder().decode(ArgumentsOptions.self, from: ["--bool", "boolValue", "args1", "args2"])
       XCTAssertEqual(options.arguments, ["boolValue", "args1", "args2"])
       
+      options = try! CommanderDecoder().decode(ArgumentsOptions.self, from: ["--bool=boolValue", "args1", "args2"])
+      XCTAssertEqual(options.arguments, ["boolValue", "args1", "args2"])
+      
       options = try! CommanderDecoder().decode(ArgumentsOptions.self, from: ["--bool", "--", "boolValue", "args1", "args2"])
       XCTAssertEqual(options.arguments, ["boolValue", "args1", "args2"])
+      
+      options = try! CommanderDecoder().decode(ArgumentsOptions.self, from: ["--bool", "--", "-b", "boolValue", "-a", "args1", "args2"])
+      XCTAssertEqual(options.arguments, ["-b", "boolValue", "-a", "args1", "args2"])
       
       options = try! CommanderDecoder().decode(ArgumentsOptions.self, from: ["--bool", "boolValue", "--", "args1", "args2"])
       XCTAssertEqual(options.arguments, ["boolValue", "args1", "args2"])
@@ -546,6 +582,7 @@ class CommanderDecoderTests: XCTestCase {
     }
     
     XCTAssertNoThrow(try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-b", "-S", "String", "-i", "5"]))
+    XCTAssertNoThrow(try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-b", "-S=String", "-i=5"]))
     XCTAssertNoThrow(try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-b", "-S", "String", "-i", "5", "-v"]))
     XCTAssertNoThrow(try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-S", "String", "-i", "5", "-v", "-b"]))
     XCTAssertNoThrow(try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-S", "String", "-i", "5", "-vb"]))

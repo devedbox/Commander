@@ -353,6 +353,11 @@ public final class CommanderDecoder {
     var arguments: [String: [ObjectFormat.Value]] = ["command-0":[]]
     var option: String?
     
+    func advance(with key: String?) {
+      option.map { set(value: .bool(true), for: $0) }
+      option = key
+    }
+    
     func set(value: ObjectFormat.Value, for key: String) {
       var optionKey = key
       if
@@ -375,9 +380,27 @@ public final class CommanderDecoder {
       }
     }
     
-    func advance(with key: String?) {
-      option.map { set(value: .bool(true), for: $0) }
-      option = key
+    func set(option key: String, short: Bool = false) throws {
+      switch type(of: self).objectFormat {
+      case .flatContainer(splitter: _, keyValuePairsSplitter: let splitter) where key.contains(splitter):
+        let keyValuePairs = key.split(separator: splitter, maxSplits: 1)
+        
+        if short, let keyVal = keyValuePairs.first.map({ String($0) }), !keyVal.isSingle {
+          throw Error.unrecognizedOptions(keyVal.map { String($0) })
+        }
+        
+        advance(with: String(keyValuePairs.first!))
+        set(value: try type(of: self).objectFormat.value(for: String(keyValuePairs.last!)), for: option!)
+        option = nil
+      default:
+        if short {
+          key.forEach { set(value: .bool(true), for: String($0)) }
+          option = nil
+        } else {
+          advance(with: key)
+        }
+        arguments.lastAppendEmptyContainer(for: key)
+      }
     }
     
     switch type(of: self).optionsFormat {
@@ -395,13 +418,11 @@ public final class CommanderDecoder {
               var args = commandLineArgs; args[index] = "↓\(args[index])"
               throw Error.unexpectedEndsOfOptions(markedArgs: args)
             } else {
-              isAtEndOfOptions = true
-              commandLineArgs.formIndex(after: &index)
-              continue
+              isAtEndOfOptions = true; commandLineArgs.formIndex(after: &index); continue
             }
           }
-          advance(with: key)
-          arguments.lastAppendEmptyContainer(for: key)
+          
+          try set(option: key)
         } else if
           !isAtEndOfOptions,
           let symbolIndex = item.endsIndex(matchs: shortSymbol),
@@ -410,14 +431,12 @@ public final class CommanderDecoder {
           advance(with: nil)
           if key.isSingle {
             advance(with: key)
+            arguments.lastAppendEmptyContainer(for: key)
           } else {
-            key.forEach { set(value: .bool(true), for: String($0)) }
-            option = nil
+            try set(option: key, short: true)
           }
-          arguments.lastAppendEmptyContainer(for: key)
         } else {
-          var value = try type(of: self).objectFormat.value(for: item)
-          value.boolValue = true
+          var value = try type(of: self).objectFormat.value(for: item); value.boolValue = true
           if option == nil {
             var last = arguments.lastKeyedArguments
             last?.value.append(value)
