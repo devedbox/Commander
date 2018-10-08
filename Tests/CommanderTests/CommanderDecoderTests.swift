@@ -261,6 +261,26 @@ struct DefaultValueOptions: OptionsRepresentable {
   let dict: [String: String]
 }
 
+struct MismatchTypeDefaultValueOptions: OptionsRepresentable {
+  enum CodingKeys: String, CodingKeysRepresentable {
+    case string
+    case bool
+    case dict
+  }
+  static var keys: [CodingKeys : Character] = [
+    :
+  ]
+  static var descriptions: [CodingKeys: OptionDescription] = [
+    .string: .default(value: ["k": 1], usage: ""),
+    .dict: .default(value: "default", usage: "")
+  ]
+  
+  let string: String
+  let bool: Bool?
+  let dict: [String: String]
+}
+
+
 // MARK: - CommanderDecoderTests.
 
 class CommanderDecoderTests: XCTestCase {
@@ -645,5 +665,27 @@ class CommanderDecoderTests: XCTestCase {
     XCTAssertNotNil(options.dict)
     XCTAssertEqual(options.string, "string")
     XCTAssertEqual(options.dict, ["k": "v"])
+    
+    do {
+      _ = try CommanderDecoder().decode(MismatchTypeDefaultValueOptions.self, from: ["--string", "string"])
+      XCTFail()
+    } catch CommanderDecoder.Error.decodingError(DecodingError.typeMismatch(let type, let ctx)) {
+      XCTAssertTrue(true)
+      XCTAssertTrue(type is [String: Any].Type)
+      XCTAssertFalse(CommanderDecoder.Error.decodingError(DecodingError.typeMismatch(type, ctx)).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      _ = try CommanderDecoder().decode(MismatchTypeDefaultValueOptions.self, from: ["--dict", "k=v"])
+      XCTFail()
+    } catch CommanderDecoder.Error.decodingError(DecodingError.typeMismatch(let type, let ctx)) {
+      XCTAssertTrue(true)
+      XCTAssertTrue(type is String.Type)
+      XCTAssertFalse(CommanderDecoder.Error.decodingError(DecodingError.typeMismatch(type, ctx)).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
   }
 }
