@@ -495,15 +495,43 @@ class CommanderDecoderTests: XCTestCase {
   
   func testDecodeArgumentsOptions() {
     do {
-      let options = try! CommanderDecoder().decode(ArgumentsOptions.self, from: ["--bool", "boolValue", "args1", "args2"])
+      var options = try! CommanderDecoder().decode(ArgumentsOptions.self, from: ["--bool", "boolValue", "args1", "args2"])
+      XCTAssertEqual(options.arguments, ["boolValue", "args1", "args2"])
+      
+      options = try! CommanderDecoder().decode(ArgumentsOptions.self, from: ["--bool", "--", "boolValue", "args1", "args2"])
+      XCTAssertEqual(options.arguments, ["boolValue", "args1", "args2"])
+      
+      options = try! CommanderDecoder().decode(ArgumentsOptions.self, from: ["--bool", "boolValue", "--", "args1", "args2"])
+      XCTAssertEqual(options.arguments, ["boolValue", "args1", "args2"])
+      
+      options = try! CommanderDecoder().decode(ArgumentsOptions.self, from: ["--bool", "boolValue", "args1", "--", "args2"])
       XCTAssertEqual(options.arguments, ["boolValue", "args1", "args2"])
     }
+    
     do {
-      let options = try! CommanderDecoder().decode(DictArgumentsOptions.self, from: ["--bool", "key1=val1", "key2=val2", "key3=val3"])
+      _ = try CommanderDecoder().decode(ArgumentsOptions.self, from: ["--bool", "boolValue", "--", "args1", "--", "args2"])
+      XCTFail()
+    } catch CommanderDecoder.Error.unexpectedEndsOfOptions(markedArgs: let args) {
+      XCTAssertTrue(true)
+      XCTAssertFalse(args.isEmpty)
+      XCTAssertEqual(args.set, ["--bool", "boolValue", "--", "args1", "↓--", "args2"])
+      XCTAssertFalse(CommanderDecoder.Error.unexpectedEndsOfOptions(markedArgs: args).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      var options = try! CommanderDecoder().decode(DictArgumentsOptions.self, from: ["--bool", "key1=val1", "key2=val2", "key3=val3"])
+      XCTAssertEqual(options.arguments.set, [["key1": "val1"], ["key2": "val2"], ["key3": "val3"]])
+      
+      options = try! CommanderDecoder().decode(DictArgumentsOptions.self, from: ["--bool", "--", "key1=val1", "key2=val2", "key3=val3"])
       XCTAssertEqual(options.arguments.set, [["key1": "val1"], ["key2": "val2"], ["key3": "val3"]])
     }
     do {
-      let options = try! CommanderDecoder().decode(ArrayArgumentsOptions.self, from: ["--bool", "1", "2", "3"])
+      var options = try! CommanderDecoder().decode(ArrayArgumentsOptions.self, from: ["--bool", "1", "2", "3"])
+      XCTAssertEqual(options.arguments.set, [[UInt32(1)], [UInt32(2)], [UInt32(3)]])
+      
+      options = try! CommanderDecoder().decode(ArrayArgumentsOptions.self, from: ["--bool", "--", "1", "2", "3"])
       XCTAssertEqual(options.arguments.set, [[UInt32(1)], [UInt32(2)], [UInt32(3)]])
     }
     do {

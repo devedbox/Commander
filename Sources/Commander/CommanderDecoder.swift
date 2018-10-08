@@ -133,6 +133,7 @@ extension CommanderDecoder {
     case unrecognizedArguments([Any])
     case unrecognizedOptions([String])
     case unresolvableArguments
+    case unexpectedEndsOfOptions(markedArgs: [String])
     
     public var description: String {
       switch self {
@@ -155,6 +156,8 @@ extension CommanderDecoder {
         return "Unrecognized options '\(options.joined(separator: " "))'."
       case .unresolvableArguments:
         return "The arguments can not be resolved."
+      case .unexpectedEndsOfOptions(markedArgs: let args):
+        return "Unexpected ends of options at: '\(args.joined(separator: " "))'"
       }
     }
   }
@@ -380,14 +383,27 @@ public final class CommanderDecoder {
     switch type(of: self).optionsFormat {
     case .format(let symbol, short: let shortSymbol):
       var index = commandLineArgs.startIndex
+      var isAtEndOfOptions: Bool = false
+      
       while index < commandLineArgs.endIndex, let item = Optional.some(commandLineArgs[index]) {
         if
           let symbolIndex = item.endsIndex(matchs: symbol),
           let key = Optional.some(String(item[symbolIndex...]))
         {
+          if key.isEmpty { // Consider pattern '--' as the ends of options. This is optional in Commander.
+            if isAtEndOfOptions {
+              var args = commandLineArgs; args[index] = "↓\(args[index])"
+              throw Error.unexpectedEndsOfOptions(markedArgs: args)
+            } else {
+              isAtEndOfOptions = true
+              commandLineArgs.formIndex(after: &index)
+              continue
+            }
+          }
           advance(with: key)
           arguments.lastAppendEmptyContainer(for: key)
         } else if
+          !isAtEndOfOptions,
           let symbolIndex = item.endsIndex(matchs: shortSymbol),
           let key = Optional.some(String(item[symbolIndex...]))
         {
@@ -603,6 +619,10 @@ extension CommanderDecoder._Decoder {
     init(index: Int) {
       self.stringValue = "Index \(index)"
       self.intValue = index
+    }
+    
+    internal var description: String {
+      return stringValue + (intValue.map { " Index - \($0)" } ?? "")
     }
   }
 }
