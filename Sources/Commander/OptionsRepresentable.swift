@@ -37,14 +37,27 @@ public protocol StringRawRepresentable {
 
 /// A protocol represents the conforming types can accecpt and resolve a sequence of arguments.
 public protocol ArgumentsResolvable {
+  /// The type of the arguments resolver to resolve with.
   associatedtype Argument: Decodable
 }
 
+// MARK: AnyArgumentsResolver.
+
+/// A generic concrete type of `ArgumentsResolvable` represents a resolver can resolve any type
+/// of arguments conforming `Decodable`.
 public struct AnyArgumentsResolver<T: Decodable>: ArgumentsResolvable {
+  /// The type of the arguments resolver to resolve with.
   public typealias Argument = T
 }
-
-public struct Void: Decodable {
+/// A concrete argument type represents the arguments is not resolvable. This is a default type
+/// for `OptionsRepresentable`.
+public struct Nothing: Decodable {
+  /// Creates a new instance by decoding from the given decoder.
+  ///
+  /// This initializer throws an error if reading from the decoder fails, or
+  /// if the data read is corrupted or otherwise invalid.
+  ///
+  /// - Parameter decoder: The decoder to read data from.
   public init(from decoder: Decoder) throws {
     throw CommanderDecoder.Error.unresolvableArguments
   }
@@ -52,6 +65,8 @@ public struct Void: Decodable {
 
 // MARK: - OptionsDescribable.
 
+/// A protocol represents the conforming types can describe the options of commands by getting
+/// the `keys`, `descriptions` and `argumentType` of that options.
 public protocol OptionsDescribable: Decodable {
   /// The short keys of the options' coding keys.
   static var keys: [AnyHashable: Character] { get }
@@ -64,15 +79,22 @@ public protocol OptionsDescribable: Decodable {
 extension OptionsDescribable {
   /// Returns a bool value indicates if the arguments can be resolved.
   static var isArgumentsResolvable: Bool {
-    return !(argumentType.self == Void.self)
+    return !(argumentType.self == Nothing.self)
   }
 }
 
 // MARK: - CodingKeysRepresentable.
 
+/// A protocol represents the conforming types can be the coding key type for `Decoder` types.
 public protocol CodingKeysRepresentable: CodingKey, StringRawRepresentable, Hashable { }
 
 extension CodingKeysRepresentable {
+  /// A textual representation of this instance.
+  ///
+  /// Calling this property directly is discouraged. Instead, convert an
+  /// instance of any type to a string by using the `String(describing:)`
+  /// initializer. This initializer works with any type, and uses the custom
+  /// `description` property for types that conform to `CustomStringConvertible`.
   public var description: String {
     return "'\(stringValue + (intValue.map { " Index - \($0)" } ?? ""))'"
   }
@@ -86,7 +108,7 @@ public protocol OptionsRepresentable: OptionsDescribable, Hashable {
   /// The coding key type of `CodingKey & StringRawRepresentable` for decoding.
   associatedtype CodingKeys: CodingKeysRepresentable
   /// The arguments resolver of the options.
-  associatedtype ArgumentsResolver: ArgumentsResolvable = AnyArgumentsResolver<Void>
+  associatedtype ArgumentsResolver: ArgumentsResolvable = AnyArgumentsResolver<Nothing>
   /// The short keys of the options' coding keys.
   static var keys: [CodingKeys: Character] { get }
   /// The extends option keys for the `Options`.
@@ -100,13 +122,18 @@ public protocol OptionsRepresentable: OptionsDescribable, Hashable {
   static func decoded(from commandLineArgs: [String]) throws -> Self
 }
 
+// MARK: - AnyOptions.
+
+/// A generic type wrapping any instances of `OptionsRepresentable` to gain the scale of `Hashable` as
+/// a key of `[AnyHashable: Any]`.
 internal struct AnyOptions<T: OptionsRepresentable>: Hashable {
+  /// The boxed underlying options of `OptionsRepresentable`.
   internal private(set) var options: T
 }
-
+/// The global storage of decoded arguments of any `OptionsRepresentable`. Key type is `AnyOptions<T>`.
 internal var _ArgumentsStorage: [AnyHashable: Any] = [:]
 
-// MARK: -
+// MARK: - Defaults.
 
 extension OptionsRepresentable {
   /// The short keys of the options' coding keys.
@@ -128,18 +155,15 @@ extension OptionsRepresentable {
   public static func decoded(from commandLineArgs: [String]) throws -> Self {
     return try CommanderDecoder().decode(Self.self, from: commandLineArgs)
   }
-  
+  /// The arguments of the options if arguments can be resolved.
   public var arguments: [ArgumentsResolver.Argument] {
-    get {
-      return _ArgumentsStorage[AnyOptions(options: self)] as? [ArgumentsResolver.Argument] ?? []
-    }
-    set {
-      _ArgumentsStorage[AnyOptions(options: self)] = newValue
-    }
+    get { return _ArgumentsStorage[AnyOptions(options: self)] as? [ArgumentsResolver.Argument] ?? [] }
+    set { _ArgumentsStorage[AnyOptions(options: self)] = newValue }
   }
 }
 
-extension OptionsRepresentable where ArgumentsResolver == AnyArgumentsResolver<Void> {
+extension OptionsRepresentable where ArgumentsResolver == AnyArgumentsResolver<Nothing> {
+  /// The arguments of the options if arguments can be resolved.
   public var arguments: [ArgumentsResolver.Argument] {
     get { return [] }
     set { }

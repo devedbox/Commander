@@ -25,8 +25,6 @@
 //  SOFTWARE.
 //
 
-import Foundation
-
 // MARK: - AnyCommandRepresentable.
 
 /// A protocol represents the conforming types can run with the specific command line arguments.

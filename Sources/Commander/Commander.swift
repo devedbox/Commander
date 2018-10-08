@@ -27,6 +27,8 @@
 
 import Foundation
 
+// MARK: - FileHandle.
+
 extension FileHandle: TextOutputStream {
   public func write(_ string: String) {
     string.data(using: .utf8).map { write($0) }
