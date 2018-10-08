@@ -528,9 +528,6 @@ class CommanderDecoderTests: XCTestCase {
       var options = try! CommanderDecoder().decode(ArgumentsOptions.self, from: ["--bool", "boolValue", "args1", "args2"])
       XCTAssertEqual(options.arguments, ["boolValue", "args1", "args2"])
       
-      options = try! CommanderDecoder().decode(ArgumentsOptions.self, from: ["--bool=boolValue", "args1", "args2"])
-      XCTAssertEqual(options.arguments, ["boolValue", "args1", "args2"])
-      
       options = try! CommanderDecoder().decode(ArgumentsOptions.self, from: ["--bool", "--", "boolValue", "args1", "args2"])
       XCTAssertEqual(options.arguments, ["boolValue", "args1", "args2"])
       
@@ -542,6 +539,17 @@ class CommanderDecoderTests: XCTestCase {
       
       options = try! CommanderDecoder().decode(ArgumentsOptions.self, from: ["--bool", "boolValue", "args1", "--", "args2"])
       XCTAssertEqual(options.arguments, ["boolValue", "args1", "args2"])
+    }
+    
+    do {
+      _ = try CommanderDecoder().decode(ArgumentsOptions.self, from: ["--bool=boolValue", "args1", "args2"])
+      XCTFail()
+    } catch CommanderDecoder.Error.decodingError(DecodingError.typeMismatch(let type, let ctx)) {
+      XCTAssertTrue(true)
+      XCTAssertTrue(type is Bool.Type)
+      XCTAssertFalse(CommanderDecoder.Error.decodingError(DecodingError.typeMismatch(type, ctx)).description.isEmpty)
+    } catch {
+      XCTFail()
     }
     
     do {
@@ -577,6 +585,28 @@ class CommanderDecoderTests: XCTestCase {
       XCTAssertTrue(true)
       XCTAssertEqual(args as? [String], ["Bool"])
       XCTAssertFalse(CommanderDecoder.Error.unrecognizedArguments(args).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      _ = try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-b", "Bool", "-S=String", "-i=5"])
+      XCTFail()
+    } catch CommanderDecoder.Error.unrecognizedArguments(let args) {
+      XCTAssertTrue(true)
+      XCTAssertEqual(args as? [String], ["Bool"])
+      XCTAssertFalse(CommanderDecoder.Error.unrecognizedArguments(args).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      _ = try CommanderDecoder().decode(ComplexArgumentsOptions.self, from: ["-b", "Bool", "-vS=String", "-i=5"])
+      XCTFail()
+    } catch CommanderDecoder.Error.unrecognizedOptions(let options) {
+      XCTAssertTrue(true)
+      XCTAssertEqual(options.set, ["v", "S"])
+      XCTAssertFalse(CommanderDecoder.Error.unrecognizedOptions(options).description.isEmpty)
     } catch {
       XCTFail()
     }

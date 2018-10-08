@@ -394,13 +394,19 @@ public final class CommanderDecoder {
         option = nil
       default:
         if short {
-          key.forEach { set(value: .bool(true), for: String($0)) }
-          option = nil
+          advance(with: nil)
+          if key.isSingle {
+            advance(with: key)
+          } else {
+            key.forEach { set(value: .bool(true), for: String($0)) }
+            option = nil
+          }
         } else {
           advance(with: key)
         }
-        arguments.lastAppendEmptyContainer(for: key)
       }
+      
+      arguments.lastAppendEmptyContainer(for: key)
     }
     
     switch type(of: self).optionsFormat {
@@ -409,11 +415,16 @@ public final class CommanderDecoder {
       var isAtEndOfOptions: Bool = false
       
       while index < commandLineArgs.endIndex, let item = Optional.some(commandLineArgs[index]) {
-        if
-          let symbolIndex = item.endsIndex(matchs: symbol),
-          let key = Optional.some(String(item[symbolIndex...]))
-        {
-          if key.isEmpty { // Consider pattern '--' as the ends of options. This is optional in Commander.
+        var isShort = false
+        let symbolIndex = item.endsIndex(matchs: symbol) ?? item.endsIndex(matchs: shortSymbol).flatMap {
+          if !isAtEndOfOptions {
+            isShort = true ;return $0
+          }
+          return nil
+        }
+        
+        if let keyIndex = symbolIndex, let key = Optional.some(String(item[keyIndex...])) {
+          if !isShort, key.isEmpty { // Consider pattern '--' as the ends of options. This is optional in Commander.
             if isAtEndOfOptions {
               var args = commandLineArgs; args[index] = "↓\(args[index])"
               throw Error.unexpectedEndsOfOptions(markedArgs: args)
@@ -422,19 +433,7 @@ public final class CommanderDecoder {
             }
           }
           
-          try set(option: key)
-        } else if
-          !isAtEndOfOptions,
-          let symbolIndex = item.endsIndex(matchs: shortSymbol),
-          let key = Optional.some(String(item[symbolIndex...]))
-        {
-          advance(with: nil)
-          if key.isSingle {
-            advance(with: key)
-            arguments.lastAppendEmptyContainer(for: key)
-          } else {
-            try set(option: key, short: true)
-          }
+          try set(option: key, short: isShort)
         } else {
           var value = try type(of: self).objectFormat.value(for: item); value.boolValue = true
           if option == nil {
