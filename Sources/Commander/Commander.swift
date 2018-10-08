@@ -124,9 +124,11 @@ internal struct HelpCommand: CommandRepresentable {
         return fixedSymbol + intents(1) + command.usage
       }.joined(separator: "\n\(intents(1))")
       
-      print(prefix, commands, /* "\nDescriptions:", */ separator: "\n  ", terminator: "\n\n", to: &stdout)
+      print(prefix, commands, separator: "\n  ", terminator: "\n", to: &stdout)
       
       /* FIXME: Disable the subcommands' description for no prefered formats for now.
+      print(prefix, commands, "\nDescriptions:", separator: "\n  ", terminator: "\n\n", to: &stdout)
+      
       var options = Options(help: nil, intents: 1)
       options.arguments = Commander.commands.map { $0.symbol }
       try self.main(options) */
