@@ -79,13 +79,13 @@ internal struct HelpCommand: CommandRepresentable {
   }
   /// Run the command with command line arguments.
   internal static func run(with commandLineArgs: [String]) throws {
-    switch CommanderDecoder.optionsFormat {
+    switch OptionsDecoder.optionsFormat {
     case .format(let symbol, short: let shortSymbol):
       let options = commandLineArgs.filter {
         $0.hasPrefix(symbol) || $0.hasPrefix(shortSymbol)
       }
       if !options.isEmpty {
-        throw CommanderDecoder.Error.unrecognizedOptions(options.map {
+        throw OptionsDecoder.Error.unrecognizedOptions(options.map {
           let index = $0.endsIndex(matchs: symbol) ?? $0.endsIndex(matchs: shortSymbol)
           return String($0[index!...])
         })
@@ -259,7 +259,7 @@ public final class Commander {
     
     if command == nil {
       if
-        case .format(let optionsSymbol, short: let shortSymbol) = CommanderDecoder.optionsFormat,
+        case .format(let optionsSymbol, short: let shortSymbol) = OptionsDecoder.optionsFormat,
         let isOptionsSymbol = symbol?.hasPrefix(optionsSymbol),
         let isShortSymbol = symbol?.hasPrefix(shortSymbol),
         isOptionsSymbol || isShortSymbol
@@ -285,7 +285,7 @@ public final class Commander {
     
     do {
       try command?.run(with: [String](commands))
-    } catch CommanderDecoder.Error.unrecognizedOptions(let optionsRawVals) {
+    } catch OptionsDecoder.Error.unrecognizedOptions(let optionsRawVals) {
       if
         HelpCommand.isHelpOptions(of: optionsRawVals),
         let command = symbol,
@@ -295,7 +295,7 @@ public final class Commander {
         options.arguments = [command]
         try HelpCommand.main(options)
       } else {
-        throw CommanderDecoder.Error.unrecognizedOptions(optionsRawVals)
+        throw OptionsDecoder.Error.unrecognizedOptions(optionsRawVals)
       }
     } catch {
       throw error

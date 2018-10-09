@@ -59,7 +59,7 @@ public struct Nothing: Decodable {
   ///
   /// - Parameter decoder: The decoder to read data from.
   public init(from decoder: Decoder) throws {
-    throw CommanderDecoder.Error.unresolvableArguments
+    throw OptionsDecoder.Error.unresolvableArguments
   }
 }
 
@@ -153,7 +153,7 @@ extension OptionsRepresentable {
   /// - Parameter commandLineArgs: The command line arguments without command symbol.
   /// - Returns: The decoded options of `Self`.
   public static func decoded(from commandLineArgs: [String]) throws -> Self {
-    return try CommanderDecoder().decode(Self.self, from: commandLineArgs)
+    return try OptionsDecoder().decode(Self.self, from: commandLineArgs)
   }
   /// The arguments of the options if arguments can be resolved.
   public var arguments: [ArgumentsResolver.Argument] {

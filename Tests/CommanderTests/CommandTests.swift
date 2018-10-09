@@ -120,10 +120,10 @@ class CommandTests: XCTestCase {
     do {
       try Commander().dispatch(with: ["commander", "help", "--help"])
       XCTFail()
-    } catch CommanderDecoder.Error.unrecognizedOptions(let options) {
+    } catch OptionsDecoder.Error.unrecognizedOptions(let options) {
       XCTAssertTrue(true)
       XCTAssertEqual(options, ["help"])
-      XCTAssertFalse(CommanderDecoder.Error.unrecognizedOptions(options).description.isEmpty)
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options).description.isEmpty)
     } catch {
       XCTFail()
     }
@@ -131,10 +131,10 @@ class CommandTests: XCTestCase {
     do {
       try Commander().dispatch(with: ["commander", "help", "-h"])
       XCTFail()
-    } catch CommanderDecoder.Error.unrecognizedOptions(let options) {
+    } catch OptionsDecoder.Error.unrecognizedOptions(let options) {
       XCTAssertTrue(true)
       XCTAssertEqual(options, ["h"])
-      XCTAssertFalse(CommanderDecoder.Error.unrecognizedOptions(options).description.isEmpty)
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options).description.isEmpty)
     } catch {
       XCTFail()
     }

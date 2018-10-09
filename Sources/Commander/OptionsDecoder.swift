@@ -1,5 +1,5 @@
 //
-//  CommanderDecoder.swift
+//  OptionsDecoder.swift
 //  Commander
 //
 //  Created by devedbox on 2018/10/2.
@@ -126,7 +126,7 @@ internal extension DecodingError {
 
 // MARK: - Error.
 
-extension CommanderDecoder {
+extension OptionsDecoder {
   public enum Error: CustomStringConvertible, Swift.Error {
     case decodingError(DecodingError)
     case invalidKeyValuePairs(pairs: [String])
@@ -165,7 +165,7 @@ extension CommanderDecoder {
 
 // MARK: - OptionsFormat.
 
-extension CommanderDecoder {
+extension OptionsDecoder {
   /// The options parsing splitter format.
   public enum OptionsFormat {
     case format(String, short: String)
@@ -174,13 +174,13 @@ extension CommanderDecoder {
 
 // MARK: - ObjectFormat.
 
-fileprivate extension Dictionary where Value == CommanderDecoder.ObjectFormat.Value {
+fileprivate extension Dictionary where Value == OptionsDecoder.ObjectFormat.Value {
   fileprivate var unwrapped: Any? {
     return mapValues { $0.unwrapped }
   }
 }
 
-fileprivate extension Dictionary where Key == String, Value == [CommanderDecoder.ObjectFormat.Value] {
+fileprivate extension Dictionary where Key == String, Value == [OptionsDecoder.ObjectFormat.Value] {
   fileprivate var lastKeyedArguments: (key: Key, value: Value)? {
     return self.first { $0.key.hasSuffix("-\(count-1)") }
   }
@@ -194,14 +194,14 @@ fileprivate extension Dictionary where Key == String, Value == [CommanderDecoder
   }
 }
 
-fileprivate extension Array where Element == CommanderDecoder.ObjectFormat.Value {
+fileprivate extension Array where Element == OptionsDecoder.ObjectFormat.Value {
   fileprivate var unwrapped: Any? {
     return compactMap { $0.unwrapped }
   }
 }
 
 fileprivate extension Encodable {
-  fileprivate var wrapped: CommanderDecoder.ObjectFormat.Value? {
+  fileprivate var wrapped: OptionsDecoder.ObjectFormat.Value? {
     if
       let jsonData = try? JSONEncoder().encode(self),
       let jsonObject = try? JSONSerialization.jsonObject(with: jsonData, options: [])
@@ -213,10 +213,10 @@ fileprivate extension Encodable {
   }
 }
 
-extension CommanderDecoder {
+extension OptionsDecoder {
   /// The object format of the value of options.
   internal enum ObjectFormat {
-    /// Wrapped value type represents the available values in `CommanderDecoder`.
+    /// Wrapped value type represents the available values in `OptionsDecoder`.
     internal struct Value {
       internal enum Error: String, Swift.Error {
         case jsonObjectFormatIsNotSupported = "Object format error: The JSON object format is not supported"
@@ -335,9 +335,9 @@ extension CommanderDecoder {
   }
 }
 
-// MARK: - CommanderDecoder.
+// MARK: - OptionsDecoder.
 
-public final class CommanderDecoder {
+public final class OptionsDecoder {
   
   internal static var optionsFormat = OptionsFormat.format("--", short: "-")
   internal static var objectFormat = ObjectFormat.flatContainer(splitter: ",", keyValuePairsSplitter: "=")
@@ -480,7 +480,7 @@ public final class CommanderDecoder {
     }
     
     guard unrecognizedOptions?.isEmpty ?? true else {
-      throw CommanderDecoder.Error.unrecognizedOptions(unrecognizedOptions!)
+      throw OptionsDecoder.Error.unrecognizedOptions(unrecognizedOptions!)
     }
     
     let decoder = _Decoder(referencing: self, wrapping: container)
@@ -493,7 +493,7 @@ public final class CommanderDecoder {
       isLastArgumentsEmpty,
       !validArguments.isEmpty
     {
-      throw CommanderDecoder.Error.unrecognizedArguments(Array(validArguments.values.flatMap { $0 }).compactMap { $0.unwrapped })
+      throw OptionsDecoder.Error.unrecognizedArguments(Array(validArguments.values.flatMap { $0 }).compactMap { $0.unwrapped })
     } else {
       if !validArguments.isEmpty {
         container.arrayValue = Array(validArguments.values).last
@@ -521,7 +521,7 @@ public final class CommanderDecoder {
 
 // MARK: - ConcreteDecoder.
 
-extension CommanderDecoder {
+extension OptionsDecoder {
   internal class _Decoder: Decoder {
     internal private(set) var codingPath: [CodingKey]
     fileprivate var storage = _Storage()
@@ -529,7 +529,7 @@ extension CommanderDecoder {
     internal var userInfo: [CodingUserInfoKey: Any] = [:]
     
     internal init(
-      referencing commanderDecoder: CommanderDecoder,
+      referencing commanderDecoder: OptionsDecoder,
       wrapping value: ObjectFormat.Value,
       at codingPath: [CodingKey] = [])
     {
@@ -540,7 +540,7 @@ extension CommanderDecoder {
     
     func container<Key>(keyedBy type: Key.Type) throws -> KeyedDecodingContainer<Key> where Key : CodingKey {
       guard let top = storage.top?.dictionaryValue else {
-        throw CommanderDecoder.Error.decodingError(
+        throw OptionsDecoder.Error.decodingError(
           .__typeMismatch(at: codingPath, expectation: [String: Any].self, reality: nil)
         )
       }
@@ -555,7 +555,7 @@ extension CommanderDecoder {
     
     func unkeyedContainer() throws -> UnkeyedDecodingContainer {
       guard let top = storage.top?.arrayValue else {
-        throw CommanderDecoder.Error.decodingError(
+        throw OptionsDecoder.Error.decodingError(
           .__typeMismatch(at: codingPath, expectation: [Any].self, reality: nil)
         )
       }
@@ -575,20 +575,20 @@ extension CommanderDecoder {
 
 // MARK: - _KeyedContainer.
 
-extension CommanderDecoder._Decoder {
+extension OptionsDecoder._Decoder {
   fileprivate struct _KeyedContainer {
-    fileprivate let storage: CommanderDecoder.ObjectFormat.Value
-    fileprivate let decoder: CommanderDecoder
+    fileprivate let storage: OptionsDecoder.ObjectFormat.Value
+    fileprivate let decoder: OptionsDecoder
     
     fileprivate init(
-      _ value: CommanderDecoder.ObjectFormat.Value,
-      referencing decoder: CommanderDecoder)
+      _ value: OptionsDecoder.ObjectFormat.Value,
+      referencing decoder: OptionsDecoder)
     {
       self.storage = value
       self.decoder = decoder
     }
     
-    fileprivate subscript(key: String) -> CommanderDecoder.ObjectFormat.Value? {
+    fileprivate subscript(key: String) -> OptionsDecoder.ObjectFormat.Value? {
       return storage.dictionaryValue?[key] ?? .value(decoder.optionsDescription[key]?.defaultValue)
     }
   }
@@ -596,22 +596,22 @@ extension CommanderDecoder._Decoder {
 
 // MARK: - _Storage.
 
-extension CommanderDecoder._Decoder {
+extension OptionsDecoder._Decoder {
   fileprivate struct _Storage {
-    fileprivate var storage: [CommanderDecoder.ObjectFormat.Value] = []
-    fileprivate var top: CommanderDecoder.ObjectFormat.Value? {
+    fileprivate var storage: [OptionsDecoder.ObjectFormat.Value] = []
+    fileprivate var top: OptionsDecoder.ObjectFormat.Value? {
       return storage.last
     }
     fileprivate var lastUnwrapped: Any? {
       return top?.unwrapped
     }
     
-    fileprivate mutating func push(_ value: CommanderDecoder.ObjectFormat.Value) {
+    fileprivate mutating func push(_ value: OptionsDecoder.ObjectFormat.Value) {
       storage.append(value)
     }
     
     @discardableResult
-    fileprivate mutating func pop() -> CommanderDecoder.ObjectFormat.Value? {
+    fileprivate mutating func pop() -> OptionsDecoder.ObjectFormat.Value? {
       return storage.popLast()
     }
   }
@@ -619,7 +619,7 @@ extension CommanderDecoder._Decoder {
 
 // MARK: - _Key.
 
-extension CommanderDecoder._Decoder {
+extension OptionsDecoder._Decoder {
   internal struct _Key: CodingKey {
     var stringValue: String
     var intValue: Int?
@@ -647,19 +647,19 @@ extension CommanderDecoder._Decoder {
 
 // MARK: - _KeyedDecodingContainer.
 
-extension CommanderDecoder._Decoder {
+extension OptionsDecoder._Decoder {
   internal struct _KeyedDecodingContainer<Key: CodingKey>: KeyedDecodingContainerProtocol {
-    internal private(set) var decoder: CommanderDecoder._Decoder
+    internal private(set) var decoder: OptionsDecoder._Decoder
     internal private(set) var codingPath: [CodingKey]
-    fileprivate private(set) var container: CommanderDecoder._Decoder._KeyedContainer
+    fileprivate private(set) var container: OptionsDecoder._Decoder._KeyedContainer
     
     internal var allKeys: [Key] {
       return container.storage.dictionaryValue?.keys.compactMap { Key(stringValue: $0) } ?? []
     }
     
     fileprivate init(
-      referencing decoder: CommanderDecoder._Decoder,
-      wrapping container: CommanderDecoder._Decoder._KeyedContainer)
+      referencing decoder: OptionsDecoder._Decoder,
+      wrapping container: OptionsDecoder._Decoder._KeyedContainer)
     {
       self.decoder = decoder
       self.container = container
@@ -679,7 +679,7 @@ extension CommanderDecoder._Decoder {
       forKey key: Key) throws -> T where T : Decodable
     {
       guard let entry = container[key.stringValue] else {
-        throw CommanderDecoder.Error.decodingError(
+        throw OptionsDecoder.Error.decodingError(
           .keyNotFound(key, .init(codingPath: decoder.codingPath, debugDescription: "No value associated with key '\(key)'"))
         )
       }
@@ -702,20 +702,20 @@ extension CommanderDecoder._Decoder {
       
       guard let value = self.container[key.stringValue] else {
         let desc = "Cannot get \(KeyedDecodingContainer<NestedKey>.self) -- no value found for key '\(key)'"
-        throw CommanderDecoder.Error.decodingError(
+        throw OptionsDecoder.Error.decodingError(
           .keyNotFound(key, .init(codingPath: codingPath, debugDescription: desc))
         )
       }
       
       guard let dictionary = value.dictionaryValue else {
-        throw CommanderDecoder.Error.decodingError(
+        throw OptionsDecoder.Error.decodingError(
           .__typeMismatch(at: codingPath, expectation: [String: Any].self, reality: value.unwrapped)
         )
       }
       
       let container = _KeyedDecodingContainer<NestedKey>(
         referencing: decoder,
-        wrapping: CommanderDecoder._Decoder._KeyedContainer(
+        wrapping: OptionsDecoder._Decoder._KeyedContainer(
           .init(dictionaryValue: dictionary),
           referencing: decoder.container.decoder
         )
@@ -731,18 +731,18 @@ extension CommanderDecoder._Decoder {
       
       guard let value = container[key.stringValue] else {
         let desc = "Cannot get UnkeyedDecodingContainer -- no value found for key '\(key)'"
-        throw CommanderDecoder.Error.decodingError(
+        throw OptionsDecoder.Error.decodingError(
           .keyNotFound(key, .init(codingPath: codingPath, debugDescription: desc))
         )
       }
       
       guard let array = value.arrayValue else {
-        throw CommanderDecoder.Error.decodingError(
+        throw OptionsDecoder.Error.decodingError(
           .__typeMismatch(at: codingPath, expectation: [Any].self, reality: type(of: value.unwrapped))
         )
       }
       
-      return CommanderDecoder._Decoder._UnkeyedDecodingContainer(referencing: decoder, wrapping: array)
+      return OptionsDecoder._Decoder._UnkeyedDecodingContainer(referencing: decoder, wrapping: array)
     }
     
     internal func superDecoder() throws -> Decoder {
@@ -758,7 +758,7 @@ extension CommanderDecoder._Decoder {
       defer { decoder.codingPath.removeLast() }
       
       let value = container[key.stringValue]?.dictionaryValue ?? [:]
-      return CommanderDecoder._Decoder(
+      return OptionsDecoder._Decoder(
         referencing: decoder.container.decoder,
         wrapping: .init(dictionaryValue: value)
       )
@@ -768,10 +768,10 @@ extension CommanderDecoder._Decoder {
 
 // MARK: - _UnkeyedDecodingContainer.
 
-extension CommanderDecoder._Decoder {
+extension OptionsDecoder._Decoder {
   internal struct _UnkeyedDecodingContainer: UnkeyedDecodingContainer {
-    internal var decoder: CommanderDecoder._Decoder
-    internal var container: [CommanderDecoder.ObjectFormat.Value]
+    internal var decoder: OptionsDecoder._Decoder
+    internal var container: [OptionsDecoder.ObjectFormat.Value]
     
     internal var codingPath: [CodingKey] = []
     internal var count: Int? { return container.count }
@@ -781,8 +781,8 @@ extension CommanderDecoder._Decoder {
     internal var currentIndex: Int = 0
     
     internal init(
-      referencing decoder: CommanderDecoder._Decoder,
-      wrapping container: [CommanderDecoder.ObjectFormat.Value])
+      referencing decoder: OptionsDecoder._Decoder,
+      wrapping container: [OptionsDecoder.ObjectFormat.Value])
     {
       self.decoder = decoder
       self.container = container
@@ -790,8 +790,8 @@ extension CommanderDecoder._Decoder {
     
     internal mutating func decodeNil() throws -> Bool {
       guard !self.isAtEnd else {
-        let codingPath = decoder.codingPath + [CommanderDecoder._Decoder._Key(index: currentIndex)]
-        throw CommanderDecoder.Error.decodingError(
+        let codingPath = decoder.codingPath + [OptionsDecoder._Decoder._Key(index: currentIndex)]
+        throw OptionsDecoder.Error.decodingError(
           .valueNotFound(Any?.self, .init(codingPath: codingPath, debugDescription: "Unkeyed container is at end"))
         )
       }
@@ -806,13 +806,13 @@ extension CommanderDecoder._Decoder {
     
     internal mutating func decode<T : Decodable>(_ type: T.Type) throws -> T {
       guard !self.isAtEnd else {
-        let codingPath = decoder.codingPath + [CommanderDecoder._Decoder._Key(index: currentIndex)]
-        throw CommanderDecoder.Error.decodingError(
+        let codingPath = decoder.codingPath + [OptionsDecoder._Decoder._Key(index: currentIndex)]
+        throw OptionsDecoder.Error.decodingError(
           .valueNotFound(type, .init(codingPath: codingPath, debugDescription: "Unkeyed container is at end"))
         )
       }
       
-      decoder.codingPath.append(CommanderDecoder._Decoder._Key(index: currentIndex))
+      decoder.codingPath.append(OptionsDecoder._Decoder._Key(index: currentIndex))
       defer { decoder.codingPath.removeLast() }
       
       decoder.storage.push(container[currentIndex])
@@ -825,11 +825,11 @@ extension CommanderDecoder._Decoder {
     internal mutating func nestedContainer<NestedKey>(
       keyedBy type: NestedKey.Type) throws -> KeyedDecodingContainer<NestedKey> where NestedKey : CodingKey
     {
-      decoder.codingPath.append(CommanderDecoder._Decoder._Key(index: currentIndex))
+      decoder.codingPath.append(OptionsDecoder._Decoder._Key(index: currentIndex))
       defer { decoder.codingPath.removeLast() }
       
       guard !self.isAtEnd else {
-        throw CommanderDecoder.Error.decodingError(
+        throw OptionsDecoder.Error.decodingError(
           .valueNotFound(KeyedDecodingContainer<NestedKey>.self, .init(codingPath: codingPath, debugDescription: "Cannot get nested keyed container -- unkeyed container is at end"))
         )
       }
@@ -837,15 +837,15 @@ extension CommanderDecoder._Decoder {
       let value = self.container[currentIndex]
       
       guard let dictionary = value.dictionaryValue else {
-        throw CommanderDecoder.Error.decodingError(
+        throw OptionsDecoder.Error.decodingError(
           .__typeMismatch(at: codingPath, expectation: [String: Any].self, reality: value.unwrapped)
         )
       }
       
       currentIndex += 1
-      let container = CommanderDecoder._Decoder._KeyedDecodingContainer<NestedKey>(
+      let container = OptionsDecoder._Decoder._KeyedDecodingContainer<NestedKey>(
         referencing: decoder,
-        wrapping: CommanderDecoder._Decoder._KeyedContainer(
+        wrapping: OptionsDecoder._Decoder._KeyedContainer(
           .init(dictionaryValue: dictionary),
           referencing: decoder.container.decoder
         )
@@ -854,12 +854,12 @@ extension CommanderDecoder._Decoder {
     }
     
     internal mutating func nestedUnkeyedContainer() throws -> UnkeyedDecodingContainer {
-      decoder.codingPath.append(CommanderDecoder._Decoder._Key(index: currentIndex))
+      decoder.codingPath.append(OptionsDecoder._Decoder._Key(index: currentIndex))
       defer { decoder.codingPath.removeLast() }
       
       guard !self.isAtEnd else {
         let desc = "Cannot get nested keyed container -- unkeyed container is at end"
-        throw CommanderDecoder.Error.decodingError(
+        throw OptionsDecoder.Error.decodingError(
           .valueNotFound(UnkeyedDecodingContainer.self, .init(codingPath: codingPath, debugDescription: desc))
         )
       }
@@ -867,7 +867,7 @@ extension CommanderDecoder._Decoder {
       let value = self.container[currentIndex]
       
       guard let array = value.arrayValue else {
-        throw CommanderDecoder.Error.decodingError(
+        throw OptionsDecoder.Error.decodingError(
           .__typeMismatch(at: codingPath, expectation: [Any].self, reality: type(of: value.unwrapped))
         )
       }
@@ -877,19 +877,19 @@ extension CommanderDecoder._Decoder {
     }
     
     internal mutating func superDecoder() throws -> Decoder {
-      decoder.codingPath.append(CommanderDecoder._Decoder._Key(index: currentIndex))
+      decoder.codingPath.append(OptionsDecoder._Decoder._Key(index: currentIndex))
       defer { decoder.codingPath.removeLast() }
       
       guard !self.isAtEnd else {
         let desc = "Cannot get superDecoder() -- unkeyed container is at end"
-        throw CommanderDecoder.Error.decodingError(
+        throw OptionsDecoder.Error.decodingError(
           .valueNotFound(Decoder.self, .init(codingPath: codingPath, debugDescription: desc))
         )
       }
       
       let value = container[currentIndex].dictionaryValue ?? [:]
       currentIndex += 1
-      return CommanderDecoder._Decoder(
+      return OptionsDecoder._Decoder(
         referencing: decoder.container.decoder,
         wrapping: .init(dictionaryValue: value),
         at: decoder.codingPath
@@ -900,7 +900,7 @@ extension CommanderDecoder._Decoder {
 
 // MARK: - SingleValueDecodingContainer.
 
-extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
+extension OptionsDecoder._Decoder: SingleValueDecodingContainer {
   
   private func unwrap<T: Decodable & _StringInitable>(as type: T.Type) throws -> T {
     var unwrapped = storage.lastUnwrapped
@@ -910,7 +910,7 @@ extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
     
     if T.self == Bool.self {
       if !(unwrapped is Bool?) {
-        var value: CommanderDecoder.ObjectFormat.Value?
+        var value: OptionsDecoder.ObjectFormat.Value?
         if let dict = storage.top?.dictionaryValue, !dict.isEmpty {
           value = .dictionary(dict)
         } else if let singleArrarString = storage.top?.singleArrayString {
@@ -927,11 +927,11 @@ extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
       
       guard let value = storage.top?.boolValue else {
         if unwrapped != nil {
-          throw CommanderDecoder.Error.decodingError(
+          throw OptionsDecoder.Error.decodingError(
             .__typeMismatch(at: codingPath, expectation: type, reality: unwrapped)
           )
         } else {
-          throw CommanderDecoder.Error.decodingError(
+          throw OptionsDecoder.Error.decodingError(
             .valueNotFound(
               type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: unwrapped))
             )
@@ -943,11 +943,11 @@ extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
     } else {
       guard let value = (unwrapped as? String).flatMap({ T.init($0) }) else {
         if unwrapped != nil {
-          throw CommanderDecoder.Error.decodingError(
+          throw OptionsDecoder.Error.decodingError(
             .__typeMismatch(at: codingPath, expectation: type, reality: unwrapped)
           )
         } else {
-          throw CommanderDecoder.Error.decodingError(
+          throw OptionsDecoder.Error.decodingError(
             .valueNotFound(
               type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: unwrapped))
             )
@@ -1025,7 +1025,7 @@ extension CommanderDecoder._Decoder: SingleValueDecodingContainer {
   internal func decode<T : Decodable>(_ type: T.Type) throws -> T {
     let unwrapped = storage.lastUnwrapped
     guard let _ = unwrapped else {
-      throw CommanderDecoder.Error.decodingError(
+      throw OptionsDecoder.Error.decodingError(
         .valueNotFound(
           type, .init(codingPath: codingPath, debugDescription: _valueNotFoundDesc(type, reality: unwrapped))
         )
