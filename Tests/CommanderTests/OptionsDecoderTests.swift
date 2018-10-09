@@ -285,8 +285,14 @@ struct MismatchTypeDefaultValueOptions: OptionsRepresentable {
 
 class OptionsDecoderTests: XCTestCase {
   static var allTests = [
+    ("testUtils", testUtils),
     ("testDecodeInContainer", testDecodeInContainer),
     ("testDecodeSimpleOptions", testDecodeSimpleOptions),
+    ("testDecodePrimaryOptions", testDecodePrimaryOptions),
+    ("testDecodeSimpleOptions", testDecodeSimpleOptions),
+    ("testDecodeArgumentsOptions", testDecodeArgumentsOptions),
+    ("testDecodeErrors", testDecodeErrors),
+    ("testDefaultValueOptionsDecode", testDefaultValueOptionsDecode)
   ]
   
   func testUtils() {

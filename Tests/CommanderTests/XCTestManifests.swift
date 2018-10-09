@@ -31,6 +31,8 @@ import XCTest
 public func allTests() -> [XCTestCaseEntry] {
   return [
     testCase(CommanderTests.allTests),
+    testCase(CommandTests.allTests),
+    testCase(OptionsDecoderTests.allTests)
   ]
 }
 #endif

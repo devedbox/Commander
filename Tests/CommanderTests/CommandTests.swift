@@ -75,6 +75,7 @@ struct TestsArgsCommand: CommandRepresentable {
 
 class CommandTests: XCTestCase {
   static var allTests = [
+    ("testCommand", testCommand),
     ("testHelpCommand", testHelpCommand),
   ]
   
