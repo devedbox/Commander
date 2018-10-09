@@ -30,6 +30,7 @@ import Foundation
 // MARK: - FileHandle.
 
 extension FileHandle: TextOutputStream {
+  /// Write the string to file handle.
   public func write(_ string: String) {
     string.data(using: .utf8).map { write($0) }
   }

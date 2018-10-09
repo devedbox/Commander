@@ -65,7 +65,7 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "sample"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-s"
@@ -77,15 +77,15 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--string-value"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "sasasa"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-h"
-            isEnabled = "NO">
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--string-value"
