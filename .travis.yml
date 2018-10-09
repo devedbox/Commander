@@ -1,5 +1,6 @@
 language: swift
 os: osx
+osx_image: xcode10
 script:
   - swift package clean
   - swift test
