@@ -1,0 +1,5 @@
+language: swift
+os: osx
+script:
+  - swift package clean
+  - swift test
