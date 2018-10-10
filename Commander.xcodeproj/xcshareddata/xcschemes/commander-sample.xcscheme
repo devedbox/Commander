@@ -65,15 +65,19 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "sample"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "help"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-h"
+            argument = "sample"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "set-args"
-            isEnabled = "NO">
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--add-args"
