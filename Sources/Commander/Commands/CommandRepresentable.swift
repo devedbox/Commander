@@ -90,8 +90,7 @@ extension CommandRepresentable {
         
         try results.first!.run(with: Array(commandLineArgs.dropFirst()))
       } else {
-        let options = try Options.decoded(from: commandLineArgs)
-        try self.main(options)
+        try self.main(try Options.decoded(from: commandLineArgs))
       }
     }
   }
