@@ -110,16 +110,32 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		DC1DF5F7216DF6D5002EB271 /* Options */ = {
+			isa = PBXGroup;
+			children = (
+				DC0B9B9A216347F000C87253 /* OptionsDecoder.swift */,
+				DC0B9BA021648B0600C87253 /* OptionDescription.swift */,
+				OBJ_22 /* OptionsRepresentable.swift */,
+			);
+			path = Options;
+			sourceTree = "<group>";
+		};
+		DC1DF5F8216DF6ED002EB271 /* Commands */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_18 /* CommandRepresentable.swift */,
+			);
+			path = Commands;
+			sourceTree = "<group>";
+		};
 		OBJ_10 /* Commander */ = {
 			isa = PBXGroup;
 			children = (
 				DC0B9BA22167457500C87253 /* misc.swift */,
 				OBJ_13 /* Error.swift */,
 				OBJ_11 /* Commander.swift */,
-				DC0B9BA021648B0600C87253 /* OptionDescription.swift */,
-				DC0B9B9A216347F000C87253 /* OptionsDecoder.swift */,
-				OBJ_22 /* OptionsRepresentable.swift */,
-				OBJ_18 /* CommandRepresentable.swift */,
+				DC1DF5F7216DF6D5002EB271 /* Options */,
+				DC1DF5F8216DF6ED002EB271 /* Commands */,
 			);
 			name = Commander;
 			path = Sources/Commander;
