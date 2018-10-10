@@ -27,6 +27,7 @@
 
 public enum CommanderError: Swift.Error, CustomStringConvertible {
   case invalidCommand(command: String)
+  case ambiguousCommands([AnyCommandRepresentable.Type], symbol: String)
   case emptyCommand
   case helpUnrecognizedCommands(commands: [String])
   
@@ -34,6 +35,8 @@ public enum CommanderError: Swift.Error, CustomStringConvertible {
     switch self {
     case .invalidCommand(command: let command):
       return "Invalid command given error: '\(command)'. See 'help' for more information."
+    case .ambiguousCommands(_, let symbol):
+      return "Ambiguous commands given error: Multi-Commands are found for '\(symbol)', which one to dispatch is ambiguous."
     case .emptyCommand:
       return "None of command is given. See 'help' for more information."
     case .helpUnrecognizedCommands(commands: let commands):

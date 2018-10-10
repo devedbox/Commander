@@ -49,6 +49,9 @@ public struct SampleCommand: CommandRepresentable {
     public var stringValue: String = ""
   }
   
+  public static let subcommands: [AnyCommandRepresentable.Type] = [
+    NoArgsCommand.self
+  ]
   public static let symbol: String = "sample"
   public static let usage: String = "Show sample usage of commander"
   

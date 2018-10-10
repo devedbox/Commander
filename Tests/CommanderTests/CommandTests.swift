@@ -37,7 +37,7 @@ struct TestsCommand: CommandRepresentable {
     }
     static var keys: [TestsCommand.Options.CodingKeys : Character] = [:]
     static var descriptions: [TestsCommand.Options.CodingKeys: OptionDescription] = [
-      .target: .usage("The target of the test command")
+      .target: .default(value: "Default", usage: "The target of the test command")
     ]
     let target: String
   }
@@ -60,11 +60,13 @@ struct TestsArgsCommand: CommandRepresentable {
       .target: "T"
     ]
     static var descriptions: [Options.CodingKeys: OptionDescription] = [
-      .target: .usage("The target of the test command")
+      .target: .default(value: "Default", usage: "The target of the test command")
     ]
     let target: String
   }
-  
+  static let subcommands: [AnyCommandRepresentable.Type] = [
+    TestsCommand.self
+  ]
   static let symbol: String = "test-args"
   static var usage: String = "Mocked command for tests args"
   
@@ -147,6 +149,34 @@ class CommandTests: XCTestCase {
       XCTAssertTrue(true)
       XCTAssertEqual(commands, ["command"])
       XCTAssertFalse(CommanderError.helpUnrecognizedCommands(commands: commands).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+  }
+  
+  func testSubcommands() {
+    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test-args"]))
+    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test-args", "test"]))
+    
+    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test-args", "test", "--target", "The target"]))
+    
+    do {
+      try Commander().dispatch(with: ["commander"])
+      XCTFail()
+    } catch CommanderError.emptyCommand {
+      XCTAssertTrue(true)
+      XCTAssertFalse(CommanderError.emptyCommand.description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      try Commander().dispatch(with: ["commander", "command"])
+      XCTFail()
+    } catch CommanderError.invalidCommand(command: let command) {
+      XCTAssertTrue(true)
+      XCTAssertEqual(command, "command")
+      XCTAssertFalse(CommanderError.invalidCommand(command: command).description.isEmpty)
     } catch {
       XCTFail()
     }

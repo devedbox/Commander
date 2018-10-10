@@ -33,15 +33,21 @@
 public protocol AnyCommandRepresentable {
   /// Returns the options type of the command.
   static var optionsDescriber: OptionsDescribable.Type { get }
+  /// Returns the subcommands of the command.
+  static var subcommands: [AnyCommandRepresentable.Type] { get }
   /// The command symbol also name of the command.
   static var symbol: String { get }
   /// The human-readable usage description of the commands.
   static var usage: String { get }
-  
   /// Run the commands with command line arguments.
   ///
   /// - Parameter commandLineArgs: The command line arguments with dropping command symbol.
   static func run(with commandLineArgs: [String]) throws
+}
+
+extension AnyCommandRepresentable {
+  /// Reutrns the subcommands of the command.
+  public static var subcommands: [AnyCommandRepresentable.Type] { return [] }
 }
 
 // MARK: - CommandRepresentable.
@@ -66,7 +72,27 @@ extension CommandRepresentable {
   }
   /// Run the command with command line arguments.
   public static func run(with commandLineArgs: [String]) throws {
-    let options = try Options.decoded(from: commandLineArgs)
-    try self.main(options)
+    switch OptionsDecoder.optionsFormat {
+    case .format(let optionSymbol, short: let shortOptionSymbol):
+      if
+        let first = commandLineArgs.first,
+        first.endsIndex(matchs: optionSymbol) == nil,
+        first.endsIndex(matchs: shortOptionSymbol) == nil
+      { // Consider a subcommand.
+        let results = subcommands.filter { $0.symbol == first }
+        
+        if results.isEmpty {
+          throw CommanderError.invalidCommand(command: first)
+        }
+        if !results.isSingle {
+          throw CommanderError.ambiguousCommands(results, symbol: first)
+        }
+        
+        try results.first!.run(with: Array(commandLineArgs.dropFirst()))
+      } else {
+        let options = try Options.decoded(from: commandLineArgs)
+        try self.main(options)
+      }
+    }
   }
 }
