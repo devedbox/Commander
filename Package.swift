@@ -17,7 +17,7 @@ let package = Package(
         "commander-sample"
       ]
     )
-    ],
+  ],
   dependencies: [
     // Dependencies declare other packages that this package depends on.
     // .package(url: /* package url */, from: "1.0.0"),
@@ -27,12 +27,15 @@ let package = Package(
     // Targets can depend on other targets in this package, and on products in packages which this package depends on.
     .target(
       name: "Commander",
-      dependencies: []),
+      dependencies: []
+    ),
     .target(
       name: "commander-sample",
-      dependencies: ["Commander"]),
+      dependencies: ["Commander"]
+    ),
     .testTarget(
       name: "CommanderTests",
-      dependencies: ["Commander"]),
-    ]
+      dependencies: ["Commander"]
+    ),
+  ]
 )

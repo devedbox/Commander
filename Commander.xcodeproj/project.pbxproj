@@ -27,6 +27,8 @@
 		DC0B9BA121648B0600C87253 /* OptionDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0B9BA021648B0600C87253 /* OptionDescription.swift */; };
 		DC0B9BA32167457600C87253 /* misc.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0B9BA22167457500C87253 /* misc.swift */; };
 		DC0B9BA5216882D200C87253 /* CommandTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0B9BA4216882D100C87253 /* CommandTests.swift */; };
+		DC1DF5FB216DF726002EB271 /* HelpCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC1DF5FA216DF726002EB271 /* HelpCommand.swift */; };
+		DC1DF5FD216DF777002EB271 /* CommandDescriber.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC1DF5FC216DF777002EB271 /* CommandDescriber.swift */; };
 		OBJ_42 /* Commander.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_11 /* Commander.swift */; };
 		OBJ_43 /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_13 /* Error.swift */; };
 		OBJ_46 /* CommandRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_18 /* CommandRepresentable.swift */; };
@@ -64,15 +66,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		"Commander::Commander::Product" /* Commander.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Commander.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		"Commander::CommanderTests::Product" /* CommanderTests.xctest */ = {isa = PBXFileReference; lastKnownFileType = file; path = CommanderTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		"Commander::commander-sample::Product" /* commander-sample */ = {isa = PBXFileReference; lastKnownFileType = text; path = "commander-sample"; sourceTree = BUILT_PRODUCTS_DIR; };
+		"Commander::Commander::Product" /* Commander.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Commander.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		"Commander::CommanderTests::Product" /* CommanderTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = CommanderTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		"Commander::commander-sample::Product" /* commander-sample */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; path = "commander-sample"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC0B9B9A216347F000C87253 /* OptionsDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionsDecoder.swift; sourceTree = "<group>"; };
 		DC0B9B9C2163B56B00C87253 /* OptionsDecoderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionsDecoderTests.swift; sourceTree = "<group>"; };
 		DC0B9B9E21647ABA00C87253 /* SampleCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleCommand.swift; sourceTree = "<group>"; };
 		DC0B9BA021648B0600C87253 /* OptionDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionDescription.swift; sourceTree = "<group>"; };
 		DC0B9BA22167457500C87253 /* misc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = misc.swift; sourceTree = "<group>"; };
 		DC0B9BA4216882D100C87253 /* CommandTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandTests.swift; sourceTree = "<group>"; };
+		DC1DF5FA216DF726002EB271 /* HelpCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpCommand.swift; sourceTree = "<group>"; };
+		DC1DF5FC216DF777002EB271 /* CommandDescriber.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandDescriber.swift; sourceTree = "<group>"; };
 		OBJ_11 /* Commander.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Commander.swift; sourceTree = "<group>"; };
 		OBJ_13 /* Error.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Error.swift; sourceTree = "<group>"; };
 		OBJ_18 /* CommandRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandRepresentable.swift; sourceTree = "<group>"; };
@@ -123,9 +127,19 @@
 		DC1DF5F8216DF6ED002EB271 /* Commands */ = {
 			isa = PBXGroup;
 			children = (
+				DC1DF5F9216DF713002EB271 /* Built-Ins */,
 				OBJ_18 /* CommandRepresentable.swift */,
+				DC1DF5FC216DF777002EB271 /* CommandDescriber.swift */,
 			);
 			path = Commands;
+			sourceTree = "<group>";
+		};
+		DC1DF5F9216DF713002EB271 /* Built-Ins */ = {
+			isa = PBXGroup;
+			children = (
+				DC1DF5FA216DF726002EB271 /* HelpCommand.swift */,
+			);
+			path = "Built-Ins";
 			sourceTree = "<group>";
 		};
 		OBJ_10 /* Commander */ = {
@@ -274,6 +288,17 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 9999;
+				TargetAttributes = {
+					"Commander::Commander" = {
+						LastSwiftMigration = 1000;
+					};
+					"Commander::CommanderTests" = {
+						LastSwiftMigration = 1000;
+					};
+					"Commander::commander-sample" = {
+						LastSwiftMigration = 1000;
+					};
+				};
 			};
 			buildConfigurationList = OBJ_2 /* Build configuration list for PBXProject "Commander" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -305,9 +330,11 @@
 				DC0B9BA121648B0600C87253 /* OptionDescription.swift in Sources */,
 				DC0B9BA32167457600C87253 /* misc.swift in Sources */,
 				OBJ_43 /* Error.swift in Sources */,
+				DC1DF5FB216DF726002EB271 /* HelpCommand.swift in Sources */,
 				OBJ_46 /* CommandRepresentable.swift in Sources */,
 				DC0B9B9B216347F000C87253 /* OptionsDecoder.swift in Sources */,
 				OBJ_50 /* OptionsRepresentable.swift in Sources */,
+				DC1DF5FD216DF777002EB271 /* CommandDescriber.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -405,7 +432,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 				TARGET_NAME = Commander;
 			};
 			name = Debug;
@@ -449,7 +476,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 				TARGET_NAME = Commander;
 			};
 			name = Release;
@@ -500,7 +527,7 @@
 				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 				TARGET_NAME = CommanderTests;
 			};
 			name = Debug;
@@ -521,7 +548,7 @@
 				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 				TARGET_NAME = CommanderTests;
 			};
 			name = Release;
@@ -542,7 +569,7 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
 				SWIFT_FORCE_DYNAMIC_LINK_STDLIB = YES;
 				SWIFT_FORCE_STATIC_LINK_STDLIB = NO;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 				TARGET_NAME = "commander-sample";
 			};
 			name = Debug;
@@ -563,7 +590,7 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
 				SWIFT_FORCE_DYNAMIC_LINK_STDLIB = YES;
 				SWIFT_FORCE_STATIC_LINK_STDLIB = NO;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 				TARGET_NAME = "commander-sample";
 			};
 			name = Release;
