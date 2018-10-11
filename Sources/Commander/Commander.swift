@@ -68,7 +68,6 @@ public final class Commander {
     var commands = commandLineArgs.dropFirst()
     let symbol = commands.popFirst()
     
-    let command = type(of: self).allCommands.first { $0.symbol == symbol }
     let commandPath = type(of: self).allCommands.first {
       $0.symbol == symbol
     }.map {
@@ -78,7 +77,7 @@ public final class Commander {
       )
     }
     
-    if command == nil {
+    if commandPath == nil {
       if
         case .format(let optionsSymbol, short: let shortSymbol) = OptionsDecoder.optionsFormat,
         let isOptionsSymbol = symbol?.hasPrefix(optionsSymbol),
@@ -93,12 +92,7 @@ public final class Commander {
         {
           try HelpCommand.main(.init(help: nil, intents: nil))
         } else {
-          try CommandPath(
-            running: HelpCommand.self,
-            at: type(of: self).runningPath.split(separator: "/").last!.string
-          ).run(
-            with: [symbol!] + commands
-          )
+          try HelpCommand.run(with: [symbol!] + commands)
         }
       } else {
         if let commandSymbol = symbol {
@@ -110,14 +104,7 @@ public final class Commander {
     }
     
     do {
-      _ = try command.map {
-        try CommandPath(
-          running: $0,
-          at: type(of: self).runningPath.split(separator: "/").last!.string
-        ).run(
-          with: Array(commands)
-        )
-      }
+      try commandPath?.run(with: Array(commands))
     } catch CommanderError.unrecognizedOptions(let options, path: let path) {
       if
         HelpCommand.validate(options: options) == true,

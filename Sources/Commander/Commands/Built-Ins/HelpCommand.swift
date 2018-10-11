@@ -103,8 +103,7 @@ internal struct HelpCommand: CommandRepresentable {
     return false
   }
   /// Run the command with command line arguments.
-  @discardableResult
-  internal static func run(with commandLineArgs: [String]) throws -> AnyCommandRepresentable.Type {
+  internal static func run(with commandLineArgs: [String]) throws {
     switch OptionsDecoder.optionsFormat {
     case .format(let symbol, short: let shortSymbol):
       let options = commandLineArgs.filter {
@@ -120,8 +119,6 @@ internal struct HelpCommand: CommandRepresentable {
     
     let options = try Options.decoded(from: commandLineArgs)
     try self.main(options)
-    
-    return self
   }
   /// The main function of the command.
   internal static func main(_ options: Options) throws {

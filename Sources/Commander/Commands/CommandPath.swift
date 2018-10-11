@@ -60,12 +60,7 @@ public struct CommandPath {
         first.endsIndex(matchs: optionSymbol) == nil,
         first.endsIndex(matchs: shortOptionSymbol) == nil,
         let subcommand = command.subcommands.filter({ $0.symbol == first }).first
-      { // Consider a subcommand.
-//        let results = command.subcommands.filter { $0.symbol == first }
-//        
-//        if results.isEmpty { throw CommanderError.invalidCommand(command: first) }
-//        if !results.isSingle { throw CommanderError.ambiguousCommands(results, symbol: first) }
-        
+      { // Consider a subcommand.        
         return try CommandPath(
           running: subcommand,
           at: "\(paths.joined(separator: " ")) \(command.symbol)"
