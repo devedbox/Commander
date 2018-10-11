@@ -40,6 +40,13 @@ internal func dispatchFailure() -> Never {
   return exit(EXIT_FAILURE)
 }
 
+// MARK: - Substring.
+
+extension Substring {
+  /// Returns the value of string of `String` by initialize a string value with the receiver.
+  internal var string: String { return String(self) }
+}
+
 // MARK: FileHandle.
 
 extension FileHandle {
