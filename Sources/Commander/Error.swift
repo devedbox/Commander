@@ -30,6 +30,7 @@ public enum CommanderError: Swift.Error, CustomStringConvertible {
   case ambiguousCommands([AnyCommandRepresentable.Type], symbol: String)
   case emptyCommand
   case helpUnrecognizedCommands(commands: [String])
+  case unrecognizedOptions([String], path: CommandPath)
   
   public var description: String {
     switch self {
@@ -41,6 +42,8 @@ public enum CommanderError: Swift.Error, CustomStringConvertible {
       return "None of command is given. See 'help' for more information."
     case .helpUnrecognizedCommands(commands: let commands):
       return "Unrecognized command error: '\(commands.joined(separator: " "))'."
+    case .unrecognizedOptions(let options, let path):
+      return "Unrecognized options for command '\(path.command.symbol)': '\(options.joined(separator: " "))'."
     }
   }
 }
