@@ -54,7 +54,6 @@ public final class Commander {
     } catch {
       if type(of: self).errorHandler?(error) == nil {
         var stderr = FileHandle.standardError
-        
         print(String(describing: error), to: &stderr)
       }
       dispatchFailure()
@@ -69,8 +68,14 @@ public final class Commander {
     var commands = commandLineArgs.dropFirst()
     let symbol = commands.popFirst()
     
-    let command = type(of: self).allCommands.first {
+    let command = type(of: self).allCommands.first { $0.symbol == symbol }
+    let commandPath = type(of: self).allCommands.first {
       $0.symbol == symbol
+    }.map {
+      CommandPath(
+        running: $0,
+        at: type(of: self).runningPath.split(separator: "/").last!.string
+      )
     }
     
     if command == nil {
@@ -88,7 +93,12 @@ public final class Commander {
         {
           try HelpCommand.main(.init(help: nil, intents: nil))
         } else {
-          try HelpCommand.run(with: [symbol!] + commands)
+          try CommandPath(
+            running: HelpCommand.self,
+            at: type(of: self).runningPath.split(separator: "/").last!.string
+          ).run(
+            with: [symbol!] + commands
+          )
         }
       } else {
         if let commandSymbol = symbol {
@@ -100,18 +110,23 @@ public final class Commander {
     }
     
     do {
-      try command?.run(with: [String](commands))
-    } catch OptionsDecoder.Error.unrecognizedOptions(let optionsRawVals) {
+      _ = try command.map {
+        try CommandPath(
+          running: $0,
+          at: type(of: self).runningPath.split(separator: "/").last!.string
+        ).run(
+          with: Array(commands)
+        )
+      }
+    } catch CommanderError.unrecognizedOptions(let options, path: let path) {
       if
-        HelpCommand.isHelpOptions(of: optionsRawVals),
-        let command = symbol,
-        !HelpCommand.isHelpOptions(of: [command])
+        HelpCommand.validate(options: options) == true,
+        HelpCommand.validate(options: [path.command.symbol]) == false
       {
-        var options = HelpCommand.Options(help: nil, intents: nil)
-        options.arguments = [command]
-        try HelpCommand.main(options)
+        HelpCommand.path = path; defer { HelpCommand.path = nil }
+        try HelpCommand.main(.default(arguments: [path.command.symbol]))
       } else {
-        throw OptionsDecoder.Error.unrecognizedOptions(optionsRawVals)
+        throw CommanderError.unrecognizedOptions(options, path: path)
       }
     } catch {
       throw error
