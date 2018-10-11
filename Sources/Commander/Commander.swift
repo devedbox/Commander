@@ -36,6 +36,8 @@ public final class Commander {
   public static var usage: String = ""
   /// The registered available commands of the commander.
   public static var commands: [AnyCommandRepresentable.Type] = []
+  /// The global options of the commander.
+  public static var options: OptionsDescribable.Type?
   /// Returns all commands of commander with registered commands along with built-in commands.
   internal static var allCommands: [AnyCommandRepresentable.Type] {
     return [HelpCommand.self] + commands
@@ -43,6 +45,8 @@ public final class Commander {
   
   /// The name of the current running commander.
   internal private(set) static var runningPath: String!
+  /// The global options of current running commander if any.
+  internal static var runningGlobalOptions: OptionsDescribable?
   /// Creates a commander instance.
   public init() { }
   

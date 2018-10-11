@@ -136,6 +136,10 @@ internal var _ArgumentsStorage: [AnyHashable: Any] = [:]
 // MARK: - Defaults.
 
 extension OptionsRepresentable {
+  /// Returns the global options of commander.
+  public var globalOptions: OptionsDescribable? {
+    return Commander.runningGlobalOptions
+  }
   /// The short keys of the options' coding keys.
   public static var keys: [AnyHashable: Character] {
     return keys.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value }
