@@ -72,26 +72,6 @@ extension CommandRepresentable {
   }
   /// Run the command with command line arguments.
   public static func run(with commandLineArgs: [String]) throws {
-    switch OptionsDecoder.optionsFormat {
-    case .format(let optionSymbol, short: let shortOptionSymbol):
-      if
-        let first = commandLineArgs.first,
-        first.endsIndex(matchs: optionSymbol) == nil,
-        first.endsIndex(matchs: shortOptionSymbol) == nil
-      { // Consider a subcommand.
-        let results = subcommands.filter { $0.symbol == first }
-        
-        if results.isEmpty {
-          throw CommanderError.invalidCommand(command: first)
-        }
-        if !results.isSingle {
-          throw CommanderError.ambiguousCommands(results, symbol: first)
-        }
-        
-        try results.first!.run(with: Array(commandLineArgs.dropFirst()))
-      } else {
-        try self.main(try Options.decoded(from: commandLineArgs))
-      }
-    }
+    try self.main(try Options.decoded(from: commandLineArgs))
   }
 }

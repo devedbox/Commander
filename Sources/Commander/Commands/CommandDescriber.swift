@@ -42,15 +42,15 @@ extension String {
 }
 
 internal struct CommandDescriber {
+  private let path: String
   private let intents: Int
   
-  internal init(intents: Int = 0) {
+  internal init(path: String, intents: Int = 0) {
+    self.path = path
     self.intents = intents
   }
   
   internal func describe(_ commander: Commander.Type) -> String {
-    let path = Commander.runningPath.split(separator: "/").last!
-    
     let commandsSymbols = commander.allCommands.map { ($0.symbol, $0.usage) }
     
     let count = commandsSymbols.reduce(0) { max($0, $1.0.count) }
@@ -70,9 +70,6 @@ internal struct CommandDescriber {
   }
   
   internal func describe(_ command: AnyCommandRepresentable.Type) -> String {
-    // var sample = String(repeating: " ", count: path.count + 1 + commandSymbols.reduce(0) { max($0, $1.count) })
-    let path = String(Commander.runningPath.split(separator: "/").last!)
-    
     let subcommandSymbols = command.subcommands.map { ($0.symbol, $0.usage) }
     let optionsSymbols = command.optionsDescriber.descriptions.map { desc -> (String, String) in
       let shortKey = command.optionsDescriber.keys[desc.key]

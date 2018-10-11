@@ -76,18 +76,26 @@ internal struct HelpCommand: CommandRepresentable {
     
     internal let help: Bool?
     internal let intents: Int?
+    
+    internal static func `default`(arguments: [ArgumentsResolver.Argument]) -> Options {
+      var options = Options(help: nil, intents: nil)
+      options.arguments = arguments
+      return options
+    }
   }
+  /// The running command path.
+  internal static var path: CommandPath!
   /// The command symbol.
   internal static var symbol: String = "help"
   /// The usage of the command.
   internal static var usage: String = "Prints the help message of the command. Usage: [[--help|-h][help COMMAND][COMMAND --help][COMMAND -h]]"
   /// Returns a bool value indicates if the given options raw value is 'help' option.
-  internal static func isHelpOptions(of keys: [String]) -> Bool {
+  internal static func validate(options: [String]) -> Bool {
     if
-      keys.count == 1,
-      let key = keys.last,
-      key == Options.CodingKeys.help.rawValue
-        || key == (Options.keys[.help]).map { String($0) }
+      options.count == 1,
+      let option = options.last,
+      option == Options.CodingKeys.help.rawValue
+   || option == (Options.keys[.help]).map { String($0) }
     {
       return true
     }
@@ -95,7 +103,8 @@ internal struct HelpCommand: CommandRepresentable {
     return false
   }
   /// Run the command with command line arguments.
-  internal static func run(with commandLineArgs: [String]) throws {
+  @discardableResult
+  internal static func run(with commandLineArgs: [String]) throws -> AnyCommandRepresentable.Type {
     switch OptionsDecoder.optionsFormat {
     case .format(let symbol, short: let shortSymbol):
       let options = commandLineArgs.filter {
@@ -111,14 +120,17 @@ internal struct HelpCommand: CommandRepresentable {
     
     let options = try Options.decoded(from: commandLineArgs)
     try self.main(options)
+    
+    return self
   }
   /// The main function of the command.
   internal static func main(_ options: Options) throws {
     var stdout = FileHandle.standardOutput
+    let path = self.path?.paths.joined(separator: " ") ?? Commander.runningPath.split(separator: "/").last!.string
     
     if options.arguments.isEmpty {
       print(
-        CommandDescriber().describe(Commander.self),
+        CommandDescriber(path: path).describe(Commander.self),
         terminator: "\n",
         to: &stdout
       )
@@ -145,7 +157,7 @@ internal struct HelpCommand: CommandRepresentable {
       }
       
       print(
-        commands.map { CommandDescriber().describe($0) }.joined(separator: "\n\n"),
+        commands.map { CommandDescriber(path: path).describe($0) }.joined(separator: "\n\n"),
         terminator: "\n",
         to: &stdout
       )
