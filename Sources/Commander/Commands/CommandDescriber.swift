@@ -126,7 +126,7 @@ internal struct CommandDescriber {
     return """
     \(intents(0))Usage of '\(command.symbol)':
     \(returns(0))
-    \(intents(1))$ \(path) \(command.symbol) \(subcommandsSummary)\(optionsSummary)\(argumentsSummary)\(returns(1))
+    \(intents(1))$ \(path) \(command.symbol)\(subcommandsSummary)\(optionsSummary)\(argumentsSummary)\(returns(1))
     \(intents(2))\(command.usage)\(subcommandsOutputs)\(optionsOutputs)\(argumentsOutputs)
     """
   }

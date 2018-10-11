@@ -64,16 +64,16 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "sample"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
             argument = "help"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "sample"
             isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-h"
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "set-args"
