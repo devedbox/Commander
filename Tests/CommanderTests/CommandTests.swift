@@ -119,6 +119,7 @@ class CommandTests: XCTestCase {
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "--help"]))
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "-h"]))
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "help", "test"]))
+    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "help", "test-args"]))
     
     do {
       try Commander().dispatch(with: ["commander", "help", "--help"])

@@ -34,25 +34,6 @@ extension FileHandle: TextOutputStream {
   }
 }
 
-// MARK: - AnyCommandRepresentable.
-
-extension AnyCommandRepresentable {
-  internal static func evaluate(_ symbols: [String]) -> (command: AnyCommandRepresentable.Type?, symbol: [String]) {
-    if symbol == symbols.first {
-      let subsymbols = Array(symbols.dropFirst())
-      if
-        !subcommands.isEmpty,
-        let subcommand = subcommands.first(where: { $0.symbol == subsymbols.first })
-      {
-        return subcommand.evaluate(subsymbols)
-      } else {
-        return (self, Array(symbols.dropFirst()))
-      }
-    }
-    return (nil, symbols)
-  }
-}
-
 // MARK: - HelpCommand.
 
 /// The built-in help command for the commander.
