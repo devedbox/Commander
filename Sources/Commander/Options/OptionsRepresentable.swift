@@ -49,9 +49,24 @@ public struct AnyArgumentsResolver<T: Decodable>: ArgumentsResolvable {
   /// The type of the arguments resolver to resolve with.
   public typealias Argument = T
 }
-/// A concrete argument type represents the arguments is not resolvable. This is a default type
-/// for `OptionsRepresentable`.
-public struct Nothing: Decodable {
+
+// MARK: - Nothingness.
+
+/// The protocol represents the conforming type means nothing and cannot be decoded.
+public protocol Nothingness: OptionsRepresentable { }
+
+/// The concrete type conforms `Nothingness` represents the options and arguments is
+/// not resolvable. Used by the `OptionsRepresentable` as default argument type and
+/// by the `CommanderRepresentable` as default options type.
+public struct Nothing: Nothingness {
+  /// The coding key type of `CodingKey & StringRawRepresentable` for decoding.
+  public enum CodingKeys: String, CodingKeysRepresentable {
+    case nothing
+  }
+  /// The short keys of the options' coding keys.
+  public static let keys: [CodingKeys : Character] = [:]
+  /// The extends option keys for the `Options`.
+  public static let descriptions: [CodingKeys : OptionDescription] = [:]
   /// Creates a new instance by decoding from the given decoder.
   ///
   /// This initializer throws an error if reading from the decoder fails, or
