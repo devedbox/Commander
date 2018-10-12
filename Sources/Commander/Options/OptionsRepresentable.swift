@@ -84,9 +84,9 @@ public struct Nothing: Nothingness {
 /// the `keys`, `descriptions` and `argumentType` of that options.
 public protocol OptionsDescribable: Decodable {
   /// The short keys of the options' coding keys.
-  static var keys: [AnyHashable: Character] { get }
+  static var keys: [String: Character] { get }
   /// Returns the options description list.
-  static var descriptions: [AnyHashable: OptionDescription] { get }
+  static var descriptions: [String: OptionDescription] { get }
   /// Returns the type of the argument.
   static var argumentType: Decodable.Type { get }
 }
@@ -124,10 +124,14 @@ public protocol OptionsRepresentable: OptionsDescribable, Hashable {
   associatedtype CodingKeys: CodingKeysRepresentable
   /// The arguments resolver of the options.
   associatedtype ArgumentsResolver: ArgumentsResolvable = AnyArgumentsResolver<Nothing>
+  /// The global options of the commander.
+  associatedtype GlobalOptions: OptionsRepresentable = Nothing
   /// The short keys of the options' coding keys.
   static var keys: [CodingKeys: Character] { get }
   /// The extends option keys for the `Options`.
   static var descriptions: [CodingKeys: OptionDescription] { get }
+  /// Returns the global options of the running commander if any.
+  var globalOptions: GlobalOptions? { get }
   /// The arguments of the options if arguments can be resolved.
   var arguments: [ArgumentsResolver.Argument] { get set }
   /// Decode the options from the given command line arguments.
@@ -152,16 +156,22 @@ internal var _ArgumentsStorage: [AnyHashable: Any] = [:]
 
 extension OptionsRepresentable {
   /// Returns the global options of commander.
-  public var globalOptions: OptionsDescribable? {
-    return Commander.runningGlobalOptions
+  public var globalOptions: GlobalOptions? {
+    return _GlobalOptions as? GlobalOptions
   }
   /// The short keys of the options' coding keys.
-  public static var keys: [AnyHashable: Character] {
-    return keys.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value }
+  public static var keys: [String: Character] {
+    let selfKeys = keys.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value } as [String: Character]
+    let globalKeys = GlobalOptions.keys.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value } as [String: Character]
+    
+    return globalKeys.merging(selfKeys) { current, _ in current }
   }
   /// Returns the options description list.
-  public static var descriptions: [AnyHashable: OptionDescription] {
-    return descriptions.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value }
+  public static var descriptions: [String: OptionDescription] {
+    let selfDescriptions = self.descriptions.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value }
+    let globalDescriptions = GlobalOptions.descriptions.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value }
+    
+    return globalDescriptions.merging(selfDescriptions) { current, _ in current }
   }
   /// Returns the type of the argument.
   public static var argumentType: Decodable.Type {
@@ -178,6 +188,24 @@ extension OptionsRepresentable {
   public var arguments: [ArgumentsResolver.Argument] {
     get { return _ArgumentsStorage[AnyOptions(options: self)] as? [ArgumentsResolver.Argument] ?? [] }
     set { _ArgumentsStorage[AnyOptions(options: self)] = newValue }
+  }
+}
+
+extension OptionsRepresentable {
+  /// Returns the coding key of the options with the given key.
+  public static func codingKey(for optionKey: String) -> CodingKeys? {
+    if let key = CodingKeys(rawValue: optionKey) {
+      return key
+    }
+    
+    if
+      optionKey.isSingle,
+      let key = (keys as [CodingKeys: Character]).first(where: { $0.value == optionKey.first })
+    {
+      return key.key
+    }
+    
+    return nil
   }
 }
 
