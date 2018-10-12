@@ -66,6 +66,8 @@ internal struct HelpCommand: CommandRepresentable {
   }
   /// The running command path.
   internal static var path: CommandPath!
+  /// The running commander path of the commander.
+  internal static var runningPath: String!
   /// The command symbol.
   internal static var symbol: String = "help"
   /// The usage of the command.
@@ -82,6 +84,18 @@ internal struct HelpCommand: CommandRepresentable {
     }
     
     return false
+  }
+  /// Try to validate and run the help command if the given options if valid help options.
+  internal static func resolve(_ options: [String], path: CommandPath) throws {
+    if
+      validate(options: options) == true,
+      validate(options: [path.command.symbol]) == false
+    {
+      self.path = path; defer { self.path = nil }
+      try main(.default(arguments: [path.command.symbol]))
+    } else {
+      throw CommanderError.unrecognizedOptions(options, path: path)
+    }
   }
   /// Run the command with command line arguments.
   internal static func run(with commandLineArgs: [String]) throws {
@@ -104,7 +118,7 @@ internal struct HelpCommand: CommandRepresentable {
   /// The main function of the command.
   internal static func main(_ options: Options) throws {
     var stdout = FileHandle.standardOutput
-    let path = self.path?.paths.joined(separator: " ") ?? Commander.runningPath!.split(separator: "/").last!.string
+    let path = self.path?.paths.joined(separator: " ") ?? runningPath.split(separator: "/").last!.string
     
     if options.arguments.isEmpty {
       print(
@@ -126,8 +140,8 @@ internal struct HelpCommand: CommandRepresentable {
           return command
         } else {
           unrecognizedCommand.append(arg)
-          return nil
         }
+        return nil
       }
       
       guard unrecognizedCommand.isEmpty else {
