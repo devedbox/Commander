@@ -27,29 +27,42 @@
 
 import Foundation
 
-// MARK: - Commander.
+// MARK: - CommanderRepresentable.
 
-public final class Commander {
+public protocol CommanderRepresentable {
+  /// The associated type of `Options`.
+  associatedtype Options: OptionsRepresentable = Nothing
   /// A closure of `(Error) -> Void` to handle the stderror.
-  public static var errorHandler: ((Swift.Error) -> Swift.Void)?
-  /// The usage description of the commander.
-  public static var usage: String = ""
+  static var errorHandler: ((Swift.Error) -> Swift.Void)? { get set }
   /// The registered available commands of the commander.
-  public static var commands: [AnyCommandRepresentable.Type] = []
-  /// The global options of the commander.
-  public static var options: OptionsDescribable.Type?
+  static var commands: [AnyCommandRepresentable.Type] { get set }
+  /// The human-readable usage description of the commands.
+  static var usage: String { get set }
+  /// The name of the current running commander.
+  static var runningPath: String? { get set }
+  /// The global options of current running commander if any.
+  static var runningGlobalOptions: Options? { get set }
+  
+  /// Decoding the given command line argumants as the current command's options type and disatch the
+  /// command with the decided options.
+  func dispatch(with commandLineArgs: [String]) throws
+}
+
+extension CommanderRepresentable where Options == Nothing {
+  /// The global options of current running commander if any.
+  public static var runningGlobalOptions: Options? {
+    get { return nil }
+    set { }
+  }
+}
+
+// MARK: - Dispatch.
+
+extension CommanderRepresentable {
   /// Returns all commands of commander with registered commands along with built-in commands.
   internal static var allCommands: [AnyCommandRepresentable.Type] {
     return [HelpCommand.self] + commands
   }
-  
-  /// The name of the current running commander.
-  internal private(set) static var runningPath: String!
-  /// The global options of current running commander if any.
-  internal static var runningGlobalOptions: OptionsDescribable?
-  /// Creates a commander instance.
-  public init() { }
-  
   /// Decoding the current command line arguments of `CommandLine.arguments` as the current command's
   /// options type and dispatch the command with the decoded options.
   public func dispatch() -> Never {
@@ -64,10 +77,13 @@ public final class Commander {
     }
     dispatchSuccess()
   }
-  
-  internal func dispatch(with commandLineArgs: [String]) throws {
-    type(of: self).runningPath = commandLineArgs.first
+  /// Decoding the given command line argumants as the current command's options type and disatch the
+  /// command with the decided options.
+  public func dispatch(with commandLineArgs: [String]) throws {
     defer { type(of: self).runningPath = nil }
+    defer { type(of: self).runningGlobalOptions = nil }
+    
+    type(of: self).runningPath = commandLineArgs.first
     
     var commands = commandLineArgs.dropFirst()
     let symbol = commands.popFirst()
@@ -77,7 +93,7 @@ public final class Commander {
     }.map {
       CommandPath(
         running: $0,
-        at: type(of: self).runningPath.split(separator: "/").last!.string
+        at: type(of: self).runningPath!.split(separator: "/").last!.string
       )
     }
     
@@ -109,6 +125,19 @@ public final class Commander {
     
     do {
       try commandPath?.run(with: Array(commands))
+    } catch let dispatcher as CommandPath.Dispatcher {
+      guard Options.self != Nothing.self else {
+        throw CommanderError.unrecognizedOptions(dispatcher.options, path: dispatcher.path)
+      }
+      
+      let unrecognizedOptions = dispatcher.options.filter { Options.CodingKeys.init(rawValue: $0) == nil }
+      guard unrecognizedOptions.isEmpty else {
+        throw CommanderError.unrecognizedOptions(unrecognizedOptions, path: dispatcher.path)
+      }
+      
+      type(of: self).runningGlobalOptions = try Options(from: dispatcher.decoder)
+      try dispatcher.path.command.run(with: dispatcher.decoded)
+      
     } catch CommanderError.unrecognizedOptions(let options, path: let path) {
       if
         HelpCommand.validate(options: options) == true,
@@ -123,4 +152,19 @@ public final class Commander {
       throw error
     }
   }
+}
+
+// MARK: - Commander.
+
+public final class Commander: CommanderRepresentable {
+  /// A closure of `(Error) -> Void` to handle the stderror.
+  public static var errorHandler: ((Error) -> Void)?
+  /// The registered available commands of the commander.
+  public static var commands: [AnyCommandRepresentable.Type] = []
+  /// The name of the current running commander.
+  public static var runningPath: String?
+  /// The human-readable usage description of the commands.
+  public static var usage: String = ""
+  /// Creates the instance of `Commander`.
+  public init() { }
 }
