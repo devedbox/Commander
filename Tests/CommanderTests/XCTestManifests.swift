@@ -33,7 +33,8 @@ public func allTests() -> [XCTestCaseEntry] {
     testCase(CommanderTests.allTests),
     testCase(CommandTests.allTests),
     testCase(CommandPathTests.allTests),
-    testCase(OptionsDecoderTests.allTests)
+    testCase(OptionsDecoderTests.allTests),
+    testcase(GlobalOptionsTests.allTests)
   ]
 }
 #endif
