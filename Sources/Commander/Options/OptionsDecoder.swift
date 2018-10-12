@@ -464,11 +464,8 @@ public final class OptionsDecoder {
     _ type: T.Type,
     from commandLineArgs: [String]) throws -> T
   {
-    optionsDescription = T.descriptions.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value }
-    defer { optionsDescription = [:] }
-    
-    codingKeys = T.keys.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value }
-    defer { codingKeys = [:] }
+    optionsDescription = T.descriptions
+    codingKeys = T.keys
     
     var container = try self.container(from: commandLineArgs)
     
@@ -505,6 +502,9 @@ public final class OptionsDecoder {
     guard unrecognizedOptions?.isEmpty ?? true else {
       throw OptionsDecoder.Error.unrecognizedOptions(unrecognizedOptions!, decoded: decoded, decoder: decoder)
     }
+    
+    defer { optionsDescription = [:] }
+    defer { codingKeys = [:] }
     
     return decoded
   }
