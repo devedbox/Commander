@@ -119,7 +119,17 @@ class CommandTests: XCTestCase {
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "--help"]))
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "-h"]))
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "help", "test"]))
+    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test", "-h"]))
+    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test", "--help"]))
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "help", "test-args"]))
+    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test-args", "-h"]))
+    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test-args", "test", "-h"]))
+    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test-args", "--help"]))
+    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test-args", "test", "--help"]))
+    
+    XCTAssertTrue(HelpCommand.validate(options: ["h"]))
+    XCTAssertTrue(HelpCommand.validate(options: ["help"]))
+    XCTAssertFalse(HelpCommand.validate(options: ["h", "h"]))
     
     do {
       try Commander().dispatch(with: ["commander", "help", "--help"])
@@ -150,6 +160,17 @@ class CommandTests: XCTestCase {
       XCTAssertTrue(true)
       XCTAssertEqual(commands, ["command"])
       XCTAssertFalse(CommanderError.helpUnrecognizedCommands(commands: commands).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      try Commander().dispatch(with: ["commander", "fake", "-s"])
+      XCTFail()
+    } catch CommanderError.invalidCommand(command: let command) {
+      XCTAssertTrue(true)
+      XCTAssertEqual(command, "fake")
+      XCTAssertFalse(CommanderError.invalidCommand(command: command).description.isEmpty)
     } catch {
       XCTFail()
     }
