@@ -131,7 +131,7 @@ extension OptionsDecoder {
     case decodingError(DecodingError)
     case invalidKeyValuePairs(pairs: [String])
     case unrecognizedArguments([Any])
-    case unrecognizedOptions([String], decoded: Decodable?, decoder: OptionsDecoder?)
+    case unrecognizedOptions([String], decoded: Decodable?, decoder: Decoder?)
     case unresolvableArguments
     case unexpectedEndsOfOptions(markedArgs: [String])
     
@@ -386,7 +386,7 @@ public final class OptionsDecoder {
         let keyValuePairs = key.split(separator: splitter, maxSplits: 1)
         
         if short, let keyVal = keyValuePairs.first.map({ String($0) }), !keyVal.isSingle {
-          throw Error.unrecognizedOptions(keyVal.map { String($0) }, decoded: nil, decoder: self)
+          throw Error.unrecognizedOptions(keyVal.map { String($0) }, decoded: nil, decoder: nil)
         }
         
         advance(with: String(keyValuePairs.first!))
@@ -503,7 +503,7 @@ public final class OptionsDecoder {
     }
     
     guard unrecognizedOptions?.isEmpty ?? true else {
-      throw OptionsDecoder.Error.unrecognizedOptions(unrecognizedOptions!, decoded: decoded, decoder: self)
+      throw OptionsDecoder.Error.unrecognizedOptions(unrecognizedOptions!, decoded: decoded, decoder: decoder)
     }
     
     return decoded
