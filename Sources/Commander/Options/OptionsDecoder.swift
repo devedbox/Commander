@@ -131,7 +131,7 @@ extension OptionsDecoder {
     case decodingError(DecodingError)
     case invalidKeyValuePairs(pairs: [String])
     case unrecognizedArguments([Any])
-    case unrecognizedOptions([String])
+    case unrecognizedOptions([String], decoded: Decodable?, decoder: OptionsDecoder?)
     case unresolvableArguments
     case unexpectedEndsOfOptions(markedArgs: [String])
     
@@ -152,7 +152,7 @@ extension OptionsDecoder {
         return "Invalid key-value pairs given: \(pairs.joined(separator: " "))."
       case .unrecognizedArguments(let args):
         return "Unrecognized arguments '\(args.map { String(describing: $0) }.joined(separator: " "))'."
-      case .unrecognizedOptions(let options):
+      case .unrecognizedOptions(let options, decoded: _, decoder: _):
         return "Unrecognized options '\(options.joined(separator: " "))'."
       case .unresolvableArguments:
         return "The arguments can not be resolved."
@@ -386,7 +386,7 @@ public final class OptionsDecoder {
         let keyValuePairs = key.split(separator: splitter, maxSplits: 1)
         
         if short, let keyVal = keyValuePairs.first.map({ String($0) }), !keyVal.isSingle {
-          throw Error.unrecognizedOptions(keyVal.map { String($0) })
+          throw Error.unrecognizedOptions(keyVal.map { String($0) }, decoded: nil, decoder: self)
         }
         
         advance(with: String(keyValuePairs.first!))
@@ -475,14 +475,6 @@ public final class OptionsDecoder {
     codingArguments = container.arrayValue?.first?.dictionaryValue?.mapValues { $0.arrayValue! }
     defer { codingArguments = nil }
     
-    let unrecognizedOptions = container.dictionaryValue?.keys.filter { key in
-      type.CodingKeys.init(rawValue: key) == nil
-    }
-    
-    guard unrecognizedOptions?.isEmpty ?? true else {
-      throw OptionsDecoder.Error.unrecognizedOptions(unrecognizedOptions!)
-    }
-    
     let decoder = _Decoder(referencing: self, wrapping: container)
     var decoded = try decoder.decode(as: type)
     
@@ -504,6 +496,14 @@ public final class OptionsDecoder {
           decoded.arguments = try decoder.decode(as: [T.ArgumentsResolver.Argument].self)
         }
       }
+    }
+    
+    let unrecognizedOptions = container.dictionaryValue?.keys.filter { key in
+      type.CodingKeys.init(rawValue: key) == nil
+    }
+    
+    guard unrecognizedOptions?.isEmpty ?? true else {
+      throw OptionsDecoder.Error.unrecognizedOptions(unrecognizedOptions!, decoded: decoded, decoder: self)
     }
     
     return decoded
