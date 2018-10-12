@@ -27,6 +27,10 @@
 
 import Foundation
 
+// MARK: - DispatchStorage.
+
+internal var _GlobalOptions: OptionsDescribable?
+
 // MARK: - CommanderRepresentable.
 
 public protocol CommanderRepresentable {
@@ -38,22 +42,10 @@ public protocol CommanderRepresentable {
   static var commands: [AnyCommandRepresentable.Type] { get set }
   /// The human-readable usage description of the commands.
   static var usage: String { get set }
-  /// The name of the current running commander.
-  static var runningPath: String? { get set }
-  /// The global options of current running commander if any.
-  static var runningGlobalOptions: Options? { get set }
   
   /// Decoding the given command line argumants as the current command's options type and disatch the
   /// command with the decided options.
   func dispatch(with commandLineArgs: [String]) throws
-}
-
-extension CommanderRepresentable where Options == Nothing {
-  /// The global options of current running commander if any.
-  public static var runningGlobalOptions: Options? {
-    get { return nil }
-    set { }
-  }
 }
 
 // MARK: - Dispatch.
@@ -80,10 +72,13 @@ extension CommanderRepresentable {
   /// Decoding the given command line argumants as the current command's options type and disatch the
   /// command with the decided options.
   public func dispatch(with commandLineArgs: [String]) throws {
-    defer { type(of: self).runningPath = nil }
-    defer { type(of: self).runningGlobalOptions = nil }
+    defer {
+      _GlobalOptions = nil
+      HelpCommand.runningPath = nil
+    }
     
-    type(of: self).runningPath = commandLineArgs.first
+    let runningPath = commandLineArgs.first!
+    HelpCommand.runningPath = runningPath
     
     var commands = commandLineArgs.dropFirst()
     let symbol = commands.popFirst()
@@ -93,7 +88,7 @@ extension CommanderRepresentable {
     }.map {
       CommandPath(
         running: $0,
-        at: type(of: self).runningPath!.split(separator: "/").last!.string
+        at: runningPath.split(separator: "/").last!.string
       )
     }
     
@@ -111,8 +106,6 @@ extension CommanderRepresentable {
        || options == "\(shortSymbol)\(HelpCommand.Options.keys[.help]!)"
         {
           try HelpCommand.main(.init(help: nil, intents: nil))
-        } else {
-          try HelpCommand.run(with: [symbol!] + commands)
         }
       } else {
         if let commandSymbol = symbol {
@@ -127,27 +120,20 @@ extension CommanderRepresentable {
       try commandPath?.run(with: Array(commands))
     } catch let dispatcher as CommandPath.Dispatcher {
       guard Options.self != Nothing.self else {
-        throw CommanderError.unrecognizedOptions(dispatcher.options, path: dispatcher.path)
+        try HelpCommand.resolve(dispatcher.options, path: dispatcher.path)
+        return
       }
       
-      let unrecognizedOptions = dispatcher.options.filter { Options.CodingKeys.init(rawValue: $0) == nil }
+      let unrecognizedOptions = dispatcher.options.filter { Options.codingKey(for: $0) == nil }
       guard unrecognizedOptions.isEmpty else {
         throw CommanderError.unrecognizedOptions(unrecognizedOptions, path: dispatcher.path)
       }
       
-      type(of: self).runningGlobalOptions = try Options(from: dispatcher.decoder)
+      _GlobalOptions = try Options(from: dispatcher.decoder)
       try dispatcher.path.command.run(with: dispatcher.decoded)
       
     } catch CommanderError.unrecognizedOptions(let options, path: let path) {
-      if
-        HelpCommand.validate(options: options) == true,
-        HelpCommand.validate(options: [path.command.symbol]) == false
-      {
-        HelpCommand.path = path; defer { HelpCommand.path = nil }
-        try HelpCommand.main(.default(arguments: [path.command.symbol]))
-      } else {
-        throw CommanderError.unrecognizedOptions(options, path: path)
-      }
+      try HelpCommand.resolve(options, path: path)
     } catch {
       throw error
     }
@@ -161,8 +147,6 @@ public final class Commander: CommanderRepresentable {
   public static var errorHandler: ((Error) -> Void)?
   /// The registered available commands of the commander.
   public static var commands: [AnyCommandRepresentable.Type] = []
-  /// The name of the current running commander.
-  public static var runningPath: String?
   /// The human-readable usage description of the commands.
   public static var usage: String = ""
   /// Creates the instance of `Commander`.
