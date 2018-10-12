@@ -27,6 +27,17 @@
 
 /// A type represents the running paths of the specific command of `AnyCommandRepresetnable.Type`.
 public struct CommandPath {
+  /// The error info of the command path to redispatch with the.
+  internal struct Dispatcher: Error {
+    /// Running command path.
+    internal let path: CommandPath
+    /// The unrecognized options keys.
+    internal let options: [String]
+    /// The decoded options.
+    internal let decoded: Decodable
+    /// The decoder to decode the options.
+    internal let decoder: Decoder
+  }
   /// The running paths of the ass
   public private(set) var paths: [String]
   /// The exact running command of the command path.
@@ -60,7 +71,7 @@ public struct CommandPath {
         first.endsIndex(matchs: optionSymbol) == nil,
         first.endsIndex(matchs: shortOptionSymbol) == nil,
         let subcommand = command.subcommands.filter({ $0.symbol == first }).first
-      { // Consider a subcommand.        
+      { // Consider a subcommand.
         return try CommandPath(
           running: subcommand,
           at: "\(paths.joined(separator: " ")) \(command.symbol)"
@@ -70,8 +81,10 @@ public struct CommandPath {
       } else {
         do {
           try command.run(with: commandLineArgs)
-        } catch OptionsDecoder.Error.unrecognizedOptions(let options) {
+        } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: nil, decoder: nil) {
           throw CommanderError.unrecognizedOptions(options, path: self)
+        } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded?, decoder: let decoder?) {
+          throw Dispatcher(path: self, options: options, decoded: decoded, decoder: decoder)
         } catch {
           throw error
         }
