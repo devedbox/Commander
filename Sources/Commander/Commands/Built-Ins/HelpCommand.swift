@@ -94,7 +94,7 @@ internal struct HelpCommand: CommandRepresentable {
         throw OptionsDecoder.Error.unrecognizedOptions(options.map {
           let index = $0.endsIndex(matchs: symbol) ?? $0.endsIndex(matchs: shortSymbol)
           return String($0[index!...])
-        })
+        }, decoded: nil, decoder: nil)
       }
     }
     
@@ -104,7 +104,7 @@ internal struct HelpCommand: CommandRepresentable {
   /// The main function of the command.
   internal static func main(_ options: Options) throws {
     var stdout = FileHandle.standardOutput
-    let path = self.path?.paths.joined(separator: " ") ?? Commander.runningPath.split(separator: "/").last!.string
+    let path = self.path?.paths.joined(separator: " ") ?? Commander.runningPath!.split(separator: "/").last!.string
     
     if options.arguments.isEmpty {
       print(
