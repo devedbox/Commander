@@ -43,6 +43,10 @@ public protocol AnyCommandRepresentable {
   ///
   /// - Parameter commandLineArgs: The command line arguments with dropping command symbol.
   static func run(with commandLineArgs: [String]) throws
+  /// Run the commands with decoded options.
+  ///
+  /// - Parameter options: The decoded options.
+  static func run(with options: Any) throws
 }
 
 extension AnyCommandRepresentable {
@@ -73,5 +77,13 @@ extension CommandRepresentable {
   /// Run the command with command line arguments.
   public static func run(with commandLineArgs: [String]) throws {
     try self.main(try Options.decoded(from: commandLineArgs))
+  }
+  /// Run the commands with decoded options.
+  ///
+  /// - Parameter options: The decoded options.
+  public static func run(with options: Any) throws {
+    if let concreteOptions = options as? Options {
+      try self.main(concreteOptions)
+    }
   }
 }
