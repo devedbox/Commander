@@ -37,11 +37,11 @@ public protocol CommanderRepresentable {
   /// The associated type of `Options`.
   associatedtype Options: OptionsRepresentable = Nothing
   /// A closure of `(Error) -> Void` to handle the stderror.
-  static var errorHandler: ((Swift.Error) -> Swift.Void)? { get set }
+  static var errorHandler: ((Swift.Error) -> Swift.Void)? { get }
   /// The registered available commands of the commander.
-  static var commands: [AnyCommandRepresentable.Type] { get set }
+  static var commands: [AnyCommandRepresentable.Type] { get }
   /// The human-readable usage description of the commands.
-  static var usage: String { get set }
+  static var usage: String { get }
   
   /// Decoding the given command line argumants as the current command's options type and disatch the
   /// command with the decided options.
@@ -75,10 +75,14 @@ extension CommanderRepresentable {
     defer {
       _GlobalOptions = nil
       HelpCommand.runningPath = nil
+      HelpCommand.runningCommanderUsage = nil
+      HelpCommand.runningCommands = []
     }
     
     let runningPath = commandLineArgs.first!
     HelpCommand.runningPath = runningPath
+    HelpCommand.runningCommanderUsage = type(of: self).usage
+    HelpCommand.runningCommands = type(of: self).allCommands
     
     var commands = commandLineArgs.dropFirst()
     let symbol = commands.popFirst()
@@ -105,7 +109,7 @@ extension CommanderRepresentable {
           options == "\(optionsSymbol)\(HelpCommand.Options.CodingKeys.help.rawValue)"
        || options == "\(shortSymbol)\(HelpCommand.Options.keys[.help]!)"
         {
-          try HelpCommand.main(.init(help: nil, intents: nil))
+          try HelpCommand.main(.init())
         }
       } else {
         if let commandSymbol = symbol {
