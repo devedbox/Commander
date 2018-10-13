@@ -58,8 +58,37 @@ internal struct HelpCommand: CommandRepresentable {
     internal let help: Bool?
     internal let intents: Int?
     
+    internal init(
+      help: Bool = false,
+      intents: Int = 0)
+    {
+      self.help = help
+      self.intents = intents
+    }
+    
+    /// Decode the options from the given command line arguments.
+    ///
+    /// - Parameter commandLineArgs: The command line arguments without command symbol.
+    /// - Returns: The decoded options of `Self`.
+    internal static func decoded(from commandLineArgs: [String]) throws -> Options {
+      switch OptionsDecoder.optionsFormat {
+      case .format(let symbol, short: let shortSymbol):
+        let options = commandLineArgs.filter {
+          $0.hasPrefix(symbol) || $0.hasPrefix(shortSymbol)
+        }
+        if !options.isEmpty {
+          throw OptionsDecoder.Error.unrecognizedOptions(options.map {
+            let index = $0.endsIndex(matchs: symbol) ?? $0.endsIndex(matchs: shortSymbol)
+            return String($0[index!...])
+          }, decoded: nil, decoder: nil)
+        }
+      }
+      
+      return try OptionsDecoder().decode(self, from: commandLineArgs)
+    }
+    
     internal static func `default`(arguments: [ArgumentsResolver.Argument]) -> Options {
-      var options = Options(help: nil, intents: nil)
+      var options = Options()
       options.arguments = arguments
       return options
     }
@@ -68,6 +97,10 @@ internal struct HelpCommand: CommandRepresentable {
   internal static var path: CommandPath!
   /// The running commander path of the commander.
   internal static var runningPath: String!
+  /// The running commander's usage.
+  internal static var runningCommanderUsage: String!
+  /// The running commander's available commands.
+  internal static var runningCommands: [AnyCommandRepresentable.Type] = []
   /// The command symbol.
   internal static var symbol: String = "help"
   /// The usage of the command.
@@ -97,24 +130,6 @@ internal struct HelpCommand: CommandRepresentable {
       throw CommanderError.unrecognizedOptions(options, path: path)
     }
   }
-  /// Run the command with command line arguments.
-  internal static func run(with commandLineArgs: [String]) throws {
-    switch OptionsDecoder.optionsFormat {
-    case .format(let symbol, short: let shortSymbol):
-      let options = commandLineArgs.filter {
-        $0.hasPrefix(symbol) || $0.hasPrefix(shortSymbol)
-      }
-      if !options.isEmpty {
-        throw OptionsDecoder.Error.unrecognizedOptions(options.map {
-          let index = $0.endsIndex(matchs: symbol) ?? $0.endsIndex(matchs: shortSymbol)
-          return String($0[index!...])
-        }, decoded: nil, decoder: nil)
-      }
-    }
-    
-    let options = try Options.decoded(from: commandLineArgs)
-    try self.main(options)
-  }
   /// The main function of the command.
   internal static func main(_ options: Options) throws {
     var stdout = FileHandle.standardOutput
@@ -122,7 +137,7 @@ internal struct HelpCommand: CommandRepresentable {
     
     if options.arguments.isEmpty {
       print(
-        CommandDescriber(path: path).describe(Commander.self),
+        CommandDescriber(path: path).describe(commander: runningCommanderUsage, commands: runningCommands),
         terminator: "\n",
         to: &stdout
       )
