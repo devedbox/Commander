@@ -151,7 +151,7 @@ internal struct HelpCommand: CommandRepresentable {
     } else {
       var unrecognizedCommand = [String]()
       let commands = options.arguments.compactMap { arg -> AnyCommandRepresentable.Type? in
-        if let command = Commander.commands.first(where: { $0.symbol == arg }) {
+        if let command = runningCommands.first(where: { $0.symbol == arg }) {
           return command
         } else {
           unrecognizedCommand.append(arg)
