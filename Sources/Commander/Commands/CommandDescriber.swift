@@ -50,8 +50,8 @@ internal struct CommandDescriber {
     self.intents = intents
   }
   
-  internal func describe(_ commander: Commander.Type) -> String {
-    let commandsSymbols = commander.allCommands.map { ($0.symbol, $0.usage) }
+  internal func describe(commander usage: String, commands: [AnyCommandRepresentable.Type]) -> String {
+    let commandsSymbols = commands.map { ($0.symbol, $0.usage) }
     
     let count = commandsSymbols.reduce(0) { max($0, $1.0.count) }
     let alignment = String(repeating: " ", count: count)
@@ -61,7 +61,7 @@ internal struct CommandDescriber {
     \(returns(0))
     \(intents(1))$ \(path) COMMAND
     \(returns(0))
-    \(intents(2))\(Commander.usage)
+    \(intents(2))\(usage)
     \(returns(0))
     Commands:
     \(returns(0))
