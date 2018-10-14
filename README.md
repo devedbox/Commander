@@ -6,6 +6,10 @@
 
 Commander is a Swift framework for decoding command-line arguments by integrating with Swift Standard Library Protocols e.g. Encodable & Decodable. With Commander, you just need to focus on writing options model of commands, the rest works will be handled by Commander.
 
+## Test Coverage Graph
+
+![coverage graph](https://codecov.io/gh/devedbox/Commander/commit/1a15f7be4db03125027641205529e0e5d5050b21/graphs/sunburst.svg)
+
 ## Example
 
 With Commander, a command and its associated options could be defined as follows:
