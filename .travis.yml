@@ -2,5 +2,8 @@ language: swift
 os: osx
 osx_image: xcode10
 script:
-  - swift package clean
-  - swift test
+  # - swift package clean
+  # - swift test
+  - xcodebuild -project Commander.xcodeproj -scheme Commander-Package -sdk macosx10.14 -destination 'platform=macOS,arch=x86_64' build test
+after_success:
+  - bash <(curl -s https://codecov.io/bash) -J 'Commander'
