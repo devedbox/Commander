@@ -1,4 +1,4 @@
-# Commander ![test](https://travis-ci.com/devedbox/Commander.svg?branch=master)
+# Commander ![test](https://travis-ci.com/devedbox/Commander.svg?branch=master)[![codecov](https://codecov.io/gh/devedbox/Commander/branch/master/graph/badge.svg)](https://codecov.io/gh/devedbox/Commander)
 
 Commander is a Swift framework for decoding command-line arguments by integrating with Swift Standard Library Protocols e.g. Encodable & Decodable. With Commander, you just need to focus on writing options model of commands, the rest works will be handled by Commander.
 
