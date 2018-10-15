@@ -6,7 +6,8 @@ install: bundle install
 script:
   # - swift package clean
   # - swift test
-  - xcodebuild -project Commander.xcodeproj -scheme Commander-Package -sdk macosx10.14 -destination 'platform=macOS,arch=x86_64' build test
+  # - xcodebuild -project Commander.xcodeproj -scheme Commander-Package -sdk macosx10.14 -destination 'platform=macOS,arch=x86_64' build test
+  xcodebuild -project Commander.xcodeproj -scheme Commander -sdk macosx -configuration Release -enableCodeCoverage YES test
 before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-darwin-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
