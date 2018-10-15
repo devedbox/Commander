@@ -1,6 +1,6 @@
 coverage_service: cobertura_xml
 xcodeproj: Commander.xcodeproj
-scheme: Commander
+scheme: Commander-Package
 configuration: Release
 source_directory: Sources
 output_directory: ./
