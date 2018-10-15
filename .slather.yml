@@ -1,0 +1,9 @@
+coverage_service: cobertura_xml
+xcodeproj: Commander.xcodeproj
+scheme: Commander-Package
+configuration: Debug
+source_directory: Sources
+output_directory: cobertura.xml
+ignore:
+  - Sources/commander-sapmle/*
+  - Tests/*
