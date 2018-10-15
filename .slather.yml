@@ -3,7 +3,7 @@ xcodeproj: Commander.xcodeproj
 scheme: Commander-Package
 configuration: Debug
 source_directory: Sources
-output_directory: cobertura.xml
+output_directory: ./
 ignore:
   - Sources/commander-sapmle/*
   - Tests/*
