@@ -10,6 +10,6 @@ before_script:
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
 after_script:
-  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+  - ./cc-test-reporter after-build -t cobertura --exit-code $TRAVIS_TEST_RESULT
 after_success:
   - bash <(curl -s https://codecov.io/bash) -J 'Commander'
