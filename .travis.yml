@@ -2,7 +2,7 @@ language: swift
 os: osx
 osx_image: xcode10
 before_install: rvm use $RVM_RUBY_VERSION
-install: bundle install --without=documentation --path ../travis_bundle_dir
+install: bundle install
 script:
   # - swift package clean
   # - swift test
