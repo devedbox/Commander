@@ -1,6 +1,8 @@
 language: swift
 os: osx
 osx_image: xcode10
+before_install: rvm use $RVM_RUBY_VERSION
+install: bundle install --without=documentation --path ../travis_bundle_dir
 script:
   # - swift package clean
   # - swift test
@@ -12,4 +14,5 @@ before_script:
 after_script:
   - ./cc-test-reporter after-build -t cobertura --exit-code $TRAVIS_TEST_RESULT
 after_success:
+  - slather
   - bash <(curl -s https://codecov.io/bash) -J 'Commander'
