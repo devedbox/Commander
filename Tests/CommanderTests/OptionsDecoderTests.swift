@@ -286,6 +286,7 @@ struct MismatchTypeDefaultValueOptions: OptionsRepresentable {
 class OptionsDecoderTests: XCTestCase {
   static var allTests = [
     ("testUtils", testUtils),
+    ("testDecodeContainers", testDecodeContainers),
     ("testDecodeInContainer", testDecodeInContainer),
     ("testDecodeSimpleOptions", testDecodeSimpleOptions),
     ("testDecodePrimaryOptions", testDecodePrimaryOptions),
@@ -301,6 +302,9 @@ class OptionsDecoderTests: XCTestCase {
     XCTAssertNil("-+".endsIndex(matchs: "--"))
     XCTAssertNotNil("---".endsIndex(matchs: "--"))
     XCTAssertTrue("--".endsIndex(matchs: "--") == "--".endIndex)
+    XCTAssertTrue("-".isSingle)
+    XCTAssertFalse("".isSingle)
+    XCTAssertFalse("--".isSingle)
     
     var array = [[Int]]()
     array.lastAppend(0)
@@ -308,6 +312,64 @@ class OptionsDecoderTests: XCTestCase {
     array = [[]]
     array.lastAppend(0)
     XCTAssertEqual([0], array.last)
+  }
+  
+  func testDecodeContainers() {
+    let dict: OptionsDecoder.ObjectFormat.Value! = .value([
+      "mock1": [
+        "key1": "value1",
+        "key2": "value2",
+        "key3": [
+          "value1",
+          "value2",
+          "value3",
+          "value4"
+        ]
+      ],
+      "mock2": [
+        "key1": "value1",
+        "key2": "value2",
+        "key3": [
+          "value1",
+          "value2",
+          "value3",
+          "value4"
+        ]
+      ]
+    ])
+    let mock = OptionsDecoder.ObjectFormat.Value(
+      dictionaryValue: dict.dictionaryValue,
+      arrayValue: [dict, dict],
+      stringValue: "mock",
+      boolValue: false
+    )
+    
+    let decoder = OptionsDecoder._Decoder(referencing: OptionsDecoder(), wrapping: mock)
+    
+    typealias Key = OptionsDecoder._Decoder._Key
+    
+    XCTAssertNoThrow(try decoder.container(keyedBy: Key.self))
+    XCTAssertNoThrow(try decoder.unkeyedContainer())
+    XCTAssertNoThrow(try decoder.singleValueContainer())
+    
+    let keyedContainer = try! decoder.container(keyedBy: Key.self)
+    XCTAssertNoThrow(try keyedContainer.nestedContainer(keyedBy: Key.self, forKey: Key(stringValue: "mock1")!))
+    XCTAssertNoThrow(try keyedContainer.nestedContainer(keyedBy: Key.self, forKey: Key(stringValue: "mock2")!))
+    
+    var nestedKeyedContainer1 = try! keyedContainer.nestedContainer(keyedBy: Key.self, forKey: Key(stringValue: "mock1")!)
+    XCTAssertNoThrow(try nestedKeyedContainer1.nestedUnkeyedContainer(forKey: Key(stringValue: "key3")!))
+    var nestedKeyedContainer2 = try! keyedContainer.nestedContainer(keyedBy: Key.self, forKey: Key(stringValue: "mock2")!)
+    XCTAssertNoThrow(try nestedKeyedContainer2.nestedUnkeyedContainer(forKey: Key(stringValue: "key3")!))
+    
+    var unkeyedContainer = try! decoder.unkeyedContainer()
+    XCTAssertNoThrow(try unkeyedContainer.nestedContainer(keyedBy: Key.self))
+    
+    let nestedKeyedContainer = try! unkeyedContainer.nestedContainer(keyedBy: Key.self)
+    
+    nestedKeyedContainer1 = try! nestedKeyedContainer.nestedContainer(keyedBy: Key.self, forKey: Key(stringValue: "mock1")!)
+    XCTAssertNoThrow(try nestedKeyedContainer1.nestedUnkeyedContainer(forKey: Key(stringValue: "key3")!))
+    nestedKeyedContainer2 = try! nestedKeyedContainer.nestedContainer(keyedBy: Key.self, forKey: Key(stringValue: "mock2")!)
+    XCTAssertNoThrow(try nestedKeyedContainer2.nestedUnkeyedContainer(forKey: Key(stringValue: "key3")!))
   }
   
   func testDecodeInContainer() {
