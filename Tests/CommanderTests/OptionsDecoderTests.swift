@@ -280,6 +280,21 @@ struct MismatchTypeDefaultValueOptions: OptionsRepresentable {
   let dict: [String: String]
 }
 
+struct ArrayOptions: OptionsRepresentable {
+  enum CodingKeys: String, CodingKeysRepresentable {
+    case arrayValue = "array-value"
+    case stringValue = "string-value"
+  }
+  static var keys: [ArrayOptions.CodingKeys : Character] = [
+    :
+  ]
+  static var descriptions: [ArrayOptions.CodingKeys : OptionDescription] = [
+    :
+  ]
+  
+  let arrayValue: [String]
+  let stringValue: String
+}
 
 // MARK: - OptionsDecoderTests.
 
@@ -293,7 +308,8 @@ class OptionsDecoderTests: XCTestCase {
     ("testDecodeSimpleOptions", testDecodeSimpleOptions),
     ("testDecodeArgumentsOptions", testDecodeArgumentsOptions),
     ("testDecodeErrors", testDecodeErrors),
-    ("testDefaultValueOptionsDecode", testDefaultValueOptionsDecode)
+    ("testDefaultValueOptionsDecode", testDefaultValueOptionsDecode),
+    ("testContainerValueDecoding", testContainerValueDecoding)
   ]
   
   func testUtils() {
@@ -850,5 +866,10 @@ class OptionsDecoderTests: XCTestCase {
     } catch {
       XCTFail()
     }
+  }
+  
+  func testContainerValueDecoding() {
+    XCTAssertNoThrow(try OptionsDecoder().decode(ArrayOptions.self, from: ["--array-value", "1,2,3,4", "--string-value", "string"]))
+    XCTAssertNoThrow(try OptionsDecoder().decode(ArrayOptions.self, from: ["--array-value", "single", "--string-value", "string1,string2"]))
   }
 }

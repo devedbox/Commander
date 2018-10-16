@@ -217,7 +217,7 @@ extension OptionsDecoder {
   /// The object format of the value of options.
   internal enum ObjectFormat {
     /// Wrapped value type represents the available values in `OptionsDecoder`.
-    internal struct Value {
+    internal struct Value: Hashable {
       internal enum Error: String, Swift.Error {
         case jsonObjectFormatIsNotSupported = "Object format error: The JSON object format is not supported"
       }
@@ -904,7 +904,16 @@ extension OptionsDecoder._Decoder: SingleValueDecodingContainer {
   
   private func unwrap<T: Decodable & _StringInitable>(as type: T.Type) throws -> T {
     var unwrapped = storage.lastUnwrapped
+    
     if T.self == String.self, unwrapped is Bool? {
+      unwrapped = storage.top?.stringValue
+    } else if
+      T.self == String.self,
+      unwrapped is [Any]?,
+      let container = try storage.top?.stringValue.map({ try OptionsDecoder.objectFormat.value(for: $0) })?.arrayValue,
+      let unwrappedContainer = storage.top?.arrayValue,
+      Set(container) == Set(unwrappedContainer)
+    {
       unwrapped = storage.top?.stringValue
     }
     
