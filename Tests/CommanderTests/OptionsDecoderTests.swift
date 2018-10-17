@@ -296,6 +296,22 @@ struct ArrayOptions: OptionsRepresentable {
   let stringValue: String
 }
 
+struct DictOptions: OptionsRepresentable {
+  enum CodingKeys: String, CodingKeysRepresentable {
+    case dictValue = "dict-value"
+    case stringValue = "string-value"
+  }
+  static var keys: [CodingKeys : Character] = [
+    :
+  ]
+  static var descriptions: [CodingKeys : OptionDescription] = [
+    :
+  ]
+  
+  let dictValue: [String: String]
+  let stringValue: String
+}
+
 // MARK: - OptionsDecoderTests.
 
 class OptionsDecoderTests: XCTestCase {
@@ -871,5 +887,8 @@ class OptionsDecoderTests: XCTestCase {
   func testContainerValueDecoding() {
     XCTAssertNoThrow(try OptionsDecoder().decode(ArrayOptions.self, from: ["--array-value", "1,2,3,4", "--string-value", "string"]))
     XCTAssertNoThrow(try OptionsDecoder().decode(ArrayOptions.self, from: ["--array-value", "single", "--string-value", "string1,string2"]))
+    
+    XCTAssertNoThrow(try OptionsDecoder().decode(DictOptions.self, from: ["--dict-value", "key1=val1,key2=val2,key3=val3", "--string-value", "string"]))
+    XCTAssertNoThrow(try OptionsDecoder().decode(DictOptions.self, from: ["--dict-value", "singleKey=singleValue", "--string-value", "key1=val1,key2=val2,key3=val3"]))
   }
 }

@@ -912,7 +912,15 @@ extension OptionsDecoder._Decoder: SingleValueDecodingContainer {
       unwrapped is [Any]?,
       let container = try storage.top?.stringValue.map({ try OptionsDecoder.objectFormat.value(for: $0) })?.arrayValue,
       let unwrappedContainer = storage.top?.arrayValue,
-      Set(container) == Set(unwrappedContainer)
+      container == unwrappedContainer
+    {
+      unwrapped = storage.top?.stringValue
+    } else if
+      T.self == String.self,
+      unwrapped is [String: Any]?,
+      let container = try storage.top?.stringValue.map({ try OptionsDecoder.objectFormat.value(for: $0) })?.dictionaryValue,
+      let unwrappedContainer = storage.top?.dictionaryValue,
+      container == unwrappedContainer
     {
       unwrapped = storage.top?.stringValue
     }
