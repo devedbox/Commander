@@ -71,10 +71,10 @@ internal extension Array where Element: RangeReplaceableCollection {
   }
 }
 
-internal extension BidirectionalCollection {
+internal extension Collection {
   /// Returns a bool value indicates if the collection is containing only one element.
   internal var isSingle: Bool {
-    return startIndex == index(before: endIndex)
+    return index(after: startIndex) == endIndex
   }
 }
 
@@ -234,6 +234,39 @@ extension OptionsDecoder {
       /// Returns the unwrapped underlying value.
       internal var unwrapped: Any? {
         return dictionaryValue?.unwrapped ?? singleArrayString?.stringValue ?? arrayValue ?? stringValue ?? boolValue
+      }
+      
+      /// Returns the wrapped unempty value.
+      internal var unempty: Value? {
+        if let dict = dictionaryValue, !dict.isEmpty {
+          return .dictionary(dict)
+        } else if let singleArrarString = singleArrayString {
+          return singleArrarString
+        } else if let array = arrayValue, !array.isEmpty {
+          return .array(array)
+        } else if let string = stringValue, !string.isEmpty {
+          return .init(stringValue: stringValue)
+        }
+        return nil
+      }
+      
+      /// Detect the string value of the 'Value', returns the string value if the array or dict container
+      /// holds the same value with the underlying string value.
+      internal var detectedStringValue: Any? {
+        guard let container = stringValue.flatMap({
+          try? OptionsDecoder.objectFormat.value(for: $0)
+        }) else {
+          return unwrapped
+        }
+        
+        if case let dict? = container.dictionaryValue, dict == dictionaryValue {
+          return stringValue
+        }
+        if case let array? = container.arrayValue, array == arrayValue {
+          return stringValue
+        }
+        
+        return unwrapped
       }
       
       internal var singleArrayString: Value? {
@@ -905,41 +938,13 @@ extension OptionsDecoder._Decoder: SingleValueDecodingContainer {
   private func unwrap<T: Decodable & _StringInitable>(as type: T.Type) throws -> T {
     var unwrapped = storage.lastUnwrapped
     
-    if T.self == String.self, unwrapped is Bool? {
-      unwrapped = storage.top?.stringValue
-    } else if
-      T.self == String.self,
-      unwrapped is [Any]?,
-      let container = try storage.top?.stringValue.map({ try OptionsDecoder.objectFormat.value(for: $0) })?.arrayValue,
-      let unwrappedContainer = storage.top?.arrayValue,
-      container == unwrappedContainer
-    {
-      unwrapped = storage.top?.stringValue
-    } else if
-      T.self == String.self,
-      unwrapped is [String: Any]?,
-      let container = try storage.top?.stringValue.map({ try OptionsDecoder.objectFormat.value(for: $0) })?.dictionaryValue,
-      let unwrappedContainer = storage.top?.dictionaryValue,
-      container == unwrappedContainer
-    {
-      unwrapped = storage.top?.stringValue
+    if T.self == String.self, !(unwrapped is String?) {
+      unwrapped = storage.top?.detectedStringValue
     }
     
     if T.self == Bool.self {
-      if !(unwrapped is Bool?) {
-        var value: OptionsDecoder.ObjectFormat.Value?
-        if let dict = storage.top?.dictionaryValue, !dict.isEmpty {
-          value = .dictionary(dict)
-        } else if let singleArrarString = storage.top?.singleArrayString {
-          value = singleArrarString
-        } else if let array = storage.top?.arrayValue, !array.isEmpty {
-          value = .array(array)
-        } else if let string = storage.top?.stringValue, !string.isEmpty {
-          value = .init(stringValue: storage.top?.stringValue)
-        }
-        if value != nil {
-          container.decoder.spitArgument(for: codingPath.last!, with: value!)
-        }
+      if !(unwrapped is Bool?), let value = storage.top?.unempty {
+        container.decoder.spitArgument(for: codingPath.last!, with: value)
       }
       
       guard let value = storage.top?.boolValue else {
@@ -959,7 +964,7 @@ extension OptionsDecoder._Decoder: SingleValueDecodingContainer {
       return value as! T
     } else {
       guard let value = (unwrapped as? String).flatMap({ T.init($0) }) else {
-        if unwrapped != nil {
+        if unwrapped != nil, !(unwrapped is Bool?) {
           throw OptionsDecoder.Error.decodingError(
             .__typeMismatch(at: codingPath, expectation: type, reality: unwrapped)
           )
