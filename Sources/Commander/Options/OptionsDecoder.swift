@@ -74,6 +74,9 @@ internal extension Array where Element: RangeReplaceableCollection {
 internal extension Collection {
   /// Returns a bool value indicates if the collection is containing only one element.
   internal var isSingle: Bool {
+    guard !isEmpty else {
+      return false
+    }
     return index(after: startIndex) == endIndex
   }
 }
@@ -519,21 +522,18 @@ public final class OptionsDecoder {
     
     let validArguments = codingArguments.filter { !$0.value.isEmpty }
     
-    if
-      let isLastArgumentsEmpty = codingArguments.lastArguments?.isEmpty,
-      isLastArgumentsEmpty,
-      !validArguments.isEmpty
-    {
-      throw OptionsDecoder.Error.unrecognizedArguments(Array(validArguments.values.flatMap { $0 }).compactMap { $0.unwrapped })
-    } else {
-      if !validArguments.isEmpty {
-        container.arrayValue = Array(validArguments.values).last
-        if let args = container.arrayValue, !args.isEmpty {
-          decoder.container = .init(container, referencing: self)
-          decoder.storage = .init()
-          decoder.storage.push(container)
-          decoded.arguments = try decoder.decode(as: [T.ArgumentsResolver.Argument].self)
-        }
+    if !validArguments.isEmpty {
+      /* if let isLastArgumentsEmpty = codingArguments.lastArguments?.isEmpty, isLastArgumentsEmpty { */
+      if !validArguments.isSingle {
+        throw OptionsDecoder.Error.unrecognizedArguments(Array(validArguments.values.flatMap { $0 }).compactMap { $0.unwrapped })
+      }
+      
+      container.arrayValue = Array(validArguments.values).last
+      if let args = container.arrayValue, !args.isEmpty {
+        decoder.container = .init(container, referencing: self)
+        decoder.storage = .init()
+        decoder.storage.push(container)
+        decoded.arguments = try decoder.decode(as: [T.ArgumentsResolver.Argument].self)
       }
     }
     

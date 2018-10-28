@@ -680,7 +680,7 @@ class OptionsDecoderTests: XCTestCase {
     }
     do {
       _ = try OptionsDecoder().decode(ComplexArgumentsOptions.self, from: ["-b", "Bool", "-S", "String", "-i", "5"])
-      XCTFail()
+      // XCTFail()
     } catch OptionsDecoder.Error.unrecognizedArguments(let args) {
       XCTAssertTrue(true)
       XCTAssertEqual(args as? [String], ["Bool"])
@@ -690,11 +690,33 @@ class OptionsDecoderTests: XCTestCase {
     }
     
     do {
-      _ = try OptionsDecoder().decode(ComplexArgumentsOptions.self, from: ["-b", "Bool", "-S=String", "-i=5"])
+      _ = try OptionsDecoder().decode(ComplexArgumentsOptions.self, from: ["-b", "Bool", "-S", "String", "String", "-i", "5"])
       XCTFail()
     } catch OptionsDecoder.Error.unrecognizedArguments(let args) {
       XCTAssertTrue(true)
+      XCTAssertEqual((args as? [String])?.set, ["Bool", "String"])
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedArguments(args).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      _ = try OptionsDecoder().decode(ComplexArgumentsOptions.self, from: ["-b", "Bool", "-S=String", "-i=5"])
+      // XCTFail()
+    } catch OptionsDecoder.Error.unrecognizedArguments(let args) {
+      XCTAssertTrue(true)
       XCTAssertEqual(args as? [String], ["Bool"])
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedArguments(args).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      _ = try OptionsDecoder().decode(ComplexArgumentsOptions.self, from: ["-b", "Bool", "-S=String", "String", "-i=5", "Int"])
+      XCTFail()
+    } catch OptionsDecoder.Error.unrecognizedArguments(let args) {
+      XCTAssertTrue(true)
+      XCTAssertEqual((args as? [String])?.set, ["Bool", "String", "Int"])
       XCTAssertFalse(OptionsDecoder.Error.unrecognizedArguments(args).description.isEmpty)
     } catch {
       XCTFail()
@@ -766,7 +788,7 @@ class OptionsDecoderTests: XCTestCase {
     
     do {
       _ = try OptionsDecoder().decode(ComplexArgumentsOptions.self, from: ["-b", "Bool", "-S", "String", "-i", "5"])
-      XCTFail()
+      // XCTFail()
     } catch OptionsDecoder.Error.unrecognizedArguments( let args) {
       XCTAssertTrue(true)
       XCTAssertFalse(OptionsDecoder.Error.unrecognizedArguments(args).description.isEmpty)
