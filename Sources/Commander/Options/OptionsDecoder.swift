@@ -506,6 +506,15 @@ public final class OptionsDecoder {
     defer { codingArguments = nil }
     
     let decoder = _Decoder(referencing: self, wrapping: container)
+    
+    let unrecognizedOptions = container.dictionaryValue?.keys.filter { key in
+      type.CodingKeys.init(rawValue: key) == nil
+    }
+    
+    guard unrecognizedOptions?.isEmpty ?? true else {
+      throw OptionsDecoder.Error.unrecognizedOptions(unrecognizedOptions!, decoded: try? decoder.decode(as: type), decoder: decoder)
+    }
+    
     var decoded = try decoder.decode(as: type)
     
     let validArguments = codingArguments.filter { !$0.value.isEmpty }
@@ -526,14 +535,6 @@ public final class OptionsDecoder {
           decoded.arguments = try decoder.decode(as: [T.ArgumentsResolver.Argument].self)
         }
       }
-    }
-    
-    let unrecognizedOptions = container.dictionaryValue?.keys.filter { key in
-      type.CodingKeys.init(rawValue: key) == nil
-    }
-    
-    guard unrecognizedOptions?.isEmpty ?? true else {
-      throw OptionsDecoder.Error.unrecognizedOptions(unrecognizedOptions!, decoded: decoded, decoder: decoder)
     }
     
     defer { optionsDescription = [:] }

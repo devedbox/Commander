@@ -89,7 +89,7 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "hahahei"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-s"
@@ -109,7 +109,7 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-h"
-            isEnabled = "NO">
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--string-value"
