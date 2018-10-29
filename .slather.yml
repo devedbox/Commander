@@ -1,7 +1,7 @@
 coverage_service: cobertura_xml
 xcodeproj: Commander.xcodeproj
 scheme: Commander-Package
-configuration: Release
+configuration: Debug
 source_directory: Sources
 output_directory: ./
 ignore:
