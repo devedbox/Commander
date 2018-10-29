@@ -76,7 +76,7 @@ public struct NoArgsCommand: CommandRepresentable {
     ]
     
     public static let descriptions: [Options.CodingKeys: OptionDescription] = [
-      .addArgs: .usage("Should add arguments to the command"),
+      .addArgs: .default(value: false, usage: "Should add arguments to the command"),
       .args: .usage("The arguments to be added to the command along with '--add-args'")
     ]
     
