@@ -80,6 +80,7 @@ public struct CommandPath {
         )
       } else {
         do {
+          HelpCommand.runningCommands.append(command)
           try command.run(with: commandLineArgs)
         } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: nil, decoder: _) {
           throw CommanderError.unrecognizedOptions(options, path: self)
