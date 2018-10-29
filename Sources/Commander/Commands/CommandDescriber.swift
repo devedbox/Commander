@@ -74,7 +74,14 @@ internal struct CommandDescriber {
     let optionsSymbols = command.optionsDescriber.descriptions.map { desc -> (String, String) in
       let shortKey = command.optionsDescriber.keys[desc.key]
       let keyDesc = (shortKey.map { "-\($0), " } ?? "") + "--\(desc.key)"
-      return (keyDesc, desc.value.usage)
+      
+      var usage = desc.value.usage
+      if let defaultValue = desc.value.defaultValue {
+        let separator = usage.hasSuffix(".") ? "" : "."
+        usage += separator + " Optional with default value: '\(defaultValue)'"
+      }
+      
+      return (keyDesc, usage)
     }
     let argumentsSymbols: [(String, String)] = command.optionsDescriber.isArgumentsResolvable == false ? [] : [
       ("[\(String(describing: command.optionsDescriber.argumentType))]", "\(path) \(command.symbol) [options] arg1 arg2 ...")
