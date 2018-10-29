@@ -10,12 +10,6 @@ let package = Package(
     .library(
       name: "Commander",
       targets: ["Commander"]
-    ),
-    .executable(
-      name: "commander-sample",
-      targets: [
-        "commander-sample"
-      ]
     )
   ],
   dependencies: [
