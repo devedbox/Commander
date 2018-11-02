@@ -32,12 +32,26 @@ import Darwin
 #endif
 import Foundation
 
-internal func dispatchSuccess() -> Never {
+#if DEBUG
+public typealias Result = Int32
+#else
+public typealias Result = Never
+#endif
+
+internal func dispatchSuccess() -> Result {
+#if DEBUG
+  return EXIT_SUCCESS
+#else
   return exit(EXIT_SUCCESS)
+#endif
 }
 
-internal func dispatchFailure() -> Never {
+internal func dispatchFailure() -> Result {
+#if DEBUG
+  return EXIT_FAILURE
+#else
   return exit(EXIT_FAILURE)
+#endif
 }
 
 // MARK: - Substring.

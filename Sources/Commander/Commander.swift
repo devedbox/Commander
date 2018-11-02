@@ -55,7 +55,7 @@ extension CommanderRepresentable {
   /// Appends the given string to the stream.
   public mutating func write(_ string: String) {
     if type(of: self).outputHandler?(string) == nil {
-      var stdout = FileHandle.standardOutput; print(stdout, to: &stdout)
+      var stdout = FileHandle.standardOutput; print(string, to: &stdout)
     }
   }
   /// Returns all commands of commander with registered commands along with built-in commands.
@@ -64,17 +64,32 @@ extension CommanderRepresentable {
   }
   /// Decoding the current command line arguments of `CommandLine.arguments` as the current command's
   /// options type and dispatch the command with the decoded options.
-  public func dispatch() -> Never {
+#if DEBUG
+  @discardableResult
+  public func dispatch() -> Result {
     do {
       try dispatch(with: CommandLine.arguments)
     } catch {
       if type(of: self).errorHandler?(error) == nil {
         var stderr = FileHandle.standardError; print(String(describing: error), to: &stderr)
       }
-      dispatchFailure()
+      return dispatchFailure()
     }
-    dispatchSuccess()
+    return dispatchSuccess()
   }
+#else
+  public func dispatch() -> Result {
+    do {
+      try dispatch(with: CommandLine.arguments)
+    } catch {
+      if type(of: self).errorHandler?(error) == nil {
+        var stderr = FileHandle.standardError; print(String(describing: error), to: &stderr)
+      }
+      return dispatchFailure()
+    }
+    return dispatchSuccess()
+  }
+#endif
   /// Decoding the given command line argumants as the current command's options type and disatch the
   /// command with the decided options.
   public func dispatch(with commandLineArgs: [String]) throws {
@@ -84,6 +99,7 @@ extension CommanderRepresentable {
       CommandPath.runningCommanderUsage = nil // Clear the runnung commander usage.
       CommandPath.runningCommands = [] // Clear the running commands.
       logger = nil // Reset the logger.
+      _ArgumentsStorage = [:] // Reset the storage of arguments.
     }
     
     let runningPath = commandLineArgs.first!

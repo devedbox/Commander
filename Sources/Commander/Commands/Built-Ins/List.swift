@@ -64,6 +64,8 @@ internal struct List: CommandRepresentable {
       )
     }
     
+    var throughCommand = false
+    
     switch options.type {
     case .command:
       if path == nil {
@@ -72,7 +74,7 @@ internal struct List: CommandRepresentable {
         logger <<< path!.command.subcommands.map { $0.symbol }.joined(separator: " ")
       }
       
-      fallthrough
+      throughCommand = true; fallthrough
     case .optionsWithShortKeys:
       guard path != nil else {
         break
@@ -82,7 +84,7 @@ internal struct List: CommandRepresentable {
       let allShortKeys = allCodingKeys.compactMap {
         path!.command.optionsDescriber.keys[$0].map { "-" + String($0) }
       }
-      
+      logger <<< (path?.command.subcommands.isEmpty ?? CommandPath.runningCommands.isEmpty || !throughCommand ? "" : " ")
       logger <<< (allShortKeys + allCodingKeys.map { "--" + $0 }).joined(separator: " ")
     case .options:
       guard path != nil else {
