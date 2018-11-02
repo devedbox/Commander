@@ -69,19 +69,11 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "list"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "sample"
-            isEnabled = "YES">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "--type"
-            isEnabled = "YES">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "optionsS"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-h"
@@ -89,6 +81,10 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "set-args"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--type=command"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
@@ -130,6 +126,14 @@
          <CommandLineArgument
             argument = "ababab"
             isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "complete"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "&quot;commander-sample sample set-args --add-args&quot;"
+            isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
       <AdditionalOptions>
