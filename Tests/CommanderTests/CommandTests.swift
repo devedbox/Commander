@@ -127,9 +127,9 @@ class CommandTests: XCTestCase {
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test-args", "--help"]))
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test-args", "test", "--help"]))
     
-    XCTAssertTrue(HelpCommand.validate(options: ["h"]))
-    XCTAssertTrue(HelpCommand.validate(options: ["help"]))
-    XCTAssertFalse(HelpCommand.validate(options: ["h", "h"]))
+    XCTAssertTrue(Help.validate(options: ["h"]))
+    XCTAssertTrue(Help.validate(options: ["help"]))
+    XCTAssertFalse(Help.validate(options: ["h", "h"]))
     
     do {
       try Commander().dispatch(with: ["commander", "help", "--help"])

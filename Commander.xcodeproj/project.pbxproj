@@ -27,7 +27,7 @@
 		DC0B9BA121648B0600C87253 /* OptionDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0B9BA021648B0600C87253 /* OptionDescription.swift */; };
 		DC0B9BA32167457600C87253 /* misc.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0B9BA22167457500C87253 /* misc.swift */; };
 		DC0B9BA5216882D200C87253 /* CommandTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0B9BA4216882D100C87253 /* CommandTests.swift */; };
-		DC1DF5FB216DF726002EB271 /* HelpCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC1DF5FA216DF726002EB271 /* HelpCommand.swift */; };
+		DC1DF5FB216DF726002EB271 /* Help.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC1DF5FA216DF726002EB271 /* Help.swift */; };
 		DC1DF5FD216DF777002EB271 /* CommandDescriber.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC1DF5FC216DF777002EB271 /* CommandDescriber.swift */; };
 		DC1DF5FF216F5662002EB271 /* CommandPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC1DF5FE216F5662002EB271 /* CommandPath.swift */; };
 		DC1DF603216F6357002EB271 /* CommandPathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC1DF602216F6357002EB271 /* CommandPathTests.swift */; };
@@ -78,7 +78,7 @@
 		DC0B9BA021648B0600C87253 /* OptionDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionDescription.swift; sourceTree = "<group>"; };
 		DC0B9BA22167457500C87253 /* misc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = misc.swift; sourceTree = "<group>"; };
 		DC0B9BA4216882D100C87253 /* CommandTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandTests.swift; sourceTree = "<group>"; };
-		DC1DF5FA216DF726002EB271 /* HelpCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpCommand.swift; sourceTree = "<group>"; };
+		DC1DF5FA216DF726002EB271 /* Help.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Help.swift; sourceTree = "<group>"; };
 		DC1DF5FC216DF777002EB271 /* CommandDescriber.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandDescriber.swift; sourceTree = "<group>"; };
 		DC1DF5FE216F5662002EB271 /* CommandPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandPath.swift; sourceTree = "<group>"; };
 		DC1DF602216F6357002EB271 /* CommandPathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandPathTests.swift; sourceTree = "<group>"; };
@@ -144,7 +144,7 @@
 		DC1DF5F9216DF713002EB271 /* Built-Ins */ = {
 			isa = PBXGroup;
 			children = (
-				DC1DF5FA216DF726002EB271 /* HelpCommand.swift */,
+				DC1DF5FA216DF726002EB271 /* Help.swift */,
 			);
 			path = "Built-Ins";
 			sourceTree = "<group>";
@@ -340,7 +340,7 @@
 				DC1DF5FF216F5662002EB271 /* CommandPath.swift in Sources */,
 				DC0B9BA32167457600C87253 /* misc.swift in Sources */,
 				OBJ_43 /* Error.swift in Sources */,
-				DC1DF5FB216DF726002EB271 /* HelpCommand.swift in Sources */,
+				DC1DF5FB216DF726002EB271 /* Help.swift in Sources */,
 				OBJ_46 /* CommandRepresentable.swift in Sources */,
 				DC0B9B9B216347F000C87253 /* OptionsDecoder.swift in Sources */,
 				OBJ_50 /* OptionsRepresentable.swift in Sources */,

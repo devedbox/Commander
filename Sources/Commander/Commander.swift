@@ -53,7 +53,7 @@ public protocol CommanderRepresentable {
 extension CommanderRepresentable {
   /// Returns all commands of commander with registered commands along with built-in commands.
   internal static var allCommands: [AnyCommandRepresentable.Type] {
-    return [HelpCommand.self] + commands
+    return [Help.self] + commands
   }
   /// Decoding the current command line arguments of `CommandLine.arguments` as the current command's
   /// options type and dispatch the command with the decoded options.
@@ -74,15 +74,15 @@ extension CommanderRepresentable {
   public func dispatch(with commandLineArgs: [String]) throws {
     defer {
       _GlobalOptions = nil
-      HelpCommand.runningPath = nil
-      HelpCommand.runningCommanderUsage = nil
-      HelpCommand.runningCommands = []
+      Help.runningPath = nil
+      Help.runningCommanderUsage = nil
+      Help.runningCommands = []
     }
     
     let runningPath = commandLineArgs.first!
-    HelpCommand.runningPath = runningPath
-    HelpCommand.runningCommanderUsage = type(of: self).usage
-    HelpCommand.runningCommands = type(of: self).allCommands
+    Help.runningPath = runningPath
+    Help.runningCommanderUsage = type(of: self).usage
+    Help.runningCommands = type(of: self).allCommands
     
     var commands = commandLineArgs.dropFirst()
     let symbol = commands.popFirst()
@@ -106,10 +106,10 @@ extension CommanderRepresentable {
         if
           commands.isEmpty,
           let options = symbol,
-          options == "\(optionsSymbol)\(HelpCommand.Options.CodingKeys.help.rawValue)"
-       || options == "\(shortSymbol)\(HelpCommand.Options.keys[.help]!)"
+          options == "\(optionsSymbol)\(Help.Options.CodingKeys.help.rawValue)"
+       || options == "\(shortSymbol)\(Help.Options.keys[.help]!)"
         {
-          try HelpCommand.main(.init())
+          try Help.main(.init())
         }
       } else {
         if let commandSymbol = symbol {
@@ -124,7 +124,7 @@ extension CommanderRepresentable {
       try commandPath?.run(with: Array(commands))
     } catch let dispatcher as CommandPath.Dispatcher {
       guard Options.self != Nothing.self else {
-        try HelpCommand.resolve(dispatcher.options, path: dispatcher.path)
+        try Help.resolve(dispatcher.options, path: dispatcher.path)
         return
       }
       
@@ -137,7 +137,7 @@ extension CommanderRepresentable {
       try dispatcher.path.command.run(with: dispatcher.decoded)
       
     } catch CommanderError.unrecognizedOptions(let options, path: let path) {
-      try HelpCommand.resolve(options, path: path)
+      try Help.resolve(options, path: path)
     } catch {
       throw error
     }

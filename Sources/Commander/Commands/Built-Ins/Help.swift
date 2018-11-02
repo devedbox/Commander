@@ -1,5 +1,5 @@
 //
-//  HelpCommand.swift
+//  Help.swift
 //  Commander
 //
 //  Created by devedbox on 2018/10/10.
@@ -34,10 +34,10 @@ extension FileHandle: TextOutputStream {
   }
 }
 
-// MARK: - HelpCommand.
+// MARK: - Help.
 
 /// The built-in help command for the commander.
-internal struct HelpCommand: CommandRepresentable {
+internal struct Help: CommandRepresentable {
   /// The options of the `HelpCommand`.
   internal struct Options: OptionsRepresentable {
     /// Type alias for resolve string arguments.
@@ -52,7 +52,7 @@ internal struct HelpCommand: CommandRepresentable {
     ]
     /// Returns the description of the options.
     internal static var descriptions: [Options.CodingKeys: OptionDescription] = [
-      .help: .usage(HelpCommand.usage)
+      .help: .usage(Help.usage)
     ]
     
     internal let help: Bool?
