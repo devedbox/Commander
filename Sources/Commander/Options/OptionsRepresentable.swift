@@ -157,7 +157,7 @@ internal var _ArgumentsStorage: [AnyHashable: Any] = [:]
 extension OptionsRepresentable {
   /// Returns the global options of commander.
   public var globalOptions: GlobalOptions? {
-    return _GlobalOptions as? GlobalOptions
+    return CommandPath.runningGlobalOptions as? GlobalOptions
   }
   /// The short keys of the options' coding keys.
   public static var keys: [String: Character] {
