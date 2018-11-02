@@ -69,7 +69,7 @@ extension CommanderRepresentable {
   /// command with the decided options.
   public func dispatch(with commandLineArgs: [String]) throws {
     defer {
-      CommandPath.runningPath = nil // Clear the running path of commander.
+      CommandPath.runningCommanderPath = nil // Clear the running path of commander.
       CommandPath.runningGlobalOptions = nil // Clear the running global options.
       CommandPath.runningCommanderUsage = nil // Clear the runnung commander usage.
       CommandPath.runningCommands = [] // Clear the running commands.
@@ -77,14 +77,15 @@ extension CommanderRepresentable {
     
     let runningPath = commandLineArgs.first!
     
-    CommandPath.runningPath = runningPath
+    CommandPath.runningCommanderPath = runningPath
     CommandPath.runningCommanderUsage = type(of: self).usage
     CommandPath.runningCommands = type(of: self).allCommands
     
     var commands = commandLineArgs.dropFirst()
     let symbol = commands.popFirst()
+    let allCommands = type(of: self).allCommands + [List.self]
     
-    let commandPath = type(of: self).allCommands.first {
+    let commandPath = allCommands.first {
       $0.symbol == symbol
     }.map {
       CommandPath(
