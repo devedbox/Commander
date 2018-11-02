@@ -96,8 +96,12 @@ public struct CommandPath {
           return self
         }
         
+        // Set the running command path before run the command path.
+        // Defer setting nil of the running command path.
+        type(of: self).path = self; defer { type(of: self).path = nil }
+        
         do {
-          Help.runningCommands.append(command)
+          type(of: self).runningCommands.append(command)
           try command.run(with: commandLineArgs)
         } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: nil, decoder: _) {
           throw CommanderError.unrecognizedOptions(options, path: self)
