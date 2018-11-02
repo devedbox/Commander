@@ -39,9 +39,7 @@ public struct List: CommandRepresentable {
       case type
     }
     public static var keys: [CodingKeys: Character] = [:]
-    public static var descriptions: [CodingKeys: OptionDescription] = [
-      .type: .default(value: "cmd", usage: "")
-    ]
+    public static var descriptions: [CodingKeys: OptionDescription] = [:]
     
     public let type: CommandType
   }
