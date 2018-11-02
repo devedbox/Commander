@@ -1,0 +1,14 @@
+#!/bin/bash
+
+_commander-sample() {
+  declare -a cur # prev
+
+  cur="${COMP_WORDS[COMP_CWORD]}"
+  # prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+  completions=$(commander-sample complete "$COMP_LINE" | tr "\n" " ")
+
+  COMPREPLY=( $(compgen -W "$completions" -- "$cur") )
+}
+
+complete -F _commander-sample commander-sample
