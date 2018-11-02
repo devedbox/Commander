@@ -94,6 +94,7 @@ class MockCommander: CommanderRepresentable {
     let mockDir: String
     let verbose: Bool
   }
+  static var outputHandler: ((String) -> Void)? = nil
   static var errorHandler: ((Error) -> Void)? = nil
   static var commands: [AnyCommandRepresentable.Type] = [
     MockCommander.TestsCommand.self,
