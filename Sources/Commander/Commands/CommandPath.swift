@@ -38,6 +38,18 @@ public struct CommandPath {
     /// The decoder to decode the options.
     internal let decoder: Decoder
   }
+  
+  /// The running command path.
+  internal static var path: CommandPath!
+  /// The running commander path of the commander.
+  internal static var runningPath: String!
+  /// The running commander's usage.
+  internal static var runningCommanderUsage: String!
+  /// The running global options of the commander.
+  internal static var runningGlobalOptions: OptionsDescribable?
+  /// The running commander's available commands.
+  internal static var runningCommands: [AnyCommandRepresentable.Type] = []
+  
   /// The running paths of the ass
   public private(set) var paths: [String]
   /// The exact running command of the command path.
