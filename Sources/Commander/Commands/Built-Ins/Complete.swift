@@ -48,11 +48,9 @@ extension Complete {
     internal static let usage = "Generate and print the bash completion script to the standard output"
     
     internal static func main(_ options: Complete.Generate.Options) throws {
-      var stdout = FileHandle.standardOutput
-      
       switch options.mode {
       case .bash:
-        print(bashCompletion, to: &stdout)
+        logger <<< bashCompletion
       }
     }
   }
@@ -102,7 +100,6 @@ internal struct Complete: CommandRepresentable {
   ]
   
   internal static func main(_ options: Complete.Options) throws {
-    // print(options.arguments)
     guard options.arguments.isSingle else {
       return
     }

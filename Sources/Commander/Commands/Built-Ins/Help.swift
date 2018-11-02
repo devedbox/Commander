@@ -126,25 +126,19 @@ internal struct Help: CommandRepresentable {
   }
   /// The main function of the command.
   internal static func main(_ options: Options) throws {
-    var stdout = FileHandle.standardOutput
     let path = self.path?.paths.joined(separator: " ") ?? CommandPath.runningCommanderPath.split(separator: "/").last!.string
     
     if options.arguments.isEmpty {
       if let command = self.path?.command {
-        print(
-          CommandDescriber(path: path).describe(command),
-          terminator: "\n",
-          to: &stdout
-        )
+        logger
+          <<< CommandDescriber(path: path).describe(command)
+          <<< "\n"
       } else {
-        print(
-          CommandDescriber(path: path).describe(
+        logger
+          <<< CommandDescriber(path: path).describe(
             commander: CommandPath.runningCommanderUsage,
             commands: CommandPath.runningCommands
-          ),
-          terminator: "\n",
-          to: &stdout
-        )
+        ) <<< "\n"
         
         /* FIXME: Disable the subcommands' description for no prefered formats for now.
          print(prefix, commands, "\nDescriptions:", separator: "\n  ", terminator: "\n\n", to: &stdout)
@@ -168,11 +162,9 @@ internal struct Help: CommandRepresentable {
         throw CommanderError.helpUnrecognizedCommands(commands: unrecognizedCommand)
       }
       
-      print(
-        commands.map { CommandDescriber(path: path).describe($0) }.joined(separator: "\n\n"),
-        terminator: "\n",
-        to: &stdout
-      )
+      logger
+        <<< commands.map { CommandDescriber(path: path).describe($0) }.joined(separator: "\n\n")
+        <<< "\n"
     }
   }
 }

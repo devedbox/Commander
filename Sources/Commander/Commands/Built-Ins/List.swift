@@ -50,7 +50,6 @@ internal struct List: CommandRepresentable {
   internal static func main(_ options: List.Options) throws {
     let arguments = options.arguments
     var path: CommandPath?
-    var stdout = FileHandle.standardOutput
 
     if
       let root = arguments.first,
@@ -68,9 +67,9 @@ internal struct List: CommandRepresentable {
     switch options.type {
     case .command:
       if path == nil {
-        print(CommandPath.runningCommands.map { $0.symbol }.joined(separator: " "), to: &stdout)
+        logger <<< CommandPath.runningCommands.map { $0.symbol }.joined(separator: " ")
       } else {
-        print(path!.command.subcommands.map { $0.symbol }.joined(separator: " "), to: &stdout)
+        logger <<< path!.command.subcommands.map { $0.symbol }.joined(separator: " ")
       }
       
       fallthrough
@@ -84,12 +83,12 @@ internal struct List: CommandRepresentable {
         path!.command.optionsDescriber.keys[$0].map { "-" + String($0) }
       }
       
-      print((allShortKeys + allCodingKeys.map { "--" + $0 }).joined(separator: " "), to: &stdout)
+      logger <<< (allShortKeys + allCodingKeys.map { "--" + $0 }).joined(separator: " ")
     case .options:
       guard path != nil else {
         break
       }
-      print(path!.command.optionsDescriber.allCodingKeys.map { "--\($0)" }.joined(separator: " "), to: &stdout)
+      logger <<< path!.command.optionsDescriber.allCodingKeys.map { "--\($0)" }.joined(separator: " ")
     }
   }
 }

@@ -46,3 +46,15 @@ extension Substring {
   /// Returns the value of string of `String` by initialize a string value with the receiver.
   internal var string: String { return String(self) }
 }
+
+// MARK: - <<<.
+
+infix operator <<<: StreamPrecedence
+precedencegroup StreamPrecedence {
+  associativity: left
+}
+
+@discardableResult
+public func <<< <Target: StringProtocol>(left: TextOutputStream, right: Target) -> TextOutputStream {
+  var stream = left; stream.write("\(right)"); return stream
+}

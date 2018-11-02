@@ -27,13 +27,18 @@
 
 import Foundation
 
+/// The logger to log the output message to standard output.
+public private(set) var logger: TextOutputStream!
+
 // MARK: - CommanderRepresentable.
 
-public protocol CommanderRepresentable {
+public protocol CommanderRepresentable: TextOutputStream {
   /// The associated type of `Options`.
   associatedtype Options: OptionsRepresentable = Nothing
   /// A closure of `(Error) -> Void` to handle the stderror.
   static var errorHandler: ((Swift.Error) -> Swift.Void)? { get }
+  /// A closure of `(String) -> Void` to handle the stdout.
+  static var outputHandler: ((String) -> Void)? { get }
   /// The registered available commands of the commander.
   static var commands: [AnyCommandRepresentable.Type] { get }
   /// The human-readable usage description of the commands.
@@ -47,6 +52,12 @@ public protocol CommanderRepresentable {
 // MARK: - Dispatch.
 
 extension CommanderRepresentable {
+  /// Appends the given string to the stream.
+  public mutating func write(_ string: String) {
+    if type(of: self).outputHandler?(string) == nil {
+      var stdout = FileHandle.standardOutput; print(stdout, to: &stdout)
+    }
+  }
   /// Returns all commands of commander with registered commands along with built-in commands.
   internal static var allCommands: [AnyCommandRepresentable.Type] {
     return [Help.self] + commands
@@ -58,8 +69,7 @@ extension CommanderRepresentable {
       try dispatch(with: CommandLine.arguments)
     } catch {
       if type(of: self).errorHandler?(error) == nil {
-        var stderr = FileHandle.standardError
-        print(String(describing: error), to: &stderr)
+        var stderr = FileHandle.standardError; print(String(describing: error), to: &stderr)
       }
       dispatchFailure()
     }
@@ -73,10 +83,12 @@ extension CommanderRepresentable {
       CommandPath.runningGlobalOptions = nil // Clear the running global options.
       CommandPath.runningCommanderUsage = nil // Clear the runnung commander usage.
       CommandPath.runningCommands = [] // Clear the running commands.
+      logger = nil // Reset the logger.
     }
     
     let runningPath = commandLineArgs.first!
     
+    logger = self
     CommandPath.runningCommanderPath = runningPath
     CommandPath.runningCommanderUsage = type(of: self).usage
     CommandPath.runningCommands = type(of: self).allCommands
@@ -147,6 +159,8 @@ extension CommanderRepresentable {
 public final class Commander: CommanderRepresentable {
   /// A closure of `(Error) -> Void` to handle the stderror.
   public static var errorHandler: ((Error) -> Void)?
+  /// A closure of `(String) -> Void` to handle the stdout.
+  public static var outputHandler: ((String) -> Void)?
   /// The registered available commands of the commander.
   public static var commands: [AnyCommandRepresentable.Type] = []
   /// The human-readable usage description of the commands.
