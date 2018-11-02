@@ -61,9 +61,10 @@ public struct CommandPath {
   /// arguments matchs the paths of subcommands of the command.
   ///
   /// - Parameter commandLineArgs: The command line arguments.
+  /// - Parameter ignoresExecution: Should ignore the execution of the command path.
   /// - Returns: Returns the exact running path.
   @discardableResult
-  internal func run(with commandLineArgs: [String]) throws -> CommandPath {
+  internal func run(with commandLineArgs: [String], ignoresExecution: Bool = false) throws -> CommandPath {
     switch OptionsDecoder.optionsFormat {
     case .format(let optionSymbol, short: let shortOptionSymbol):
       if
@@ -79,6 +80,10 @@ public struct CommandPath {
           with: Array(commandLineArgs.dropFirst())
         )
       } else {
+        guard ignoresExecution == false else {
+          return self
+        }
+        
         do {
           Help.runningCommands.append(command)
           try command.run(with: commandLineArgs)
