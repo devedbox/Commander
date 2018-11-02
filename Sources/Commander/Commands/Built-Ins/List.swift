@@ -29,17 +29,19 @@ import Foundation
 /// and given command name.
 public struct List: CommandRepresentable {
   public struct Options: OptionsRepresentable {
-    public typealias ArgumentsRsolver = AnyArgumentsResolver<String>
+    public typealias ArgumentsResolver = AnyArgumentsResolver<String>
     public enum CommandType: String, Codable {
-      case command = "cmd"
-      case options = "ops"
-      case optionsWithShortKeys = "s-ops"
+      case command
+      case options
+      case optionsWithShortKeys = "optionsS"
     }
     public enum CodingKeys: String, CodingKeysRepresentable {
       case type
     }
     public static var keys: [CodingKeys: Character] = [:]
-    public static var descriptions: [CodingKeys: OptionDescription] = [:]
+    public static var descriptions: [CodingKeys: OptionDescription] = [
+      .type: .default(value: "cmd", usage: "")
+    ]
     
     public let type: CommandType
   }
@@ -49,18 +51,39 @@ public struct List: CommandRepresentable {
   
   public static func main(_ options: List.Options) throws {
     let arguments = options.arguments
-    let path: CommandPath?
+    var path: CommandPath?
+    var stdout = FileHandle.standardOutput
 
-    if let root = arguments.first,  {
-      path = CommandPath(running: <#T##AnyCommandRepresentable.Type#>, at: <#T##String#>)
+    if
+      let root = arguments.first,
+      let command = CommandPath.runningCommands.first(where: { $0.symbol == root })
+    {
+      path = CommandPath(running: command, at: CommandPath.runningCommanderPath)
     }
     
     switch options.type {
     case .command:
-      
-    case .options: break
+      if path == nil {
+        print(CommandPath.runningCommands.map { $0.symbol }.joined(separator: " "), to: &stdout)
+      } else {
+        print(path!.command.subcommands.map { $0.symbol }.joined(separator: " "), to: &stdout)
+      }
+    case .options:
+      guard path != nil else {
+        break
+      }
+      print(path!.command.optionsDescriber.allCodingKeys.map { "--\($0)" }.joined(separator: " "), to: &stdout)
     case .optionsWithShortKeys:
-      break
+      guard path != nil else {
+        break
+      }
+      
+      let allCodingKeys = path!.command.optionsDescriber.allCodingKeys
+      let allShortKeys = allCodingKeys.compactMap {
+        path!.command.optionsDescriber.keys[$0].map { "-" + String($0) }
+      }
+      
+      print((allShortKeys + allCodingKeys.map { "--" + $0 }).joined(separator: " "), to: &stdout)
     }
   }
 }
