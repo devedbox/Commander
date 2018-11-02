@@ -27,10 +27,6 @@
 
 import Foundation
 
-// MARK: - DispatchStorage.
-
-internal var _GlobalOptions: OptionsDescribable?
-
 // MARK: - CommanderRepresentable.
 
 public protocol CommanderRepresentable {
@@ -73,16 +69,17 @@ extension CommanderRepresentable {
   /// command with the decided options.
   public func dispatch(with commandLineArgs: [String]) throws {
     defer {
-      _GlobalOptions = nil
-      Help.runningPath = nil
-      Help.runningCommanderUsage = nil
-      Help.runningCommands = []
+      CommandPath.runningPath = nil // Clear the running path of commander.
+      CommandPath.runningGlobalOptions = nil // Clear the running global options.
+      CommandPath.runningCommanderUsage = nil // Clear the runnung commander usage.
+      CommandPath.runningCommands = [] // Clear the running commands.
     }
     
     let runningPath = commandLineArgs.first!
-    Help.runningPath = runningPath
-    Help.runningCommanderUsage = type(of: self).usage
-    Help.runningCommands = type(of: self).allCommands
+    
+    CommandPath.runningPath = runningPath
+    CommandPath.runningCommanderUsage = type(of: self).usage
+    CommandPath.runningCommands = type(of: self).allCommands
     
     var commands = commandLineArgs.dropFirst()
     let symbol = commands.popFirst()
@@ -133,7 +130,7 @@ extension CommanderRepresentable {
         throw CommanderError.unrecognizedOptions(unrecognizedOptions, path: dispatcher.path)
       }
       
-      _GlobalOptions = try Options(from: dispatcher.decoder)
+      CommandPath.runningGlobalOptions = try Options(from: dispatcher.decoder)
       try dispatcher.path.command.run(with: dispatcher.decoded)
       
     } catch CommanderError.unrecognizedOptions(let options, path: let path) {
