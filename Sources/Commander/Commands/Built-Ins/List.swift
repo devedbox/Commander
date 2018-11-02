@@ -31,8 +31,8 @@ internal struct List: CommandRepresentable {
   internal struct Options: OptionsRepresentable {
     internal typealias ArgumentsResolver = AnyArgumentsResolver<String>
     internal enum CommandType: String, Codable {
-      case command
-      case options
+      case command // List subcommands, and then list the options.
+      case options // List the options only.
       case optionsWithShortKeys = "optionsS"
     }
     internal enum CodingKeys: String, CodingKeysRepresentable {
@@ -56,7 +56,13 @@ internal struct List: CommandRepresentable {
       let root = arguments.first,
       let command = CommandPath.runningCommands.first(where: { $0.symbol == root })
     {
-      path = CommandPath(running: command, at: CommandPath.runningCommanderPath)
+      path = try CommandPath(
+        running: command,
+        at: CommandPath.runningCommanderPath
+      ).run(
+        with: Array(arguments.dropFirst()),
+        ignoresExecution: true
+      )
     }
     
     switch options.type {
@@ -66,11 +72,8 @@ internal struct List: CommandRepresentable {
       } else {
         print(path!.command.subcommands.map { $0.symbol }.joined(separator: " "), to: &stdout)
       }
-    case .options:
-      guard path != nil else {
-        break
-      }
-      print(path!.command.optionsDescriber.allCodingKeys.map { "--\($0)" }.joined(separator: " "), to: &stdout)
+      
+      fallthrough
     case .optionsWithShortKeys:
       guard path != nil else {
         break
@@ -82,6 +85,11 @@ internal struct List: CommandRepresentable {
       }
       
       print((allShortKeys + allCodingKeys.map { "--" + $0 }).joined(separator: " "), to: &stdout)
+    case .options:
+      guard path != nil else {
+        break
+      }
+      print(path!.command.optionsDescriber.allCodingKeys.map { "--\($0)" }.joined(separator: " "), to: &stdout)
     }
   }
 }
