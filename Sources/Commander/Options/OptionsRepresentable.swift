@@ -89,6 +89,8 @@ public protocol OptionsDescribable: Decodable {
   static var descriptions: [String: OptionDescription] { get }
   /// Returns the type of the argument.
   static var argumentType: Decodable.Type { get }
+  /// Returns all the coding keys of the options.
+  static var allCodingKeys: [String] { get }
 }
 
 extension OptionsDescribable {
@@ -101,7 +103,7 @@ extension OptionsDescribable {
 // MARK: - CodingKeysRepresentable.
 
 /// A protocol represents the conforming types can be the coding key type for `Decoder` types.
-public protocol CodingKeysRepresentable: CodingKey, StringRawRepresentable, Hashable { }
+public protocol CodingKeysRepresentable: CodingKey, StringRawRepresentable, Hashable, CaseIterable { }
 
 extension CodingKeysRepresentable {
   /// A textual representation of this instance.
@@ -176,6 +178,10 @@ extension OptionsRepresentable {
   /// Returns the type of the argument.
   public static var argumentType: Decodable.Type {
     return ArgumentsResolver.Argument.self
+  }
+  /// Returns all the coding keys of the options.
+  public static var allCodingKeys: [String] {
+    return CodingKeys.allCases.map { $0.description }
   }
   /// Decode the options from the given command line arguments.
   ///
