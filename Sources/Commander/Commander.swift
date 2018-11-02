@@ -83,7 +83,7 @@ extension CommanderRepresentable {
     
     var commands = commandLineArgs.dropFirst()
     let symbol = commands.popFirst()
-    let allCommands = type(of: self).allCommands + [List.self]
+    let allCommands = type(of: self).allCommands + [List.self, Complete.self]
     
     let commandPath = allCommands.first {
       $0.symbol == symbol
