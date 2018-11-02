@@ -93,14 +93,6 @@ internal struct Help: CommandRepresentable {
       return options
     }
   }
-  /// The running command path.
-  internal static var path: CommandPath!
-  /// The running commander path of the commander.
-  internal static var runningPath: String!
-  /// The running commander's usage.
-  internal static var runningCommanderUsage: String!
-  /// The running commander's available commands.
-  internal static var runningCommands: [AnyCommandRepresentable.Type] = []
   /// The command symbol.
   internal static var symbol: String = "help"
   /// The usage of the command.
@@ -124,7 +116,7 @@ internal struct Help: CommandRepresentable {
       validate(options: options) == true,
       validate(options: [path.command.symbol]) == false
     {
-      self.path = path; defer { self.path = nil }
+      CommandPath.path = path; defer { CommandPath.path = nil }
       try main(.default(arguments: [path.command.symbol]))
     } else {
       throw CommanderError.unrecognizedOptions(options, path: path)
@@ -133,11 +125,14 @@ internal struct Help: CommandRepresentable {
   /// The main function of the command.
   internal static func main(_ options: Options) throws {
     var stdout = FileHandle.standardOutput
-    let path = self.path?.paths.joined(separator: " ") ?? runningPath.split(separator: "/").last!.string
+    let path = CommandPath.path?.paths.joined(separator: " ") ?? CommandPath.runningPath.split(separator: "/").last!.string
     
     if options.arguments.isEmpty {
       print(
-        CommandDescriber(path: path).describe(commander: runningCommanderUsage, commands: runningCommands),
+        CommandDescriber(path: path).describe(
+          commander: CommandPath.runningCommanderUsage,
+          commands: CommandPath.runningCommands
+        ),
         terminator: "\n",
         to: &stdout
       )
@@ -151,7 +146,7 @@ internal struct Help: CommandRepresentable {
     } else {
       var unrecognizedCommand = [String]()
       let commands = options.arguments.compactMap { arg -> AnyCommandRepresentable.Type? in
-        if let command = runningCommands.first(where: { $0.symbol == arg }) {
+        if let command = CommandPath.runningCommands.first(where: { $0.symbol == arg }) {
           return command
         } else {
           unrecognizedCommand.append(arg)
