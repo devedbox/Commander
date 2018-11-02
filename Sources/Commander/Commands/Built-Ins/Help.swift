@@ -93,6 +93,8 @@ internal struct Help: CommandRepresentable {
       return options
     }
   }
+  /// The resolving command path.
+  internal static var path: CommandPath!
   /// The command symbol.
   internal static var symbol: String = "help"
   /// The usage of the command.
@@ -116,8 +118,8 @@ internal struct Help: CommandRepresentable {
       validate(options: options) == true,
       validate(options: [path.command.symbol]) == false
     {
-      CommandPath.path = path; defer { CommandPath.path = nil }
-      try main(.default(arguments: [path.command.symbol]))
+      self.path = path; defer { self.path = nil }
+      try main(.default(arguments: []))
     } else {
       throw CommanderError.unrecognizedOptions(options, path: path)
     }
@@ -125,24 +127,32 @@ internal struct Help: CommandRepresentable {
   /// The main function of the command.
   internal static func main(_ options: Options) throws {
     var stdout = FileHandle.standardOutput
-    let path = CommandPath.path?.paths.joined(separator: " ") ?? CommandPath.runningPath.split(separator: "/").last!.string
+    let path = self.path?.paths.joined(separator: " ") ?? CommandPath.runningCommanderPath.split(separator: "/").last!.string
     
     if options.arguments.isEmpty {
-      print(
-        CommandDescriber(path: path).describe(
-          commander: CommandPath.runningCommanderUsage,
-          commands: CommandPath.runningCommands
-        ),
-        terminator: "\n",
-        to: &stdout
-      )
-      
-      /* FIXME: Disable the subcommands' description for no prefered formats for now.
-       print(prefix, commands, "\nDescriptions:", separator: "\n  ", terminator: "\n\n", to: &stdout)
-       
-       var options = Options(help: nil, intents: 1)
-       options.arguments = Commander.commands.map { $0.symbol }
-       try self.main(options) */
+      if let command = self.path?.command {
+        print(
+          CommandDescriber(path: path).describe(command),
+          terminator: "\n",
+          to: &stdout
+        )
+      } else {
+        print(
+          CommandDescriber(path: path).describe(
+            commander: CommandPath.runningCommanderUsage,
+            commands: CommandPath.runningCommands
+          ),
+          terminator: "\n",
+          to: &stdout
+        )
+        
+        /* FIXME: Disable the subcommands' description for no prefered formats for now.
+         print(prefix, commands, "\nDescriptions:", separator: "\n  ", terminator: "\n\n", to: &stdout)
+         
+         var options = Options(help: nil, intents: 1)
+         options.arguments = Commander.commands.map { $0.symbol }
+         try self.main(options) */
+      }
     } else {
       var unrecognizedCommand = [String]()
       let commands = options.arguments.compactMap { arg -> AnyCommandRepresentable.Type? in
