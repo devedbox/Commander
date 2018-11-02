@@ -27,27 +27,27 @@ import Foundation
 
 /// The built-in command to list all the subcommands and options info of the given parameter
 /// and given command name.
-public struct List: CommandRepresentable {
-  public struct Options: OptionsRepresentable {
-    public typealias ArgumentsResolver = AnyArgumentsResolver<String>
-    public enum CommandType: String, Codable {
+internal struct List: CommandRepresentable {
+  internal struct Options: OptionsRepresentable {
+    internal typealias ArgumentsResolver = AnyArgumentsResolver<String>
+    internal enum CommandType: String, Codable {
       case command
       case options
       case optionsWithShortKeys = "optionsS"
     }
-    public enum CodingKeys: String, CodingKeysRepresentable {
+    internal enum CodingKeys: String, CodingKeysRepresentable {
       case type
     }
-    public static var keys: [CodingKeys: Character] = [:]
-    public static var descriptions: [CodingKeys: OptionDescription] = [:]
+    internal static var keys: [CodingKeys: Character] = [:]
+    internal static var descriptions: [CodingKeys: OptionDescription] = [:]
     
-    public let type: CommandType
+    internal let type: CommandType
   }
   
-  public static let symbol = "list"
-  public static let usage = "List all subcommands or options of given command"
+  internal static let symbol = "list"
+  internal static let usage = "List all subcommands or options of given command"
   
-  public static func main(_ options: List.Options) throws {
+  internal static func main(_ options: List.Options) throws {
     let arguments = options.arguments
     var path: CommandPath?
     var stdout = FileHandle.standardOutput
