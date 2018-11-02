@@ -40,9 +40,9 @@ public struct CommandPath {
   }
   
   /// The running command path.
-  internal static var path: CommandPath!
+  internal static var runningCommandPath: CommandPath!
   /// The running commander path of the commander.
-  internal static var runningPath: String!
+  internal static var runningCommanderPath: String!
   /// The running commander's usage.
   internal static var runningCommanderUsage: String!
   /// The running global options of the commander.
@@ -98,10 +98,9 @@ public struct CommandPath {
         
         // Set the running command path before run the command path.
         // Defer setting nil of the running command path.
-        type(of: self).path = self; defer { type(of: self).path = nil }
+        type(of: self).runningCommandPath = self; defer { type(of: self).runningCommandPath = nil }
         
         do {
-          type(of: self).runningCommands.append(command)
           try command.run(with: commandLineArgs)
         } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: nil, decoder: _) {
           throw CommanderError.unrecognizedOptions(options, path: self)
