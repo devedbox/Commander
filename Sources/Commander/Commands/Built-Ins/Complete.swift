@@ -68,7 +68,7 @@ extension Complete.Generate {
       cur=\"${COMP_WORDS[COMP_CWORD]}\"
       # prev=\"${COMP_WORDS[COMP_CWORD-1]}\"
     
-      completions=$(\(commander) complete \"$COMP_LINE\" | tr \"\\n\" \" \")
+      completions=$(\(CommandPath.runningCommanderPath!) complete \"$COMP_LINE\" | tr \"\\n\" \" \")
     
       COMPREPLY=( $(compgen -W \"$completions\" -- \"$cur\") )
     }
