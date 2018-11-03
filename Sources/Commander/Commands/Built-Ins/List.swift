@@ -80,7 +80,8 @@ internal struct List: CommandRepresentable {
         break
       }
       
-      let allCodingKeys = path!.command.optionsDescriber.allCodingKeys
+      // let allCodingKeys = path!.command.optionsDescriber.allCodingKeys
+      let allCodingKeys = path!.command.optionsDescriber.descriptions.keys.map { $0 }
       let allShortKeys = allCodingKeys.compactMap {
         path!.command.optionsDescriber.keys[$0].map { "-" + String($0) }
       }
