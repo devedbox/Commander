@@ -47,13 +47,9 @@ internal struct Help: CommandRepresentable {
       case help
       case intents
     }
-    internal static let keys: [Options.CodingKeys: Character] = [
-      .help: "h"
-    ]
+    internal static let keys: [Options.CodingKeys: Character] = [:]
     /// Returns the description of the options.
-    internal static var descriptions: [Options.CodingKeys: OptionDescription] = [
-      .help: .usage(Help.usage)
-    ]
+    internal static var descriptions: [Options.CodingKeys: OptionDescription] = [:]
     
     internal let help: Bool?
     internal let intents: Int?
