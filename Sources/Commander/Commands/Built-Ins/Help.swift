@@ -127,13 +127,11 @@ internal struct Help: CommandRepresentable {
     if options.arguments.isEmpty {
       if let command = self.path?.command {
         logger <<< CommandDescriber(path: path).describe(command)
-        logger <<< "\n"
       } else {
         logger <<< CommandDescriber(path: path).describe(
             commander: CommandPath.runningCommanderUsage,
             commands: CommandPath.runningCommands
         )
-        logger <<< "\n"
         
         /* FIXME: Disable the subcommands' description for no prefered formats for now.
          print(prefix, commands, "\nDescriptions:", separator: "\n  ", terminator: "\n\n", to: &stdout)
@@ -158,7 +156,6 @@ internal struct Help: CommandRepresentable {
       }
       
       logger <<< commands.map { CommandDescriber(path: path).describe($0) }.joined(separator: "\n\n")
-      logger <<< "\n"
     }
   }
 }

@@ -94,7 +94,7 @@ internal struct Complete: CommandRepresentable {
   }
   
   internal static let symbol = "complete"
-  internal static let usage = "Auto add the shell completion script of the commander"
+  internal static let usage = "The built-in command to generate bash-completion wordlist"
   internal static let subcommands: [AnyCommandRepresentable.Type] = [
     Generate.self
   ]
