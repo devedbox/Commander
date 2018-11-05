@@ -55,6 +55,10 @@ extension CommanderRepresentable {
   /// Appends the given string to the stream.
   public mutating func write(_ string: String) {
     if type(of: self).outputHandler?(string) == nil {
+      guard string.isEmpty == false else {
+        return
+      }
+      
       var stdout = FileHandle.standardOutput; print(string, to: &stdout)
     }
   }
