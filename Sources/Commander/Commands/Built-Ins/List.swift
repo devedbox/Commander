@@ -95,7 +95,7 @@ internal struct List: CommandRepresentable {
       guard path != nil else {
         break
       }
-      logger <<< path!.command.optionsDescriber.allCodingKeys.map { "--\($0)" }.joined(separator: " ") <<< "\n"
+      logger <<< path!.command.optionsDescriber.descriptions.keys.map { "--\($0)" }.joined(separator: " ") <<< "\n"
     }
   }
 }
