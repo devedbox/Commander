@@ -49,7 +49,8 @@ extension Complete {
       switch options.shell {
       case .bash:
         logger <<< bashCompletion
-      case .zsh: break
+      case .zsh:
+        logger <<< zshCompletion
       }
     }
   }
@@ -73,6 +74,19 @@ extension Complete.Generate {
     }
     
     complete -F _\(commander) \(commander)
+    """
+  }
+  
+  internal static var zshCompletion: String {
+    let commander = CommandPath.runningCommanderPath.split(separator: "/").last!
+    return """
+    #compdef \(commander)
+    
+    _\(commander)() {
+      compadd $(\((CommandPath.runningCommanderPath!)) complete -s=bash "$words")
+    }
+    
+    \(commander)
     """
   }
 }

@@ -1,5 +1,7 @@
 #compdef commander-sample
 
 _commander-sample() {
-  export
+  compadd $(commander-sample complete -s=bash "$words")
 }
+
+commander-sample
