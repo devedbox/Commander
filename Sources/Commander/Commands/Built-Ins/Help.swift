@@ -157,5 +157,7 @@ internal struct Help: CommandRepresentable {
       
       logger <<< commands.map { CommandDescriber(path: path).describe($0) }.joined(separator: "\n\n")
     }
+    
+    logger <<< "\n"
   }
 }
