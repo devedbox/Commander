@@ -167,11 +167,11 @@ class CommandTests: XCTestCase {
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander tes"]))
     XCTAssertEqual(outputs, "help test test-args"); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test"]))
-    XCTAssertEqual(outputs, "-t -v --target --verbose"); outputs = ""
+    XCTAssertEqual(outputs.split(separator: " ").set, "-t -v --target --verbose".split(separator: " ").set); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test "]))
-    XCTAssertEqual(outputs, "-t -v --target --verbose"); outputs = ""
+    XCTAssertEqual(outputs.split(separator: " ").set, "-t -v --target --verbose".split(separator: " ").set); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test -"]))
-    XCTAssertEqual(outputs, "-t -v --target --verbose"); outputs = ""
+    XCTAssertEqual(outputs.split(separator: " ").set, "-t -v --target --verbose".split(separator: " ").set); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test -t"]))
     XCTAssertEqual(outputs, ""); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test -t "]))
