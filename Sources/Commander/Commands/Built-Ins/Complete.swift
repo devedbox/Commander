@@ -83,7 +83,7 @@ extension Complete.Generate {
     #compdef \(commander)
     
     _\(commander)() {
-      compadd $(\((CommandPath.runningCommanderPath!)) complete -s=bash "$words")
+      compadd $(\((CommandPath.runningCommanderPath!)) complete "$words")
     }
     
     \(commander)
