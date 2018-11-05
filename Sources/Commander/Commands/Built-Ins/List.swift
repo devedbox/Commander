@@ -77,12 +77,13 @@ internal struct List: CommandRepresentable {
     switch options.type {
     case .command:
       switch options.shell {
-      case .bash:
+      case .bash, .zsh:
         if path == nil {
           logger <<< CommandPath.runningCommands.map { $0.symbol }.joined(separator: " ")
         } else {
           logger <<< path!.command.subcommands.map { $0.symbol }.joined(separator: " ")
         }
+        /*
       case .zsh:
         if path == nil {
           logger <<< CommandPath.runningCommands.map {
@@ -93,6 +94,7 @@ internal struct List: CommandRepresentable {
             "\($0.symbol):\($0.usage.replacingOccurrences(of: ":", with: "\\:"))"
           }.joined(separator: "\n")
         }
+         */
       }
       
       throughCommand = true; fallthrough
@@ -110,7 +112,7 @@ internal struct List: CommandRepresentable {
       switch OptionsDecoder.optionsFormat {
       case .format(let symbol, short: let short):
         switch options.shell {
-        case .bash:
+        case .bash, .zsh:
           opts = path!.command.optionsDescriber.descriptions.map {
             "\(symbol)\($0.key)"
           }
@@ -120,6 +122,7 @@ internal struct List: CommandRepresentable {
           
           logger <<< (path?.command.subcommands.isEmpty ?? CommandPath.runningCommands.isEmpty || !throughCommand ? "" : " ")
           logger <<< (sopts + opts).joined(separator: " ") <<< "\n"
+          /*
         case .zsh:
           opts = path!.command.optionsDescriber.descriptions.map {
             "\(symbol)\($0.key):\($0.value.usage.replacingOccurrences(of: ":", with: "\\:"))"
@@ -132,6 +135,7 @@ internal struct List: CommandRepresentable {
           
           logger <<< (path?.command.subcommands.isEmpty ?? CommandPath.runningCommands.isEmpty || !throughCommand ? "" : "\n")
           logger <<< (sopts + opts).joined(separator: "\n") <<< "\n"
+         */
         }
       }
     case .options:
@@ -141,12 +145,14 @@ internal struct List: CommandRepresentable {
       switch OptionsDecoder.optionsFormat {
       case .format(let symbol, short: _):
         switch options.shell {
-        case .bash:
+        case .bash, .zsh:
           logger <<< path!.command.optionsDescriber.descriptions.keys.map { "\(symbol)\($0)" }.joined(separator: " ") <<< "\n"
+          /*
         case .zsh:
           logger <<< path!.command.optionsDescriber.descriptions.map {
             "\(symbol)\($0.key):\($0.value.usage.replacingOccurrences(of: ":", with: "\\:"))"
           }.joined(separator: "\n") <<< "\n"
+         */
         }
       }
     }
