@@ -59,7 +59,7 @@ extension CommanderRepresentable {
         return
       }
       
-      var stdout = FileHandle.standardOutput; print(string, to: &stdout)
+      var stdout = FileHandle.standardOutput; print(string, terminator: "", to: &stdout)
     }
   }
   /// Returns all commands of commander with registered commands along with built-in commands.
