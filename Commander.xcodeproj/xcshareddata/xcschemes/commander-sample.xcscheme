@@ -65,15 +65,15 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "help"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "list"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "sample"
+            argument = "list"
             isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "sample"
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-h"
@@ -81,7 +81,7 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "set-args"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--type=command"
@@ -89,7 +89,7 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--type=options"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--add-args"
