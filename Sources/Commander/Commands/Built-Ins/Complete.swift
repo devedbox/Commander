@@ -130,6 +130,17 @@ internal struct Complete: CommandRepresentable {
     } else { // Complete according to the last arg.
       let last = commands.last!
       
+      // Make an exception for 'help' command.
+      if commands.first == Help.symbol {
+        let args = Array(commands.dropFirst())
+        
+        logger <<< CommandPath.runningCommands.compactMap {
+            !(args.contains($0.symbol) || $0.symbol == Help.symbol) ? $0.symbol : nil
+        }.joined(separator: " ") <<< "\n"
+        
+        return
+      }
+      
       switch OptionsDecoder.optionsFormat {
       case .format(let symbol, short: let shortSymbol):
         var listOptions: List.Options
