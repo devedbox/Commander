@@ -34,6 +34,7 @@
 		DC467576218BF18300F26301 /* List.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC467575218BF18300F26301 /* List.swift */; };
 		DC71F3212170E774002DA345 /* GlobalOptionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC71F3202170E774002DA345 /* GlobalOptionsTests.swift */; };
 		DCA3B895218C416600888E2F /* Complete.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCA3B894218C416600888E2F /* Complete.swift */; };
+		DCA3B89821903C8C00888E2F /* Shell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCA3B89721903C8C00888E2F /* Shell.swift */; };
 		OBJ_42 /* Commander.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_11 /* Commander.swift */; };
 		OBJ_43 /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_13 /* Error.swift */; };
 		OBJ_46 /* CommandRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_18 /* CommandRepresentable.swift */; };
@@ -87,6 +88,7 @@
 		DC467575218BF18300F26301 /* List.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = List.swift; sourceTree = "<group>"; };
 		DC71F3202170E774002DA345 /* GlobalOptionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalOptionsTests.swift; sourceTree = "<group>"; };
 		DCA3B894218C416600888E2F /* Complete.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Complete.swift; sourceTree = "<group>"; };
+		DCA3B89721903C8C00888E2F /* Shell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shell.swift; sourceTree = "<group>"; };
 		OBJ_11 /* Commander.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Commander.swift; sourceTree = "<group>"; };
 		OBJ_13 /* Error.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Error.swift; sourceTree = "<group>"; };
 		OBJ_18 /* CommandRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandRepresentable.swift; sourceTree = "<group>"; };
@@ -148,11 +150,20 @@
 		DC1DF5F9216DF713002EB271 /* Built-Ins */ = {
 			isa = PBXGroup;
 			children = (
+				DCA3B89621903C7B00888E2F /* Types */,
 				DC1DF5FA216DF726002EB271 /* Help.swift */,
 				DC467575218BF18300F26301 /* List.swift */,
 				DCA3B894218C416600888E2F /* Complete.swift */,
 			);
 			path = "Built-Ins";
+			sourceTree = "<group>";
+		};
+		DCA3B89621903C7B00888E2F /* Types */ = {
+			isa = PBXGroup;
+			children = (
+				DCA3B89721903C8C00888E2F /* Shell.swift */,
+			);
+			path = Types;
 			sourceTree = "<group>";
 		};
 		OBJ_10 /* Commander */ = {
@@ -350,6 +361,7 @@
 				DCA3B895218C416600888E2F /* Complete.swift in Sources */,
 				DC467576218BF18300F26301 /* List.swift in Sources */,
 				OBJ_46 /* CommandRepresentable.swift in Sources */,
+				DCA3B89821903C8C00888E2F /* Shell.swift in Sources */,
 				DC0B9B9B216347F000C87253 /* OptionsDecoder.swift in Sources */,
 				OBJ_50 /* OptionsRepresentable.swift in Sources */,
 				DC1DF5FD216DF777002EB271 /* CommandDescriber.swift in Sources */,

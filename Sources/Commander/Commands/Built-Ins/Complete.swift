@@ -30,27 +30,26 @@ import Foundation
 extension Complete {
   internal struct Generate: CommandRepresentable {
     internal struct Options: OptionsRepresentable {
-      internal enum ShellMode: String, Codable {
-        case bash
-      }
-      
       internal enum CodingKeys: String, CodingKeysRepresentable {
-        case mode
+        case shell
       }
       
-      internal static var keys: [CodingKeys: Character] = [:]
-      internal static var descriptions: [CodingKeys: OptionDescription] = [:]
+      internal static var keys: [CodingKeys: Character] = [.shell: "s"]
+      internal static var descriptions: [CodingKeys: OptionDescription] = [
+        .shell: .default(value: "bash", usage: "The shell type to gen. Available shell: bash, zsh")
+      ]
       
-      internal let mode: ShellMode
+      internal let shell: Shell
     }
     
     internal static let symbol = "generate"
     internal static let usage = "Generate and print the bash completion script to the standard output"
     
     internal static func main(_ options: Complete.Generate.Options) throws {
-      switch options.mode {
+      switch options.shell {
       case .bash:
         logger <<< bashCompletion
+      case .zsh: break
       }
     }
   }
@@ -68,7 +67,7 @@ extension Complete.Generate {
       cur=\"${COMP_WORDS[COMP_CWORD]}\"
       # prev=\"${COMP_WORDS[COMP_CWORD-1]}\"
     
-      completions=$(\(CommandPath.runningCommanderPath!) complete \"$COMP_LINE\" | tr \"\\n\" \" \")
+      completions=$(\(CommandPath.runningCommanderPath!) complete \"$COMP_LINE\" -s=bash | tr \"\\n\" \" \")
     
       COMPREPLY=( $(compgen -W \"$completions\" -- \"$cur\") )
     }
@@ -84,13 +83,15 @@ internal struct Complete: CommandRepresentable {
     internal typealias ArgumentsResolver = AnyArgumentsResolver<String>
     
     internal enum CodingKeys: String, CodingKeysRepresentable {
-      case none
+      case shell
     }
     
-    internal static var keys: [CodingKeys: Character] = [:]
-    internal static var descriptions: [CodingKeys: OptionDescription] = [:]
+    internal static var keys: [CodingKeys: Character] = [.shell: "s"]
+    internal static var descriptions: [CodingKeys: OptionDescription] = [
+      .shell: .default(value: "bash", usage: "The shell type to complete. Available shell: bash, zsh")
+    ]
     
-    internal let none: Bool?
+    internal let shell: Shell
   }
   
   internal static let symbol = "complete"
@@ -126,7 +127,7 @@ internal struct Complete: CommandRepresentable {
     }
     
     if arguments.isSingle { // Consider a commander.
-      try List.main(.init(type: .command))
+      try List.main(.init(type: .command, shell: options.shell))
     } else { // Complete according to the last arg.
       let last = commands.last!
       
@@ -154,7 +155,7 @@ internal struct Complete: CommandRepresentable {
             return
           }
           
-          listOptions = List.Options(type: .options)
+          listOptions = List.Options(type: .options, shell: options.shell)
           listOptions.arguments = Array(commands.dropLast())
         case let arg where arg.hasPrefix(shortSymbol):
           if
@@ -164,14 +165,14 @@ internal struct Complete: CommandRepresentable {
             return
           }
           
-          listOptions = List.Options(type: .optionsWithShortKeys)
+          listOptions = List.Options(type: .optionsWithShortKeys, shell: options.shell)
           listOptions.arguments = Array(commands.dropLast())
         default:
           guard commands.filter({ $0.hasPrefix(symbol) || $0.hasPrefix(shortSymbol) }).isEmpty else {
             return
           }
           
-          listOptions = List.Options(type: .command)
+          listOptions = List.Options(type: .command, shell: options.shell)
           listOptions.arguments = commands
         }
         

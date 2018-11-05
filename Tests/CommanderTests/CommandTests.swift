@@ -154,7 +154,7 @@ class CommandTests: XCTestCase {
     var outputs = String()
     Commander.outputHandler = { outputs += $0.trimmingCharacters(in: .newlines) }; defer { Commander.outputHandler = nil }
     
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "generate", "--mode=bash"]))
+    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "generate", "--shell=bash"]))
     XCTAssertEqual(outputs.isEmpty, false); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete"]))
     XCTAssertEqual(outputs, ""); outputs = ""

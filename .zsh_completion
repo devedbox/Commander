@@ -1,0 +1,5 @@
+#compdef commander-sample
+
+_commander-sample() {
+  export
+}

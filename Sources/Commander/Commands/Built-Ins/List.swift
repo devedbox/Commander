@@ -37,11 +37,19 @@ internal struct List: CommandRepresentable {
     }
     internal enum CodingKeys: String, CodingKeysRepresentable {
       case type
+      case shell
     }
-    internal static var keys: [CodingKeys: Character] = [:]
-    internal static var descriptions: [CodingKeys: OptionDescription] = [:]
+    internal static var keys: [CodingKeys: Character] = [
+      .type: "t",
+      .shell: "s"
+    ]
+    internal static var descriptions: [CodingKeys: OptionDescription] = [
+      .type: .usage("The type to list"),
+      .shell: .default(value: "bash", usage: "The shell type to list. Available shell: bash, zsh")
+    ]
     
     internal let type: CommandType
+    internal let shell: Shell
   }
   
   internal static let symbol = "list"
@@ -68,10 +76,23 @@ internal struct List: CommandRepresentable {
     
     switch options.type {
     case .command:
-      if path == nil {
-        logger <<< CommandPath.runningCommands.map { $0.symbol }.joined(separator: " ")
-      } else {
-        logger <<< path!.command.subcommands.map { $0.symbol }.joined(separator: " ")
+      switch options.shell {
+      case .bash:
+        if path == nil {
+          logger <<< CommandPath.runningCommands.map { $0.symbol }.joined(separator: " ")
+        } else {
+          logger <<< path!.command.subcommands.map { $0.symbol }.joined(separator: " ")
+        }
+      case .zsh:
+        if path == nil {
+          logger <<< CommandPath.runningCommands.map {
+            "\($0.symbol):\($0.usage.replacingOccurrences(of: ":", with: "\\:"))"
+          }.joined(separator: "\n")
+        } else {
+          logger <<< path!.command.subcommands.map {
+            "\($0.symbol):\($0.usage.replacingOccurrences(of: ":", with: "\\:"))"
+          }.joined(separator: "\n")
+        }
       }
       
       throughCommand = true; fallthrough
@@ -83,19 +104,51 @@ internal struct List: CommandRepresentable {
         break
       }
       
-      // let allCodingKeys = path!.command.optionsDescriber.allCodingKeys
-      let allCodingKeys = path!.command.optionsDescriber.descriptions.keys.map { $0 }
-      let allShortKeys = allCodingKeys.compactMap {
-        path!.command.optionsDescriber.keys[$0].map { "-" + String($0) }
-      }
+      let opts: [String]
+      let sopts: [String]
       
-      logger <<< (path?.command.subcommands.isEmpty ?? CommandPath.runningCommands.isEmpty || !throughCommand ? "" : " ")
-      logger <<< (allShortKeys + allCodingKeys.map { "--" + $0 }).joined(separator: " ") <<< "\n"
+      switch OptionsDecoder.optionsFormat {
+      case .format(let symbol, short: let short):
+        switch options.shell {
+        case .bash:
+          opts = path!.command.optionsDescriber.descriptions.map {
+            "\(symbol)\($0.key)"
+          }
+          sopts = path!.command.optionsDescriber.descriptions.compactMap { desc in
+            path!.command.optionsDescriber.keys[desc.key].map { "\(short)\($0)" }
+          }
+          
+          logger <<< (path?.command.subcommands.isEmpty ?? CommandPath.runningCommands.isEmpty || !throughCommand ? "" : " ")
+          logger <<< (sopts + opts).joined(separator: " ") <<< "\n"
+        case .zsh:
+          opts = path!.command.optionsDescriber.descriptions.map {
+            "\(symbol)\($0.key):\($0.value.usage.replacingOccurrences(of: ":", with: "\\:"))"
+          }
+          sopts = path!.command.optionsDescriber.descriptions.compactMap { desc in
+            path!.command.optionsDescriber.keys[desc.key].map {
+              "\(short)\($0):\(desc.value.usage.replacingOccurrences(of: ":", with: "\\:"))"
+            }
+          }
+          
+          logger <<< (path?.command.subcommands.isEmpty ?? CommandPath.runningCommands.isEmpty || !throughCommand ? "" : "\n")
+          logger <<< (sopts + opts).joined(separator: "\n") <<< "\n"
+        }
+      }
     case .options:
       guard path != nil else {
         break
       }
-      logger <<< path!.command.optionsDescriber.descriptions.keys.map { "--\($0)" }.joined(separator: " ") <<< "\n"
+      switch OptionsDecoder.optionsFormat {
+      case .format(let symbol, short: _):
+        switch options.shell {
+        case .bash:
+          logger <<< path!.command.optionsDescriber.descriptions.keys.map { "\(symbol)\($0)" }.joined(separator: " ") <<< "\n"
+        case .zsh:
+          logger <<< path!.command.optionsDescriber.descriptions.map {
+            "\(symbol)\($0.key):\($0.value.usage.replacingOccurrences(of: ":", with: "\\:"))"
+          }.joined(separator: "\n") <<< "\n"
+        }
+      }
     }
   }
 }
