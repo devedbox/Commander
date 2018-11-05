@@ -162,6 +162,24 @@ class CommandTests: XCTestCase {
     XCTAssertEqual(outputs, ""); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "help test test-args".split(separator: " ").set); outputs = ""
+    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander h"]))
+    XCTAssertEqual(outputs.split(separator: " ").set, "help test test-args".split(separator: " ").set); outputs = ""
+    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander he"]))
+    XCTAssertEqual(outputs.split(separator: " ").set, "help test test-args".split(separator: " ").set); outputs = ""
+    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander hel"]))
+    XCTAssertEqual(outputs.split(separator: " ").set, "help test test-args".split(separator: " ").set); outputs = ""
+    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander help"]))
+    XCTAssertEqual(outputs.split(separator: " ").set, "test test-args".split(separator: " ").set); outputs = ""
+    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander help "]))
+    XCTAssertEqual(outputs.split(separator: " ").set, "test test-args".split(separator: " ").set); outputs = ""
+    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander help t"]))
+    XCTAssertEqual(outputs.split(separator: " ").set, "test test-args".split(separator: " ").set); outputs = ""
+    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander help test"]))
+    XCTAssertEqual(outputs.split(separator: " ").set, "test-args".split(separator: " ").set); outputs = ""
+    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander help test-args"]))
+    XCTAssertEqual(outputs.split(separator: " ").set, "test".split(separator: " ").set); outputs = ""
+    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander help test test-args"]))
+    XCTAssertEqual(outputs.split(separator: " ").set, "".split(separator: " ").set); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander te"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "help test test-args".split(separator: " ").set); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander tes"]))
