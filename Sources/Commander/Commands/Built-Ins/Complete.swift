@@ -86,7 +86,7 @@ extension Complete.Generate {
       compadd $(\((CommandPath.runningCommanderPath!)) complete "$words")
     }
     
-    \(commander)
+    _\(commander)
     """
   }
 }
