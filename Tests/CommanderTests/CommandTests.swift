@@ -43,7 +43,7 @@ struct TestsCommand: CommandRepresentable {
     ]
     static var descriptions: [TestsCommand.Options.CodingKeys: OptionDescription] = [
       .target: .default(value: "Default", usage: "The target of the test command"),
-      .verbose: .default(value: false, usage: "verbose")
+      .verbose: .usage("verbose")
     ]
     let target: String
     let verbose: Bool
@@ -97,7 +97,7 @@ class CommandTests: XCTestCase {
   }
   
   func testCommand() {
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test", "--target", "The target"]))
+    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test", "--verbose", "--target", "The target"]))
     Commander().dispatch()
     XCTAssertEqual(dispatchFailure(), EXIT_FAILURE)
     
@@ -555,9 +555,8 @@ class CommandTests: XCTestCase {
   
   func testSubcommands() {
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test-args"]))
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test-args", "test"]))
-    
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test-args", "test", "--target", "The target"]))
+    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test-args", "test", "--verbose"]))
+    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test-args", "test", "-v", "--target", "The target"]))
     
     do {
       try Commander().dispatch(with: ["commander"])
