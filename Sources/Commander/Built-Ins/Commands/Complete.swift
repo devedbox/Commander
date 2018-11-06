@@ -143,7 +143,7 @@ internal struct Complete: CommandRepresentable {
     }
     
     if arguments.isSingle { // Consider a commander.
-      try List.main(.init(type: .command, shell: options.shell))
+      try List.main(.init(type: .command, help: true, shell: options.shell))
     } else { // Complete according to the last arg.
       let last = commands.last!
       
@@ -172,30 +172,40 @@ internal struct Complete: CommandRepresentable {
         switch last {
         case let arg where arg.hasPrefix(symbol):
           if
-            let commandPath = path,
+            case let commandPath? = path,
             commandPath.command.optionsDescriber.allCodingKeys.map({ "\(symbol)\($0)" }).contains(arg)
           {
             return
           }
           
-          listOptions = List.Options(type: .options, shell: options.shell)
+          if commands.dropLast().filter({ $0.hasPrefix(symbol) || $0.hasPrefix(short) }).isEmpty {
+            listOptions = List.Options(type: .options, help: true, shell: options.shell)
+          } else {
+            listOptions = List.Options(type: .options, help: false, shell: options.shell)
+          }
+          
           listOptions.arguments = Array(commands.dropLast())
         case let arg where arg.hasPrefix(short):
           if
-            let commandPath = path,
+            case let commandPath? = path,
             commandPath.command.optionsDescriber.keys.values.map({ "\(short)\($0)" }).contains(arg)
           {
             return
           }
           
-          listOptions = List.Options(type: .optionsWithShortKeys, shell: options.shell)
+          if commands.dropLast().filter({ $0.hasPrefix(symbol) || $0.hasPrefix(short) }).isEmpty {
+            listOptions = List.Options(type: .optionsWithShortKeys, help: true, shell: options.shell)
+          } else {
+            listOptions = List.Options(type: .optionsWithShortKeys, help: false, shell: options.shell)
+          }
+          
           listOptions.arguments = Array(commands.dropLast())
         default:
           guard commands.filter({ $0.hasPrefix(symbol) || $0.hasPrefix(short) }).isEmpty else {
             return
           }
           
-          listOptions = List.Options(type: .command, shell: options.shell)
+          listOptions = List.Options(type: .command, help: true, shell: options.shell)
           listOptions.arguments = commands
         }
         

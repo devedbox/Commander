@@ -218,8 +218,10 @@ class CommandTests: XCTestCase {
     XCTAssertEqual(outputs, ""); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test --target "]))
     XCTAssertEqual(outputs, ""); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test --target s"]))
-    XCTAssertEqual(outputs, ""); outputs = ""
+    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test --target -"]))
+    XCTAssertEqual(outputs.split(separator: " ").set, "-t -v --target --verbose".split(separator: " ").set); outputs = ""
+    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test --target --"]))
+    XCTAssertEqual(outputs.split(separator: " ").set, "--target --verbose".split(separator: " ").set); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test --help"]))
     XCTAssertEqual(outputs, ""); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test --help "]))

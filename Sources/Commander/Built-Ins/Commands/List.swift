@@ -38,17 +38,21 @@ internal struct List: CommandRepresentable {
     internal enum CodingKeys: String, CodingKeysRepresentable {
       case type
       case shell
+      case help
     }
     internal static var keys: [CodingKeys: Character] = [
       .type: "t",
-      .shell: "s"
+      .shell: "s",
+      .help: "h"
     ]
     internal static var descriptions: [CodingKeys: OptionDescription] = [
       .type: .usage("The type to list. Available types: 'command', 'options' and 'optionsS'"),
-      .shell: .default(value: "bash", usage: "The shell type to list. Available shell: 'bash', 'zsh'")
+      .shell: .default(value: "bash", usage: "The shell type to list. Available shell: 'bash', 'zsh'"),
+      .help: .default(value: true, usage: "Should list alongwith help options")
     ]
     
     internal let type: CommandType
+    internal let help: Bool
     internal let shell: Shell
   }
   
@@ -99,23 +103,29 @@ internal struct List: CommandRepresentable {
       
       throughCommand = true; fallthrough
     case .optionsWithShortKeys:
-      let opts: [String]
-      let sopts: [String]
+      var opts: [String]
+      var sopts: [String]
       
       switch OptionsDecoder.optionsFormat {
       case .format(let symbol, short: let short):
         switch options.shell {
         case .bash, .zsh:
-          opts = (path?.command.optionsDescriber.descriptions.map {
+          opts = path?.command.optionsDescriber.descriptions.map {
             "\(symbol)\($0.key)"
-          } ?? []) + [
-            "\(symbol)\((BuiltIn.help as! Help.Type).Options.CodingKeys.help)"
-          ]
-          sopts = (path?.command.optionsDescriber.descriptions.compactMap { desc in
+          } ?? []
+          
+          sopts = path?.command.optionsDescriber.descriptions.compactMap { desc in
             path!.command.optionsDescriber.keys[desc.key].map { "\(short)\($0)" }
-          } ?? []) + [
-            "\(short)\((BuiltIn.help as! Help.Type).Options.keys[.help]!)"
-          ]
+          } ?? []
+          
+          if options.help {
+            opts += [
+              "\(symbol)\((BuiltIn.help as! Help.Type).Options.CodingKeys.help)"
+            ]
+            sopts += [
+              "\(short)\((BuiltIn.help as! Help.Type).Options.keys[.help]!)"
+            ]
+          }
           
           logger <<< (path?.command.subcommands.isEmpty ?? CommandPath.runningCommands.isEmpty || !throughCommand ? "" : " ")
           logger <<< (sopts + opts).joined(separator: " ") <<< "\n"
@@ -140,11 +150,16 @@ internal struct List: CommandRepresentable {
       case .format(let symbol, short: _):
         switch options.shell {
         case .bash, .zsh:
-          let opts = (path?.command.optionsDescriber.descriptions.keys.map {
+          var opts = path?.command.optionsDescriber.descriptions.keys.map {
             "\(symbol)\($0)"
-          } ?? []) + [
-            "\(symbol)\((BuiltIn.help as! Help.Type).Options.CodingKeys.help)"
-          ]
+          } ?? []
+          
+          if options.help {
+            opts += [
+              "\(symbol)\((BuiltIn.help as! Help.Type).Options.CodingKeys.help)"
+            ]
+          }
+          
           logger <<< opts.joined(separator: " ") <<< "\n"
           /*
         case .zsh:
