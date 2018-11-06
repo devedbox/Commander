@@ -83,7 +83,9 @@ extension Complete.Generate {
     #compdef \(commander)
     
     _\(commander)() {
-      compadd $(\((CommandPath.runningCommanderPath!)) complete "$words")
+      local -a comps
+      comps=($(\((CommandPath.runningCommanderPath!)) complete "$words" | tr \"\\n\" \" \"))
+      compadd -a comps
     }
     
     _\(commander)
