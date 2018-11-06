@@ -159,7 +159,14 @@ internal struct Complete: CommandRepresentable {
       }
       
       switch OptionsDecoder.optionsFormat {
-      case .format(let symbol, short: let shortSymbol):
+      case .format(let symbol, short: let short):
+        if
+          arguments.contains("\(short)\((BuiltIn.help as! Help.Type).Options.keys[.help]!)")
+       || arguments.contains("\(symbol)\((BuiltIn.help as! Help.Type).Options.CodingKeys.help.rawValue)")
+        {
+          return
+        }
+        
         var listOptions: List.Options
         
         switch last {
@@ -173,10 +180,10 @@ internal struct Complete: CommandRepresentable {
           
           listOptions = List.Options(type: .options, shell: options.shell)
           listOptions.arguments = Array(commands.dropLast())
-        case let arg where arg.hasPrefix(shortSymbol):
+        case let arg where arg.hasPrefix(short):
           if
             let commandPath = path,
-            commandPath.command.optionsDescriber.keys.values.map({ "\(shortSymbol)\($0)" }).contains(arg)
+            commandPath.command.optionsDescriber.keys.values.map({ "\(short)\($0)" }).contains(arg)
           {
             return
           }
@@ -184,7 +191,7 @@ internal struct Complete: CommandRepresentable {
           listOptions = List.Options(type: .optionsWithShortKeys, shell: options.shell)
           listOptions.arguments = Array(commands.dropLast())
         default:
-          guard commands.filter({ $0.hasPrefix(symbol) || $0.hasPrefix(shortSymbol) }).isEmpty else {
+          guard commands.filter({ $0.hasPrefix(symbol) || $0.hasPrefix(short) }).isEmpty else {
             return
           }
           

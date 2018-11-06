@@ -99,13 +99,6 @@ internal struct List: CommandRepresentable {
       
       throughCommand = true; fallthrough
     case .optionsWithShortKeys:
-      guard path != nil else {
-        if throughCommand {
-          logger <<< "\n"
-        }
-        break
-      }
-      
       let opts: [String]
       let sopts: [String]
       
@@ -113,12 +106,16 @@ internal struct List: CommandRepresentable {
       case .format(let symbol, short: let short):
         switch options.shell {
         case .bash, .zsh:
-          opts = path!.command.optionsDescriber.descriptions.map {
+          opts = (path?.command.optionsDescriber.descriptions.map {
             "\(symbol)\($0.key)"
-          }
-          sopts = path!.command.optionsDescriber.descriptions.compactMap { desc in
+          } ?? []) + [
+            "\(symbol)\((BuiltIn.help as! Help.Type).Options.CodingKeys.help)"
+          ]
+          sopts = (path?.command.optionsDescriber.descriptions.compactMap { desc in
             path!.command.optionsDescriber.keys[desc.key].map { "\(short)\($0)" }
-          }
+          } ?? []) + [
+            "\(short)\((BuiltIn.help as! Help.Type).Options.keys[.help]!)"
+          ]
           
           logger <<< (path?.command.subcommands.isEmpty ?? CommandPath.runningCommands.isEmpty || !throughCommand ? "" : " ")
           logger <<< (sopts + opts).joined(separator: " ") <<< "\n"
@@ -139,14 +136,16 @@ internal struct List: CommandRepresentable {
         }
       }
     case .options:
-      guard path != nil else {
-        break
-      }
       switch OptionsDecoder.optionsFormat {
       case .format(let symbol, short: _):
         switch options.shell {
         case .bash, .zsh:
-          logger <<< path!.command.optionsDescriber.descriptions.keys.map { "\(symbol)\($0)" }.joined(separator: " ") <<< "\n"
+          let opts = (path?.command.optionsDescriber.descriptions.keys.map {
+            "\(symbol)\($0)"
+          } ?? []) + [
+            "\(symbol)\((BuiltIn.help as! Help.Type).Options.CodingKeys.help)"
+          ]
+          logger <<< opts.joined(separator: " ") <<< "\n"
           /*
         case .zsh:
           logger <<< path!.command.optionsDescriber.descriptions.map {
