@@ -96,9 +96,12 @@ internal struct Help: CommandRepresentable {
   /// The usage of the command.
   internal static var usage: String = "Prints the help message of the command. Usage: [[--help|-h][help COMMAND][COMMAND --help][COMMAND -h]]"
   /// Returns a bool value indicates if the given options raw value is 'help' option.
-  internal static func validate(options: [String]) -> Bool {
+  internal static func validate(options: [String]) throws -> Bool {
+    guard options.isSingle else {
+      throw CommanderError.helpExtraOptions(options: options)
+    }
+    
     if
-      options.count == 1,
       let option = options.last,
       option == Options.CodingKeys.help.rawValue
    || option == (Options.keys[.help]).map { String($0) }
@@ -109,15 +112,35 @@ internal struct Help: CommandRepresentable {
     return false
   }
   /// Try to validate and run the help command if the given options if valid help options.
-  internal static func resolve(_ options: [String], path: CommandPath) throws {
-    if
-      validate(options: options) == true,
-      validate(options: [path.command.symbol]) == false
-    {
-      self.path = path; defer { self.path = nil }
-      try main(.default(arguments: []))
-    } else {
-      throw CommanderError.unrecognizedOptions(options, path: path)
+  internal static func resolve(
+    _ options: [String],
+    path: CommandPath,
+    commandLineArgs: [String]) throws
+  {
+    switch OptionsDecoder.optionsFormat {
+    case .format(let symbol, short: let short):
+      var options = options; options += commandLineArgs.compactMap {
+        if let index = $0.endsIndex(matchs: symbol) ?? $0.endsIndex(matchs: short) {
+          return Optional.some(String($0[index...])).flatMap {
+            if $0 == Options.CodingKeys.help.rawValue || $0 == String(Options.keys[.help]!) {
+              return nil
+            } else {
+              return $0
+            }
+          }
+        }
+        return nil
+      }
+      
+      if
+        try validate(options: options) == true,
+        try validate(options: [path.command.symbol]) == false
+      {
+        self.path = path; defer { self.path = nil }
+        try main(.default(arguments: []))
+      } else {
+        throw CommanderError.unrecognizedOptions(options, path: path)
+      }
     }
   }
   /// The main function of the command.

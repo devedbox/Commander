@@ -293,9 +293,218 @@ class CommandTests: XCTestCase {
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test-args", "--help"]))
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test-args", "test", "--help"]))
     
-    XCTAssertTrue(Help.validate(options: ["h"]))
-    XCTAssertTrue(Help.validate(options: ["help"]))
-    XCTAssertFalse(Help.validate(options: ["h", "h"]))
+    XCTAssertTrue(try! Help.validate(options: ["h"]))
+    XCTAssertTrue(try! Help.validate(options: ["help"]))
+    
+    do {
+      _ = try Help.validate(options: ["h", "h"])
+      XCTFail()
+    } catch CommanderError.helpExtraOptions(options: let options) {
+      XCTAssertEqual(options.set, ["h", "h"])
+      XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      try Commander().dispatch(with: ["commander", "test", "-h", "-t"])
+      XCTFail()
+    } catch CommanderError.helpExtraOptions(options: let options) {
+      XCTAssertEqual(options.set, ["h", "t"])
+      XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      try Commander().dispatch(with: ["commander", "test", "-h", "--target"])
+      XCTFail()
+    } catch CommanderError.helpExtraOptions(options: let options) {
+      XCTAssertEqual(options.set, ["h", "target"])
+      XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      try Commander().dispatch(with: ["commander", "test", "-h", "-v"])
+      XCTFail()
+    } catch CommanderError.helpExtraOptions(options: let options) {
+      XCTAssertEqual(options.set, ["h", "v"])
+      XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      try Commander().dispatch(with: ["commander", "test", "-h", "--verbose"])
+      XCTFail()
+    } catch CommanderError.helpExtraOptions(options: let options) {
+      XCTAssertEqual(options.set, ["h", "verbose"])
+      XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      try Commander().dispatch(with: ["commander", "test", "-h", "-v", "-t"])
+      XCTFail()
+    } catch CommanderError.helpExtraOptions(options: let options) {
+      XCTAssertEqual(options.set, ["h", "v", "t"])
+      XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      try Commander().dispatch(with: ["commander", "test", "--help", "-t"])
+      XCTFail()
+    } catch CommanderError.helpExtraOptions(options: let options) {
+      XCTAssertEqual(options.set, ["help", "t"])
+      XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      try Commander().dispatch(with: ["commander", "test", "--help", "--target"])
+      XCTFail()
+    } catch CommanderError.helpExtraOptions(options: let options) {
+      XCTAssertEqual(options.set, ["help", "target"])
+      XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      try Commander().dispatch(with: ["commander", "test", "--help", "-v"])
+      XCTFail()
+    } catch CommanderError.helpExtraOptions(options: let options) {
+      XCTAssertEqual(options.set, ["help", "v"])
+      XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      try Commander().dispatch(with: ["commander", "test", "--help", "--verbose"])
+      XCTFail()
+    } catch CommanderError.helpExtraOptions(options: let options) {
+      XCTAssertEqual(options.set, ["help", "verbose"])
+      XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      try Commander().dispatch(with: ["commander", "test", "--help", "-v", "-t"])
+      XCTFail()
+    } catch CommanderError.helpExtraOptions(options: let options) {
+      XCTAssertEqual(options.set, ["help", "v", "t"])
+      XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      try Commander().dispatch(with: ["commander", "test", "-t", "-h"])
+      XCTFail()
+    } catch CommanderError.helpExtraOptions(options: let options) {
+      XCTAssertEqual(options.set, ["h", "t"])
+      XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      try Commander().dispatch(with: ["commander", "test", "--target", "-h"])
+      XCTFail()
+    } catch CommanderError.helpExtraOptions(options: let options) {
+      XCTAssertEqual(options.set, ["h", "target"])
+      XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      try Commander().dispatch(with: ["commander", "test", "-v", "-h"])
+      XCTFail()
+    } catch CommanderError.helpExtraOptions(options: let options) {
+      XCTAssertEqual(options.set, ["h", "v"])
+      XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      try Commander().dispatch(with: ["commander", "test", "--verbose", "-h"])
+      XCTFail()
+    } catch CommanderError.helpExtraOptions(options: let options) {
+      XCTAssertEqual(options.set, ["h", "verbose"])
+      XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      try Commander().dispatch(with: ["commander", "test", "-v", "-t", "-h"])
+      XCTFail()
+    } catch CommanderError.helpExtraOptions(options: let options) {
+      XCTAssertEqual(options.set, ["h", "v", "t"])
+      XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      try Commander().dispatch(with: ["commander", "test", "-t", "--help"])
+      XCTFail()
+    } catch CommanderError.helpExtraOptions(options: let options) {
+      XCTAssertEqual(options.set, ["help", "t"])
+      XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      try Commander().dispatch(with: ["commander", "test", "--target", "--help"])
+      XCTFail()
+    } catch CommanderError.helpExtraOptions(options: let options) {
+      XCTAssertEqual(options.set, ["help", "target"])
+      XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      try Commander().dispatch(with: ["commander", "test", "-v", "--help"])
+      XCTFail()
+    } catch CommanderError.helpExtraOptions(options: let options) {
+      XCTAssertEqual(options.set, ["help", "v"])
+      XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      try Commander().dispatch(with: ["commander", "test", "--verbose", "--help"])
+      XCTFail()
+    } catch CommanderError.helpExtraOptions(options: let options) {
+      XCTAssertEqual(options.set, ["help", "verbose"])
+      XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      try Commander().dispatch(with: ["commander", "test", "-t", "-v", "--help"])
+      XCTFail()
+    } catch CommanderError.helpExtraOptions(options: let options) {
+      XCTAssertEqual(options.set, ["help", "v", "t"])
+      XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
     
     do {
       try Commander().dispatch(with: ["commander", "help", "--help"])

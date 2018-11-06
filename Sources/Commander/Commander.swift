@@ -154,7 +154,7 @@ extension CommanderRepresentable {
       try commandPath?.run(with: Array(commands))
     } catch let dispatcher as CommandPath.Dispatcher {
       guard Options.self != Nothing.self else {
-        try Help.resolve(dispatcher.options, path: dispatcher.path)
+        try Help.resolve(dispatcher.options, path: dispatcher.path, commandLineArgs: commandLineArgs)
         return
       }
       
@@ -167,7 +167,7 @@ extension CommanderRepresentable {
       try dispatcher.path.command.run(with: dispatcher.decoded)
       
     } catch CommanderError.unrecognizedOptions(let options, path: let path) {
-      try Help.resolve(options, path: path)
+      try Help.resolve(options, path: path, commandLineArgs: commandLineArgs)
     } catch {
       throw error
     }
