@@ -38,7 +38,7 @@ internal struct List: CommandRepresentable {
     internal enum CodingKeys: String, CodingKeysRepresentable {
       case type
       case shell
-      case help
+      case help = "with-help"
     }
     internal static var keys: [CodingKeys: Character] = [
       .type: "t",
