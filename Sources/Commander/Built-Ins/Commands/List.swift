@@ -42,8 +42,7 @@ internal struct List: CommandRepresentable {
     }
     internal static var keys: [CodingKeys: Character] = [
       .type: "t",
-      .shell: "s",
-      .help: "h"
+      .shell: "s"
     ]
     internal static var descriptions: [CodingKeys: OptionDescription] = [
       .type: .usage("The type to list. Available types: 'command', 'options' and 'optionsS'"),
