@@ -64,7 +64,7 @@ extension CommanderRepresentable {
   }
   /// Returns all commands of commander with registered commands along with built-in commands.
   internal static var allCommands: [AnyCommandRepresentable.Type] {
-    return [Help.self] + commands
+    return [BuiltIn.help] + commands
   }
   /// Decoding the current command line arguments of `CommandLine.arguments` as the current command's
   /// options type and dispatch the command with the decoded options.
@@ -115,7 +115,7 @@ extension CommanderRepresentable {
     
     var commands = commandLineArgs.dropFirst()
     let symbol = commands.popFirst()
-    let allCommands = type(of: self).allCommands + [List.self, Complete.self]
+    let allCommands = type(of: self).allCommands + BuiltIn.commands
     
     let commandPath = allCommands.first {
       $0.symbol == symbol

@@ -44,8 +44,8 @@ internal struct List: CommandRepresentable {
       .shell: "s"
     ]
     internal static var descriptions: [CodingKeys: OptionDescription] = [
-      .type: .usage("The type to list"),
-      .shell: .default(value: "bash", usage: "The shell type to list. Available shell: bash, zsh")
+      .type: .usage("The type to list. Available types: 'command', 'options' and 'optionsS'"),
+      .shell: .default(value: "bash", usage: "The shell type to list. Available shell: 'bash', 'zsh'")
     ]
     
     internal let type: CommandType
