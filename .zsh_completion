@@ -1,9 +1,9 @@
-#compdef erpretail
+#compdef commander-sample
 
-_erpretail() {
+_commander-sample() {
   local -a comps
-  comps=($(erpretail complete "$words" | tr "\n" " "))
+  comps=($(commander-sample complete "$words" | tr "\n" " "))
   compadd -a comps
 }
 
-_erpretail
+_commander-sample
