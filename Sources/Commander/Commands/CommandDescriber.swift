@@ -25,6 +25,23 @@
 
 import Foundation
 
+// MARK: - CommandDescribable.
+
+public protocol CommandDescribable {
+  /// Returns the options type of the instance of `CommandDescribable`.
+  static var optionsDescriber: OptionsDescribable.Type { get }
+  /// Returns the children of the insrance of `CommandDescribable`.
+  static var children: [CommandDescribable.Type] { get }
+  /// The command symbol also name of the command.
+  static var symbol: String { get }
+  /// The human-readable usage description of the commands.
+  static var usage: String { get }
+  /// Is the describer top level.
+  static var isTopLevel: Bool { get }
+}
+
+// MARK: - Merging.
+
 extension String {
   internal func merging(_ other: String) -> String {
     var merging: String
@@ -41,6 +58,8 @@ extension String {
   }
 }
 
+// MARK: - CommandDescriber.
+
 internal struct CommandDescriber {
   private let path: String
   private let intents: Int
@@ -50,30 +69,18 @@ internal struct CommandDescriber {
     self.intents = intents
   }
   
-  internal func describe(commander usage: String, commands: [AnyCommandRepresentable.Type]) -> String {
-    let commandsSymbols = commands.map { ($0.symbol, $0.usage) }
+  internal func describe(_ command: CommandDescribable.Type) -> String {
+    let optionsFormat: (symbol: String, short: String)
     
-    let count = commandsSymbols.reduce(0) { max($0, $1.0.count) }
-    let alignment = String(repeating: " ", count: count)
+    switch OptionsDecoder.optionsFormat {
+    case .format(let symbol, short: let short):
+      optionsFormat = (symbol, short)
+    }
     
-    return """
-    Usage:
-    \(returns(0))
-    \(intents(1))$ \(path) COMMAND
-    \(returns(0))
-    \(intents(2))\(usage)
-    \(returns(0))
-    Commands:
-    \(returns(0))
-    \(commandsSymbols.map { intents(2) + $0.0.merging(alignment) + intents(1) + $0.1 }.joined(separator: "\n"))
-    """
-  }
-  
-  internal func describe(_ command: AnyCommandRepresentable.Type) -> String {
-    let subcommandSymbols = command.subcommands.map { ($0.symbol, $0.usage) }
+    let subcommandSymbols = command.children.map { ($0.symbol, $0.usage) }
     let optionsSymbols = command.optionsDescriber.descriptions.map { desc -> (String, String) in
       let shortKey = command.optionsDescriber.keys[desc.key]
-      let keyDesc = (shortKey.map { "-\($0), " } ?? "") + "--\(desc.key)"
+      let keyDesc = (shortKey.map { "\(optionsFormat.short)\($0), " } ?? "") + "\(optionsFormat.symbol)\(desc.key)"
       
       var usage = desc.value.usage
       if let defaultValue = desc.value.defaultValue {
@@ -82,7 +89,13 @@ internal struct CommandDescriber {
       }
       
       return (keyDesc, usage)
-    }
+      } + [
+        (
+          "\(optionsFormat.short)\(Help.Options.keys[.help]!), \(optionsFormat.symbol)\(Help.Options.CodingKeys.help.rawValue)",
+          Help.Options.descriptions[.help]!.usage
+        )
+    ]
+    
     let argumentsSymbols: [(String, String)] = command.optionsDescriber.isArgumentsResolvable == false ? [] : [
       ("[\(String(describing: command.optionsDescriber.argumentType))]", "\(path) \(command.symbol) [options] arg1 arg2 ...")
     ]
@@ -92,13 +105,15 @@ internal struct CommandDescriber {
     }
     let alignment = String(repeating: " ", count: count)
     
-    let subcommandsSummary = subcommandSymbols.isEmpty ? "" : " [SUBCOMMANDS]"
+    let subcommandsDesc = command.isTopLevel ? "[COMMAND]" : " [SUBCOMMAND]"
+    
+    let subcommandsSummary = subcommandSymbols.isEmpty ? "" : "\(subcommandsDesc)"
     let optionsSummary = optionsSymbols.isEmpty ? "" : " [OPTIONS]"
     let argumentsSummary = command.optionsDescriber.isArgumentsResolvable ? " [ARGUMENTS]" : ""
     
     let subcommandsLabel = subcommandSymbols.isEmpty ? "" : """
     \(returns(1))
-    \(intents(1))Subcommands:
+    \(intents(1))\(command.isTopLevel ? "Commands" : "Subcommands"):
     \(returns(0))
     """
     let optionsLabel = optionsSymbols.isEmpty ? "" : """
@@ -128,7 +143,7 @@ internal struct CommandDescriber {
     """
     
     return """
-    \(intents(0))Usage of '\(command.symbol)':
+    \(intents(0))Usage\(command.isTopLevel ? "" : " of '\(command.symbol)'"):
     \(returns(0))
     \(intents(1))$ \(path) \(command.symbol)\(subcommandsSummary)\(optionsSummary)\(argumentsSummary)\(returns(1))
     \(intents(2))\(command.usage)\(subcommandsOutputs)\(optionsOutputs)\(argumentsOutputs)

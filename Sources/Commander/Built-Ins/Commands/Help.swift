@@ -49,7 +49,9 @@ internal struct Help: CommandRepresentable {
     }
     internal static let keys: [Options.CodingKeys: Character] = [.help: "h"]
     /// Returns the description of the options.
-    internal static var descriptions: [Options.CodingKeys: OptionDescription] = [:]
+    internal static var descriptions: [Options.CodingKeys: OptionDescription] = [
+      .help: .usage("Prints the help message of the command. Usage: [[--help|-h][COMMAND --help][COMMAND -h]]")
+    ]
     
     internal let help: Bool?
     internal let intents: Int?
@@ -94,7 +96,7 @@ internal struct Help: CommandRepresentable {
   /// The command symbol.
   internal static var symbol: String = "help"
   /// The usage of the command.
-  internal static var usage: String = "Prints the help message of the command. Usage: [[--help|-h][help COMMAND][COMMAND --help][COMMAND -h]]"
+  internal static var usage: String = "Prints the help message of the command. Usage: [help [COMMANDS]]"
   /// Returns a bool value indicates if the given options raw value is 'help' option.
   internal static func validate(options: [String]) throws -> Bool {
     guard options.isSingle else {
@@ -151,10 +153,7 @@ internal struct Help: CommandRepresentable {
       if let command = self.path?.command {
         logger <<< CommandDescriber(path: path).describe(command) <<< "\n"
       } else {
-        logger <<< CommandDescriber(path: path).describe(
-            commander: CommandPath.runningCommanderUsage,
-            commands: CommandPath.runningCommands
-        ) <<< "\n"
+        logger <<< CommandDescriber(path: path).describe(CommandPath.runningCommander) <<< "\n"
         
         /* FIXME: Disable the subcommands' description for no prefered formats for now.
          print(prefix, commands, "\nDescriptions:", separator: "\n  ", terminator: "\n\n", to: &stdout)

@@ -32,7 +32,7 @@ public private(set) var logger: TextOutputStream!
 
 // MARK: - CommanderRepresentable.
 
-public protocol CommanderRepresentable: TextOutputStream {
+public protocol CommanderRepresentable: CommandDescribable, TextOutputStream {
   /// The associated type of `Options`.
   associatedtype Options: OptionsRepresentable = Nothing
   /// A closure of `(Error) -> Void` to handle the stderror.
@@ -41,8 +41,6 @@ public protocol CommanderRepresentable: TextOutputStream {
   static var outputHandler: ((String) -> Void)? { get }
   /// The registered available commands of the commander.
   static var commands: [AnyCommandRepresentable.Type] { get }
-  /// The human-readable usage description of the commands.
-  static var usage: String { get }
   
   /// Decoding the given command line argumants as the current command's options type and disatch the
   /// command with the decided options.
@@ -52,6 +50,20 @@ public protocol CommanderRepresentable: TextOutputStream {
 // MARK: - Dispatch.
 
 extension CommanderRepresentable {
+  /// Returns the options type of the command.
+  public static var optionsDescriber: OptionsDescribable.Type {
+    return Options.self
+  }
+  /// Returns the children of the insrance of `CommandDescribable`.
+  public static var children: [CommandDescribable.Type] {
+    return allCommands
+  }
+  /// The command symbol also name of the command.
+  public static var symbol: String { return "" }
+  /// Is the describer top level.
+  public static var isTopLevel: Bool {
+    return true
+  }
   /// Appends the given string to the stream.
   public mutating func write(_ string: String) {
     if type(of: self).outputHandler?(string) == nil {
@@ -98,6 +110,7 @@ extension CommanderRepresentable {
   /// command with the decided options.
   public func dispatch(with commandLineArgs: [String]) throws {
     defer {
+      CommandPath.runningCommander = nil // Clear the running commander.
       CommandPath.runningCommanderPath = nil // Clear the running path of commander.
       CommandPath.runningGlobalOptions = nil // Clear the running global options.
       CommandPath.runningCommanderUsage = nil // Clear the runnung commander usage.
@@ -109,6 +122,7 @@ extension CommanderRepresentable {
     let runningPath = commandLineArgs.first!
     
     logger = self
+    CommandPath.runningCommander = type(of: self)
     CommandPath.runningCommanderPath = runningPath
     CommandPath.runningCommanderUsage = type(of: self).usage
     CommandPath.runningCommands = type(of: self).allCommands

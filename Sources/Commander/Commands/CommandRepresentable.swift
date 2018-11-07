@@ -30,15 +30,9 @@
 /// A protocol represents the conforming types can run with the specific command line arguments.
 /// This protocol represents type-erased command types without associated types can be used as
 /// argument rather than generic constraints.
-public protocol AnyCommandRepresentable {
-  /// Returns the options type of the command.
-  static var optionsDescriber: OptionsDescribable.Type { get }
+public protocol AnyCommandRepresentable: CommandDescribable {
   /// Returns the subcommands of the command.
   static var subcommands: [AnyCommandRepresentable.Type] { get }
-  /// The command symbol also name of the command.
-  static var symbol: String { get }
-  /// The human-readable usage description of the commands.
-  static var usage: String { get }
   /// Run the commands with command line arguments.
   ///
   /// - Parameter commandLineArgs: The command line arguments with dropping command symbol.
@@ -50,8 +44,12 @@ public protocol AnyCommandRepresentable {
 }
 
 extension AnyCommandRepresentable {
+  /// Returns the children of the insrance of `CommandDescribable`.
+  public static var children: [CommandDescribable.Type] { return subcommands }
   /// Reutrns the subcommands of the command.
   public static var subcommands: [AnyCommandRepresentable.Type] { return [] }
+  /// Is the describer top level.
+  public static var isTopLevel: Bool { return false }
 }
 
 // MARK: - CommandRepresentable.

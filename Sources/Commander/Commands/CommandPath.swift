@@ -39,6 +39,8 @@ public struct CommandPath {
     internal let decoder: Decoder
   }
   
+  /// The running commander.
+  internal static var runningCommander: CommandDescribable.Type!
   /// The running command path.
   internal static var runningCommandPath: CommandPath!
   /// The running commander path of the commander.
