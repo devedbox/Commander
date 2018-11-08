@@ -61,10 +61,6 @@ extension CommanderRepresentable {
   /// Appends the given string to the stream.
   public mutating func write(_ string: String) {
     if type(of: self).outputHandler?(string) == nil {
-      guard string.isEmpty == false else {
-        return
-      }
-      
       var stdout = FileHandle.standardOutput; print(string, terminator: "", to: &stdout)
     }
   }
@@ -166,15 +162,23 @@ extension CommanderRepresentable {
         return
       }
       
-      let unrecognizedOptions = dispatcher.options.filter { Options.codingKey(for: $0) == nil }
+      let unrecognizedOptions = dispatcher.options.filter { Options.CodingKeys(rawValue: $0) == nil }
       guard unrecognizedOptions.isEmpty else {
-        throw CommanderError.unrecognizedOptions(unrecognizedOptions, path: dispatcher.path)
+        throw CommanderError.unrecognizedOptions(
+          unrecognizedOptions,
+          path: dispatcher.path,
+          underlyingError: nil
+        )
       }
       
       CommandPath.runningGlobalOptions = try Options(from: dispatcher.decoder)
       try dispatcher.path.command.run(with: dispatcher.decoded)
       
-    } catch CommanderError.unrecognizedOptions(let options, path: let path) {
+    } catch CommanderError.unrecognizedOptions(let options, path: let path, underlyingError: let error) {
+      if Set(Options.allCodingKeys).isSuperset(of: Set(options)) {
+        try error.map { throw $0 }
+      }
+      
       try Help.resolve(options, path: path, commandLineArgs: commandLineArgs)
     } catch {
       throw error

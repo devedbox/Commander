@@ -30,7 +30,7 @@ public enum CommanderError: Swift.Error, CustomStringConvertible {
   case emptyCommand
   case helpUnrecognizedCommands(commands: [String])
   case helpExtraOptions(options: [String])
-  case unrecognizedOptions([String], path: CommandPath)
+  case unrecognizedOptions([String], path: CommandPath, underlyingError: Swift.Error?)
   
   public var description: String {
     switch self {
@@ -42,7 +42,7 @@ public enum CommanderError: Swift.Error, CustomStringConvertible {
       return "Unrecognized command error: '\(commands.joined(separator: " "))'."
     case .helpExtraOptions(options: let options):
       return "Invalid help options format error: Expecting 'help' or 'h' alone but giving '\(options.joined(separator: " "))'."
-    case .unrecognizedOptions(let options, let path):
+    case .unrecognizedOptions(let options, let path, underlyingError: _):
       return "Unrecognized options for command '\(path.command.symbol)': '\(options.joined(separator: " "))'."
     }
   }

@@ -31,14 +31,18 @@ class MockCommander: CommanderRepresentable {
     struct Options: OptionsRepresentable {
       typealias GlobalOptions = MockCommander.Options
       enum CodingKeys: String, CodingKeysRepresentable {
+        case mockDir = "mock-dir"
         case target
       }
       static var keys: [TestsCommand.Options.CodingKeys : Character] = [
+        .mockDir: "C",
         .target: "T"
       ]
       static var descriptions: [TestsCommand.Options.CodingKeys: OptionDescription] = [
+        .mockDir: .usage("The mock dir"),
         .target: .default(value: "Default", usage: "The target of the test command")
       ]
+      let mockDir: String
       let target: String
     }
     
@@ -88,6 +92,7 @@ class MockCommander: CommanderRepresentable {
     ]
     
     static var descriptions: [MockCommander.Options.CodingKeys : OptionDescription] = [
+      .mockDir: .usage("The mock dir"),
       .verbose: .default(value: false, usage: "")
     ]
     
@@ -110,11 +115,14 @@ class GlobalOptionsTests: XCTestCase {
   ]
   
   func testGlobalOptions() {
-    XCTAssertNoThrow(try MockCommander().dispatch(with: ["commander", "test"]))
     XCTAssertNoThrow(try MockCommander().dispatch(with: ["commander", "test", "-C=path"]))
     XCTAssertNoThrow(try MockCommander().dispatch(with: ["commander", "test", "-C=path", "-v"]))
     XCTAssertNoThrow(try MockCommander().dispatch(with: ["commander", "test", "--mock-dir", "path"]))
     XCTAssertNoThrow(try MockCommander().dispatch(with: ["commander", "test", "--mock-dir", "path", "--verbose"]))
+    XCTAssertNoThrow(try MockCommander().dispatch(with: ["commander", "test-args", "-C=path"]))
+    XCTAssertNoThrow(try MockCommander().dispatch(with: ["commander", "test-args", "-C=path", "-v"]))
+    XCTAssertNoThrow(try MockCommander().dispatch(with: ["commander", "test-args", "--mock-dir", "path"]))
+    XCTAssertNoThrow(try MockCommander().dispatch(with: ["commander", "test-args", "--mock-dir", "path", "--verbose"]))
     
     do {
       try MockCommander().dispatch(with: ["commander", "test", "--verbose"])
@@ -127,13 +135,23 @@ class GlobalOptionsTests: XCTestCase {
     }
     
     do {
+      try MockCommander().dispatch(with: ["commander", "test-args", "--verbose"])
+      XCTFail()
+    } catch OptionsDecoder.Error.decodingError(DecodingError.keyNotFound(let key, let ctx)) {
+      XCTAssertEqual(key.stringValue, "mock-dir")
+      XCTAssertFalse(OptionsDecoder.Error.decodingError(DecodingError.keyNotFound(key, ctx)).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
       try MockCommander().dispatch(with: ["commander", "test", "-C=path", "--verbose", "-s", "-r"])
       XCTFail()
-    } catch CommanderError.unrecognizedOptions(let options, path: let path) {
+    } catch CommanderError.unrecognizedOptions(let options, path: let path, underlyingError: let error) {
       XCTAssertEqual(options.set, ["s", "r"])
       XCTAssertTrue(path.command == MockCommander.TestsCommand.self)
       XCTAssertEqual(path.paths.set, ["commander"])
-      XCTAssertFalse(CommanderError.unrecognizedOptions(options, path: path).description.isEmpty)
+      XCTAssertFalse(CommanderError.unrecognizedOptions(options, path: path, underlyingError: error).description.isEmpty)
     } catch {
       XCTFail()
     }

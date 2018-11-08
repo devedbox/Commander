@@ -725,10 +725,10 @@ class OptionsDecoderTests: XCTestCase {
     do {
       _ = try OptionsDecoder().decode(ComplexArgumentsOptions.self, from: ["-b", "Bool", "-vS=String", "-i=5"])
       XCTFail()
-    } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded, decoder: let decoder) {
+    } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded, decoder: let decoder, decodeError: let error) {
       XCTAssertTrue(true)
       XCTAssertEqual(options.set, ["v", "S"])
-      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options, decoded: decoded, decoder: decoder).description.isEmpty)
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options, decoded: decoded, decoder: decoder, decodeError: error).description.isEmpty)
     } catch {
       XCTFail()
     }
@@ -777,9 +777,9 @@ class OptionsDecoderTests: XCTestCase {
     do {
       _ = try OptionsDecoder().decode(KeyedOptions.self, from: ["--dict", "key1=val1,key2=val2", "-d"])
       XCTFail()
-    } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded, decoder: let decoder) {
+    } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded, decoder: let decoder, decodeError: let error) {
       XCTAssertEqual(Set(options), ["d"])
-      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options, decoded: decoded, decoder: decoder).description.isEmpty)
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options, decoded: decoded, decoder: decoder, decodeError: error).description.isEmpty)
     } catch {
       XCTFail()
     }

@@ -134,7 +134,7 @@ extension OptionsDecoder {
     case decodingError(DecodingError)
     case invalidKeyValuePairs(pairs: [String])
     case unrecognizedArguments([Any])
-    case unrecognizedOptions([String], decoded: Decodable?, decoder: Decoder?)
+    case unrecognizedOptions([String], decoded: Decodable?, decoder: Decoder?, decodeError: Swift.Error?)
     case unresolvableArguments
     case unexpectedEndsOfOptions(markedArgs: [String])
     
@@ -155,7 +155,7 @@ extension OptionsDecoder {
         return "Invalid key-value pairs given: \(pairs.joined(separator: " "))."
       case .unrecognizedArguments(let args):
         return "Unrecognized arguments '\(args.map { String(describing: $0) }.joined(separator: " "))'."
-      case .unrecognizedOptions(let options, decoded: _, decoder: _):
+      case .unrecognizedOptions(let options, decoded: _, decoder: _, decodeError: _):
         return "Unrecognized options '\(options.joined(separator: " "))'."
       case .unresolvableArguments:
         return "The arguments can not be resolved."
@@ -458,7 +458,7 @@ public final class OptionsDecoder {
         let keyValuePairs = key.split(separator: splitter, maxSplits: 1)
         
         if short, let keyVal = keyValuePairs.first.map({ String($0) }), !keyVal.isSingle {
-          throw Error.unrecognizedOptions(keyVal.map { String($0) }, decoded: nil, decoder: nil)
+          throw Error.unrecognizedOptions(keyVal.map { String($0) }, decoded: nil, decoder: nil, decodeError: nil)
         }
         
         advance(with: String(keyValuePairs.first!))
@@ -551,7 +551,19 @@ public final class OptionsDecoder {
     }
     
     guard unrecognizedOptions?.isEmpty ?? true else {
-      throw OptionsDecoder.Error.unrecognizedOptions(unrecognizedOptions!, decoded: try? decoder.decode(as: type), decoder: decoder)
+      var decoded: T?
+      var decodeError: Swift.Error?
+      do {
+        decoded = try decoder.decode(as: type)
+      } catch {
+        decodeError = error
+      }
+      throw OptionsDecoder.Error.unrecognizedOptions(
+        unrecognizedOptions!,
+        decoded: decoded,
+        decoder: decoder,
+        decodeError: decodeError
+      )
     }
     
     var decoded = try decoder.decode(as: type)

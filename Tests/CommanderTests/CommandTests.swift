@@ -484,10 +484,10 @@ class CommandTests: XCTestCase {
     do {
       try Commander().dispatch(with: ["commander", "help", "--help"])
       XCTFail()
-    } catch CommanderError.unrecognizedOptions(let options, path: let path) {
+    } catch CommanderError.unrecognizedOptions(let options, path: let path, underlyingError: let error) {
       XCTAssertTrue(true)
       XCTAssertEqual(options, ["help"])
-      XCTAssertFalse(CommanderError.unrecognizedOptions(options, path: path).description.isEmpty)
+      XCTAssertFalse(CommanderError.unrecognizedOptions(options, path: path, underlyingError: error).description.isEmpty)
     } catch {
       XCTFail()
     }
@@ -495,10 +495,10 @@ class CommandTests: XCTestCase {
     do {
       try Commander().dispatch(with: ["commander", "help", "-h"])
       XCTFail()
-    } catch CommanderError.unrecognizedOptions(let options, path: let path) {
+    } catch CommanderError.unrecognizedOptions(let options, path: let path, underlyingError: let error) {
       XCTAssertTrue(true)
       XCTAssertEqual(options, ["h"])
-      XCTAssertFalse(CommanderError.unrecognizedOptions(options, path: path).description.isEmpty)
+      XCTAssertFalse(CommanderError.unrecognizedOptions(options, path: path, underlyingError: error).description.isEmpty)
     } catch {
       XCTFail()
     }

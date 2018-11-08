@@ -74,7 +74,7 @@ internal struct Help: CommandRepresentable {
         throw OptionsDecoder.Error.unrecognizedOptions(options.map {
           let index = OptionsDecoder.optionsFormat.index(of: $0)
           return String($0[index!...])
-        }, decoded: nil, decoder: nil)
+        }, decoded: nil, decoder: nil, decodeError: nil)
       }
       
       return try OptionsDecoder().decode(self, from: commandLineArgs)
@@ -117,7 +117,7 @@ internal struct Help: CommandRepresentable {
     var options = options; options += commandLineArgs.compactMap {
       if let index = OptionsDecoder.optionsFormat.index(of: $0) {
         return Optional.some(String($0[index...])).flatMap {
-          if $0 == Options.CodingKeys.help.rawValue || $0 == String(Options.keys[.help]!) {
+          if $0 == Options.CodingKeys.help.rawValue || $0 == String(Options.keys[.help]!) || options.contains($0) {
             return nil
           } else {
             return $0
@@ -134,7 +134,7 @@ internal struct Help: CommandRepresentable {
       self.path = path; defer { self.path = nil }
       try main(.default(arguments: []))
     } else {
-      throw CommanderError.unrecognizedOptions(options, path: path)
+      throw CommanderError.unrecognizedOptions(options, path: path, underlyingError: nil)
     }
   }
   /// The main function of the command.

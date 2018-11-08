@@ -102,9 +102,9 @@ public struct CommandPath {
       
       do {
         try command.run(with: commandLineArgs)
-      } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: nil, decoder: _) {
-        throw CommanderError.unrecognizedOptions(options, path: self)
-      } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded?, decoder: let decoder?) {
+      } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: nil, decoder: _, decodeError: let error) {
+        throw CommanderError.unrecognizedOptions(options, path: self, underlyingError: error)
+      } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded?, decoder: let decoder?, decodeError: _) {
         throw Dispatcher(path: self, options: options, decoded: decoded, decoder: decoder)
       } catch {
         throw error

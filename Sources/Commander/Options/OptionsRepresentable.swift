@@ -113,7 +113,7 @@ extension CodingKeysRepresentable {
   /// initializer. This initializer works with any type, and uses the custom
   /// `description` property for types that conform to `CustomStringConvertible`.
   public var description: String {
-    return stringValue + (intValue.map { " Index - \($0)" } ?? "")
+    return stringValue // + (intValue.map { " Index - \($0)" } ?? "")
   }
 }
 
@@ -204,24 +204,6 @@ extension OptionsRepresentable {
   public var arguments: [ArgumentsResolver.Argument] {
     get { return _ArgumentsStorage[AnyOptions(options: self)] as? [ArgumentsResolver.Argument] ?? [] }
     set { _ArgumentsStorage[AnyOptions(options: self)] = newValue }
-  }
-}
-
-extension OptionsRepresentable {
-  /// Returns the coding key of the options with the given key.
-  public static func codingKey(for optionKey: String) -> CodingKeys? {
-    if let key = CodingKeys(rawValue: optionKey) {
-      return key
-    }
-    
-    if
-      optionKey.isSingle,
-      let key = (keys as [CodingKeys: Character]).first(where: { $0.value == optionKey.first })
-    {
-      return key.key
-    }
-    
-    return nil
   }
 }
 
