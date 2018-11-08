@@ -344,6 +344,9 @@ class OptionsDecoderTests: XCTestCase {
     array = [[]]
     array.lastAppend(0)
     XCTAssertEqual([0], array.last)
+    
+    XCTAssertEqual(OptionsDecoder._Decoder._Key(index: 1).description, "Index 1 Index - 1")
+    XCTAssertEqual(OptionsDecoder._Decoder._Key(intValue: 1)!.description, "1 Index - 1")
   }
   
   func testDecodeContainers() {
