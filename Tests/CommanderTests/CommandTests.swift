@@ -129,6 +129,8 @@ class CommandTests: XCTestCase {
     
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "generate", "--shell=bash"]))
     XCTAssertEqual(outputs.isEmpty, false); outputs = ""
+    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "generate", "--shell=zsh"]))
+    XCTAssertEqual(outputs.isEmpty, false); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete"]))
     XCTAssertEqual(outputs, ""); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", ""]))
