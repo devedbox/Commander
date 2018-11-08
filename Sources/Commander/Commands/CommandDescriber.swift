@@ -27,7 +27,7 @@ import Foundation
 
 // MARK: - CommandDescribable.
 
-public protocol CommandDescribable {
+public protocol CommandDescribable: ShellCompletable {
   /// Returns the options type of the instance of `CommandDescribable`.
   static var optionsDescriber: OptionsDescribable.Type { get }
   /// Returns the children of the insrance of `CommandDescribable`.
@@ -38,6 +38,53 @@ public protocol CommandDescribable {
   static var usage: String { get }
   /// Is the describer top level.
   static var isTopLevel: Bool { get }
+}
+
+// MARK: - ShellCompletable.
+
+extension CommandDescribable {
+  /// Returns the completions list for the specific option key.
+  ///
+  /// - Parameter key: The key to be completed.
+  /// - Returns: Returns the completion list for the given key.
+  public static func completions(for key: String) -> [String] {
+    let optionsf = {
+      optionsDescriber.descriptions.map {
+        OptionsDecoder.optionsFormat.symbol + $0.key
+      }
+    }
+    
+    let shortOptionsf = {
+      optionsDescriber.keys.map {
+        OptionsDecoder.optionsFormat.shortSymbol + String($0.value)
+      }
+    }
+    
+    let commandsf = {
+      children.map {
+        $0.symbol
+      }
+    }
+    
+    switch key {
+    case let arg where arg.hasPrefix(OptionsDecoder.optionsFormat.symbol):
+      let options = optionsf()
+      if options.contains(arg) {
+        return optionsDescriber.completions(for: arg)
+      } else {
+        return options
+      }
+    case let arg where arg.hasPrefix(OptionsDecoder.optionsFormat.shortSymbol):
+      let shortOptions = shortOptionsf()
+      if shortOptions.contains(arg) {
+        return optionsDescriber.completions(for: arg)
+      } else {
+        return shortOptions + optionsf()
+      }
+    default:
+      return optionsf() + shortOptionsf() + commandsf()
+    }
+  }
 }
 
 // MARK: - Merging.
@@ -89,12 +136,7 @@ internal struct CommandDescriber {
       }
       
       return (keyDesc, usage)
-      } + [
-        (
-          "\(optionsFormat.short)\(Help.Options.keys[.help]!), \(optionsFormat.symbol)\(Help.Options.CodingKeys.help.rawValue)",
-          Help.Options.descriptions[.help]!.usage
-        )
-    ]
+    }
     
     let argumentsSymbols: [(String, String)] = command.optionsDescriber.isArgumentsResolvable == false ? [] : [
       ("[\(String(describing: command.optionsDescriber.argumentType))]", "\(path) \(command.symbol) [options] arg1 arg2 ...")

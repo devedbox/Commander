@@ -82,7 +82,7 @@ public struct Nothing: Nothingness {
 
 /// A protocol represents the conforming types can describe the options of commands by getting
 /// the `keys`, `descriptions` and `argumentType` of that options.
-public protocol OptionsDescribable: Decodable {
+public protocol OptionsDescribable: Decodable, ShellCompletable {
   /// The short keys of the options' coding keys.
   static var keys: [String: Character] { get }
   /// Returns the options description list.
@@ -163,17 +163,27 @@ extension OptionsRepresentable {
   }
   /// The short keys of the options' coding keys.
   public static var keys: [String: Character] {
-    let selfKeys = keys.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value } as [String: Character]
-    let globalKeys = GlobalOptions.keys.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value } as [String: Character]
+    let skeys = keys.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value } as [String: Character]
+    let gkeys = GlobalOptions.keys.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value } as [String: Character]
+    let hkeys = Help.Options.keys.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value } as [String: Character]
     
-    return globalKeys.merging(selfKeys) { current, _ in current }
+    return gkeys.merging(skeys) {
+      current, _ in current
+    }.merging(hkeys) {
+      current, _ in current
+    }
   }
   /// Returns the options description list.
   public static var descriptions: [String: OptionDescription] {
-    let selfDescriptions = self.descriptions.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value }
-    let globalDescriptions = GlobalOptions.descriptions.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value }
+    let sdescs = self.descriptions.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value }
+    let gdescs = GlobalOptions.descriptions.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value }
+    let hdescs = Help.Options.descriptions.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value }
     
-    return globalDescriptions.merging(selfDescriptions) { current, _ in current }
+    return gdescs.merging(sdescs) {
+      current, _ in current
+    }.merging(hdescs) {
+      current, _ in current
+    }
   }
   /// Returns the type of the argument.
   public static var argumentType: Decodable.Type {

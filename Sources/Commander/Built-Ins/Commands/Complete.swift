@@ -122,95 +122,149 @@ internal struct Complete: CommandRepresentable {
     }
     
     let arguments = options.arguments.last!.split(separator: " ").map { String($0) }
-    let commands = Array(arguments.dropFirst())
-    var path: CommandPath?
-    
-    if
-      let root = commands.first,
-      let command = CommandPath.runningCommands.first(where: { $0.symbol == root })
-    {
-      path = try CommandPath(
-        running: command,
-        at: CommandPath.runningCommanderPath
-      ).run(
-        with: Array(commands.dropFirst()),
-        ignoresExecution: true
-      )
-    }
     
     guard arguments.isEmpty == false else {
       return
     }
     
-    if arguments.isSingle { // Consider a commander.
-      try List.main(.init(type: .command, help: true, shell: options.shell))
-    } else { // Complete according to the last arg.
-      let last = commands.last!
+    let commands = Array(arguments.dropFirst())
+    
+    guard
+      commands.isEmpty == false,
+      let command = CommandPath.runningCommands.first(where: { $0.symbol == commands.first! })
+    else {
+      logger <<< CommandPath.runningCommander.completions(for: "").joined(separator: " ") <<< "\n"
+      return
+    }
+    
+    // Make an exception for 'help' command.
+    if commands.first == Help.symbol {
+      let args = Array(commands.dropFirst())
       
-      // Make an exception for 'help' command.
-      if commands.first == Help.symbol {
-        let args = Array(commands.dropFirst())
-        
-        logger <<< CommandPath.runningCommands.compactMap {
-            !(args.contains($0.symbol) || $0.symbol == Help.symbol) ? $0.symbol : nil
+      logger <<< CommandPath.runningCommands.compactMap {
+        !(args.contains($0.symbol) || $0.symbol == Help.symbol) ? $0.symbol : nil
         }.joined(separator: " ") <<< "\n"
-        
-        return
-      }
       
-      switch OptionsDecoder.optionsFormat {
-      case .format(let symbol, short: let short):
-        if
-          arguments.contains("\(short)\((BuiltIn.help as! Help.Type).Options.keys[.help]!)")
-       || arguments.contains("\(symbol)\((BuiltIn.help as! Help.Type).Options.CodingKeys.help.rawValue)")
-        {
-          return
-        }
-        
-        var listOptions: List.Options
-        
-        switch last {
-        case let arg where arg.hasPrefix(symbol):
-          if
-            case let commandPath? = path,
-            commandPath.command.optionsDescriber.allCodingKeys.map({ "\(symbol)\($0)" }).contains(arg)
-          {
-            return
-          }
-          
-          if commands.dropLast().filter({ $0.hasPrefix(symbol) || $0.hasPrefix(short) }).isEmpty {
-            listOptions = List.Options(type: .options, help: true, shell: options.shell)
-          } else {
-            listOptions = List.Options(type: .options, help: false, shell: options.shell)
-          }
-          
-          listOptions.arguments = Array(commands.dropLast())
-        case let arg where arg.hasPrefix(short):
-          if
-            case let commandPath? = path,
-            commandPath.command.optionsDescriber.keys.values.map({ "\(short)\($0)" }).contains(arg)
-          {
-            return
-          }
-          
-          if commands.dropLast().filter({ $0.hasPrefix(symbol) || $0.hasPrefix(short) }).isEmpty {
-            listOptions = List.Options(type: .optionsWithShortKeys, help: true, shell: options.shell)
-          } else {
-            listOptions = List.Options(type: .optionsWithShortKeys, help: false, shell: options.shell)
-          }
-          
-          listOptions.arguments = Array(commands.dropLast())
-        default:
-          guard commands.filter({ $0.hasPrefix(symbol) || $0.hasPrefix(short) }).isEmpty else {
-            return
-          }
-          
-          listOptions = List.Options(type: .command, help: true, shell: options.shell)
-          listOptions.arguments = commands
-        }
-        
-        try List.main(listOptions)
+      return
+    }
+    
+    let help = OptionsDecoder.optionsFormat.symbol + Help.Options.CodingKeys.help.rawValue
+    let h = OptionsDecoder.optionsFormat.shortSymbol + String(Help.Options.keys[.help]!)
+    
+    if
+      arguments.contains(help)
+   || arguments.contains(h)
+    {
+      return
+    }
+    
+    if
+      !commands.last!.hasPrefix(OptionsDecoder.optionsFormat.symbol),
+      !commands.last!.hasPrefix(OptionsDecoder.optionsFormat.shortSymbol),
+      !commands.filter({ $0.hasPrefix(OptionsDecoder.optionsFormat.symbol) || $0.hasPrefix(OptionsDecoder.optionsFormat.shortSymbol) }).isEmpty
+    {
+      return
+    }
+    
+    let path = try CommandPath(
+      running: command,
+      at: CommandPath.runningCommanderPath
+    ).run(
+      with: Array(commands.dropFirst()),
+      ignoresExecution: true
+    )
+    
+    var completions = path.command.completions(for: commands.last!)
+    
+    if !commands.filter({ $0.hasPrefix(OptionsDecoder.optionsFormat.symbol) || $0.hasPrefix(OptionsDecoder.optionsFormat.shortSymbol) }).isEmpty {
+      completions = completions.filter {
+        !($0 == help || $0 == h)
       }
     }
+    
+    logger <<< completions.joined(separator: " ") <<< "\n"
+//
+//    return
+//
+//    guard arguments.isEmpty == false else {
+//      return
+//    }
+//
+//    if arguments.isSingle { // Consider a commander.
+//      logger <<< CommandPath.runningCommander.completions(for: "").joined(separator: " ") <<< "\n"
+//    } else { // Complete according to the last arg.
+//      let last = commands.last!
+//
+//      // Make an exception for 'help' command.
+//      if commands.first == Help.symbol {
+//        let args = Array(commands.dropFirst())
+//
+//        logger <<< CommandPath.runningCommands.compactMap {
+//            !(args.contains($0.symbol) || $0.symbol == Help.symbol) ? $0.symbol : nil
+//        }.joined(separator: " ") <<< "\n"
+//
+//        return
+//      }
+//
+//      switch OptionsDecoder.optionsFormat {
+//      case .format(let symbol, short: let short):
+//        if
+//          arguments.contains("\(short)\(Help.Options.keys[.help]!)")
+//       || arguments.contains("\(symbol)\(Help.Options.CodingKeys.help.rawValue)")
+//        {
+//          return
+//        }
+//
+//        _ = path.map {
+//          logger <<< $0.command.completions(for: last).joined(separator: " ") <<< "\n"
+//        }
+//
+//        return
+//
+//        var listOptions: List.Options
+//
+//        switch last {
+//        case let arg where arg.hasPrefix(symbol):
+//          if
+//            case let commandPath? = path,
+//            commandPath.command.optionsDescriber.allCodingKeys.map({ "\(symbol)\($0)" }).contains(arg)
+//          {
+//            return
+//          }
+//
+//          if commands.dropLast().filter({ $0.hasPrefix(symbol) || $0.hasPrefix(short) }).isEmpty {
+//            listOptions = List.Options(type: .options, help: true, shell: options.shell)
+//          } else {
+//            listOptions = List.Options(type: .options, help: false, shell: options.shell)
+//          }
+//
+//          listOptions.arguments = Array(commands.dropLast())
+//        case let arg where arg.hasPrefix(short):
+//          if
+//            case let commandPath? = path,
+//            commandPath.command.optionsDescriber.keys.values.map({ "\(short)\($0)" }).contains(arg)
+//          {
+//            return
+//          }
+//
+//          if commands.dropLast().filter({ $0.hasPrefix(symbol) || $0.hasPrefix(short) }).isEmpty {
+//            listOptions = List.Options(type: .optionsWithShortKeys, help: true, shell: options.shell)
+//          } else {
+//            listOptions = List.Options(type: .optionsWithShortKeys, help: false, shell: options.shell)
+//          }
+//
+//          listOptions.arguments = Array(commands.dropLast())
+//        default:
+//          guard commands.filter({ $0.hasPrefix(symbol) || $0.hasPrefix(short) }).isEmpty else {
+//            return
+//          }
+//
+//          listOptions = List.Options(type: .command, help: true, shell: options.shell)
+//          listOptions.arguments = commands
+//        }
+//
+//        try List.main(listOptions)
+//      }
+//    }
   }
 }

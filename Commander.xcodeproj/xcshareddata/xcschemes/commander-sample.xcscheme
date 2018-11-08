@@ -65,7 +65,7 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "help"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "list"
@@ -133,11 +133,11 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "complete"
-            isEnabled = "NO">
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "&quot;commander-sample set-args --add-args -&quot;"
-            isEnabled = "NO">
+            argument = "&quot;commander-sample&quot;"
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-s=zsh"

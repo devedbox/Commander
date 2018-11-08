@@ -43,6 +43,8 @@ public protocol AnyCommandRepresentable: CommandDescribable {
   static func run(with options: Any) throws
 }
 
+// MARK: - CommandDescribable.
+
 extension AnyCommandRepresentable {
   /// Returns the children of the insrance of `CommandDescribable`.
   public static var children: [CommandDescribable.Type] { return subcommands }

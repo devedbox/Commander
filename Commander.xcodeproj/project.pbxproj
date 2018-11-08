@@ -33,6 +33,7 @@
 		DC1DF603216F6357002EB271 /* CommandPathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC1DF602216F6357002EB271 /* CommandPathTests.swift */; };
 		DC467576218BF18300F26301 /* List.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC467575218BF18300F26301 /* List.swift */; };
 		DC71F3212170E774002DA345 /* GlobalOptionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC71F3202170E774002DA345 /* GlobalOptionsTests.swift */; };
+		DC7CA8F221943E5A00D7969E /* ShellCompletable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC7CA8F121943E5A00D7969E /* ShellCompletable.swift */; };
 		DCA3B895218C416600888E2F /* Complete.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCA3B894218C416600888E2F /* Complete.swift */; };
 		DCA3B89821903C8C00888E2F /* Shell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCA3B89721903C8C00888E2F /* Shell.swift */; };
 		DCA3B8BE21917C5A00888E2F /* BuiltIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCA3B8BD21917C5A00888E2F /* BuiltIn.swift */; };
@@ -88,6 +89,7 @@
 		DC1DF602216F6357002EB271 /* CommandPathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandPathTests.swift; sourceTree = "<group>"; };
 		DC467575218BF18300F26301 /* List.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = List.swift; sourceTree = "<group>"; };
 		DC71F3202170E774002DA345 /* GlobalOptionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalOptionsTests.swift; sourceTree = "<group>"; };
+		DC7CA8F121943E5A00D7969E /* ShellCompletable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellCompletable.swift; sourceTree = "<group>"; };
 		DCA3B894218C416600888E2F /* Complete.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Complete.swift; sourceTree = "<group>"; };
 		DCA3B89721903C8C00888E2F /* Shell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shell.swift; sourceTree = "<group>"; };
 		DCA3B8BD21917C5A00888E2F /* BuiltIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuiltIn.swift; sourceTree = "<group>"; };
@@ -151,19 +153,19 @@
 		DC1DF5F9216DF713002EB271 /* Built-Ins */ = {
 			isa = PBXGroup;
 			children = (
-				DCA3B89621903C7B00888E2F /* Types */,
+				DCA3B8BD21917C5A00888E2F /* BuiltIn.swift */,
 				DCA3B8BF21917E9D00888E2F /* Commands */,
 			);
 			path = "Built-Ins";
 			sourceTree = "<group>";
 		};
-		DCA3B89621903C7B00888E2F /* Types */ = {
+		DC7CA8F021943E1B00D7969E /* Shell */ = {
 			isa = PBXGroup;
 			children = (
 				DCA3B89721903C8C00888E2F /* Shell.swift */,
-				DCA3B8BD21917C5A00888E2F /* BuiltIn.swift */,
+				DC7CA8F121943E5A00D7969E /* ShellCompletable.swift */,
 			);
-			path = Types;
+			path = Shell;
 			sourceTree = "<group>";
 		};
 		DCA3B8BF21917E9D00888E2F /* Commands */ = {
@@ -182,6 +184,7 @@
 				DC0B9BA22167457500C87253 /* misc.swift */,
 				OBJ_13 /* Error.swift */,
 				OBJ_11 /* Commander.swift */,
+				DC7CA8F021943E1B00D7969E /* Shell */,
 				DC1DF5F9216DF713002EB271 /* Built-Ins */,
 				DC1DF5F7216DF6D5002EB271 /* Options */,
 				DC1DF5F8216DF6ED002EB271 /* Commands */,
@@ -374,6 +377,7 @@
 				OBJ_46 /* CommandRepresentable.swift in Sources */,
 				DCA3B89821903C8C00888E2F /* Shell.swift in Sources */,
 				DC0B9B9B216347F000C87253 /* OptionsDecoder.swift in Sources */,
+				DC7CA8F221943E5A00D7969E /* ShellCompletable.swift in Sources */,
 				OBJ_50 /* OptionsRepresentable.swift in Sources */,
 				DC1DF5FD216DF777002EB271 /* CommandDescriber.swift in Sources */,
 				DCA3B8BE21917C5A00888E2F /* BuiltIn.swift in Sources */,

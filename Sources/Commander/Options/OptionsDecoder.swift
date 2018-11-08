@@ -172,6 +172,21 @@ extension OptionsDecoder {
   /// The options parsing splitter format.
   public enum OptionsFormat {
     case format(String, short: String)
+    
+    /// Returns the symbol for options.
+    public var symbol: String {
+      switch self {
+      case .format(let symbol, short: _):
+        return symbol
+      }
+    }
+    /// Returns the short symbol for options.
+    public var shortSymbol: String {
+      switch self {
+      case .format(_, short: let short):
+        return short
+      }
+    }
   }
 }
 
