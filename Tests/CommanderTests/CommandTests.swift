@@ -312,7 +312,7 @@ class CommandTests: XCTestCase {
       try Commander().dispatch(with: ["commander", "test", "-h", "-t"])
       XCTFail()
     } catch CommanderError.helpExtraOptions(options: let options) {
-      XCTAssertEqual(options.set, ["h", "t"])
+      XCTAssertEqual(options.set, ["help", "t"])
       XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
     } catch {
       XCTFail()
@@ -322,7 +322,7 @@ class CommandTests: XCTestCase {
       try Commander().dispatch(with: ["commander", "test", "-h", "--target"])
       XCTFail()
     } catch CommanderError.helpExtraOptions(options: let options) {
-      XCTAssertEqual(options.set, ["h", "target"])
+      XCTAssertEqual(options.set, ["help", "target"])
       XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
     } catch {
       XCTFail()
@@ -332,7 +332,7 @@ class CommandTests: XCTestCase {
       try Commander().dispatch(with: ["commander", "test", "-h", "-v"])
       XCTFail()
     } catch CommanderError.helpExtraOptions(options: let options) {
-      XCTAssertEqual(options.set, ["h", "v"])
+      XCTAssertEqual(options.set, ["help", "v"])
       XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
     } catch {
       XCTFail()
@@ -342,7 +342,7 @@ class CommandTests: XCTestCase {
       try Commander().dispatch(with: ["commander", "test", "-h", "--verbose"])
       XCTFail()
     } catch CommanderError.helpExtraOptions(options: let options) {
-      XCTAssertEqual(options.set, ["h", "verbose"])
+      XCTAssertEqual(options.set, ["help", "verbose"])
       XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
     } catch {
       XCTFail()
@@ -352,7 +352,7 @@ class CommandTests: XCTestCase {
       try Commander().dispatch(with: ["commander", "test", "-h", "-v", "-t"])
       XCTFail()
     } catch CommanderError.helpExtraOptions(options: let options) {
-      XCTAssertEqual(options.set, ["h", "v", "t"])
+      XCTAssertEqual(options.set, ["help", "v", "t"])
       XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
     } catch {
       XCTFail()
@@ -412,7 +412,7 @@ class CommandTests: XCTestCase {
       try Commander().dispatch(with: ["commander", "test", "-t", "-h"])
       XCTFail()
     } catch CommanderError.helpExtraOptions(options: let options) {
-      XCTAssertEqual(options.set, ["h", "t"])
+      XCTAssertEqual(options.set, ["help", "t"])
       XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
     } catch {
       XCTFail()
@@ -422,7 +422,7 @@ class CommandTests: XCTestCase {
       try Commander().dispatch(with: ["commander", "test", "--target", "-h"])
       XCTFail()
     } catch CommanderError.helpExtraOptions(options: let options) {
-      XCTAssertEqual(options.set, ["h", "target"])
+      XCTAssertEqual(options.set, ["help", "target"])
       XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
     } catch {
       XCTFail()
@@ -432,7 +432,7 @@ class CommandTests: XCTestCase {
       try Commander().dispatch(with: ["commander", "test", "-v", "-h"])
       XCTFail()
     } catch CommanderError.helpExtraOptions(options: let options) {
-      XCTAssertEqual(options.set, ["h", "v"])
+      XCTAssertEqual(options.set, ["help", "v"])
       XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
     } catch {
       XCTFail()
@@ -442,7 +442,7 @@ class CommandTests: XCTestCase {
       try Commander().dispatch(with: ["commander", "test", "--verbose", "-h"])
       XCTFail()
     } catch CommanderError.helpExtraOptions(options: let options) {
-      XCTAssertEqual(options.set, ["h", "verbose"])
+      XCTAssertEqual(options.set, ["help", "verbose"])
       XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
     } catch {
       XCTFail()
@@ -452,7 +452,7 @@ class CommandTests: XCTestCase {
       try Commander().dispatch(with: ["commander", "test", "-v", "-t", "-h"])
       XCTFail()
     } catch CommanderError.helpExtraOptions(options: let options) {
-      XCTAssertEqual(options.set, ["h", "v", "t"])
+      XCTAssertEqual(options.set, ["help", "v", "t"])
       XCTAssertFalse(CommanderError.helpExtraOptions(options: options).description.isEmpty)
     } catch {
       XCTFail()
