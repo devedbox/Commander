@@ -187,6 +187,27 @@ extension OptionsDecoder {
         return short
       }
     }
+    /// Returns a boolean value indicates the given string is valid
+    /// options or not.
+    public func validate(_ string: String) -> Bool {
+      if let _ = string.endsIndex(matchs: symbol) ?? string.endsIndex(matchs: shortSymbol) {
+        return true
+      } else {
+        return false
+      }
+    }
+    /// Format the given string into a valid options.
+    public func format(_ string: String, isShort: Bool = false) -> String {
+      if isShort {
+        return shortSymbol + string
+      } else {
+        return symbol + string
+      }
+    }
+    /// Options value index for the given options key.
+    public func index(of options: String) -> String.Index? {
+      return options.endsIndex(matchs: symbol) ?? options.endsIndex(matchs: shortSymbol)
+    }
   }
 }
 

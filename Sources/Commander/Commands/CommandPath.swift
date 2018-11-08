@@ -79,42 +79,38 @@ public struct CommandPath {
   /// - Returns: Returns the exact running path.
   @discardableResult
   internal func run(with commandLineArgs: [String], ignoresExecution: Bool = false) throws -> CommandPath {
-    switch OptionsDecoder.optionsFormat {
-    case .format(let optionSymbol, short: let shortOptionSymbol):
-      if
-        let first = commandLineArgs.first,
-        first.endsIndex(matchs: optionSymbol) == nil,
-        first.endsIndex(matchs: shortOptionSymbol) == nil,
-        let subcommand = command.subcommands.filter({ $0.symbol == first }).first
-      { // Consider a subcommand.
-        return try CommandPath(
-          running: subcommand,
-          at: "\(paths.joined(separator: " ")) \(command.symbol)"
+    if
+      let first = commandLineArgs.first,
+      OptionsDecoder.optionsFormat.index(of: first) == nil,
+      let subcommand = command.subcommands.filter({ $0.symbol == first }).first
+    { // Consider a subcommand.
+      return try CommandPath(
+        running: subcommand,
+        at: "\(paths.joined(separator: " ")) \(command.symbol)"
         ).run(
           with: Array(commandLineArgs.dropFirst()),
           ignoresExecution: ignoresExecution
-        )
-      } else {
-        guard ignoresExecution == false else {
-          return self
-        }
-        
-        // Set the running command path before run the command path.
-        // Defer setting nil of the running command path.
-        type(of: self).runningCommandPath = self; defer { type(of: self).runningCommandPath = nil }
-        
-        do {
-          try command.run(with: commandLineArgs)
-        } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: nil, decoder: _) {
-          throw CommanderError.unrecognizedOptions(options, path: self)
-        } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded?, decoder: let decoder?) {
-          throw Dispatcher(path: self, options: options, decoded: decoded, decoder: decoder)
-        } catch {
-          throw error
-        }
-        
+      )
+    } else {
+      guard ignoresExecution == false else {
         return self
       }
+      
+      // Set the running command path before run the command path.
+      // Defer setting nil of the running command path.
+      type(of: self).runningCommandPath = self; defer { type(of: self).runningCommandPath = nil }
+      
+      do {
+        try command.run(with: commandLineArgs)
+      } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: nil, decoder: _) {
+        throw CommanderError.unrecognizedOptions(options, path: self)
+      } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded?, decoder: let decoder?) {
+        throw Dispatcher(path: self, options: options, decoded: decoded, decoder: decoder)
+      } catch {
+        throw error
+      }
+      
+      return self
     }
   }
 }

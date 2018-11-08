@@ -148,20 +148,16 @@ internal struct Complete: CommandRepresentable {
       return
     }
     
-    let optionsSymbol = OptionsDecoder.optionsFormat.symbol
-    let optionsShortSymbol = OptionsDecoder.optionsFormat.shortSymbol
-    
-    let help = optionsSymbol + Help.Options.CodingKeys.help.rawValue
-    let h = optionsShortSymbol + String(Help.Options.keys[.help]!)
+    let help = OptionsDecoder.optionsFormat.format(Help.Options.CodingKeys.help.rawValue)
+    let h = OptionsDecoder.optionsFormat.format(String(Help.Options.keys[.help]!), isShort: true)
     
     if arguments.contains(help) || arguments.contains(h) {
       return
     }
     
     if
-      !commands.last!.hasPrefix(optionsSymbol),
-      !commands.last!.hasPrefix(optionsShortSymbol),
-      !commands.filter({ $0.hasPrefix(optionsSymbol) || $0.hasPrefix(optionsShortSymbol) }).isEmpty
+      !OptionsDecoder.optionsFormat.validate(commands.last!),
+      !commands.filter({ OptionsDecoder.optionsFormat.validate($0) }).isEmpty
     {
       return
     }
@@ -175,8 +171,8 @@ internal struct Complete: CommandRepresentable {
     ).command.completions(for: commands.last!)
     
     if
-      commands.last!.hasPrefix(optionsSymbol) || commands.last!.hasPrefix(optionsShortSymbol),
-      !commands.dropLast().filter({ $0.hasPrefix(optionsSymbol) || $0.hasPrefix(optionsShortSymbol) }).isEmpty
+      OptionsDecoder.optionsFormat.validate(commands.last!),
+      !commands.dropLast().filter({ OptionsDecoder.optionsFormat.validate($0) }).isEmpty
     {
       completions = completions.filter {
         !($0 == help || $0 == h)

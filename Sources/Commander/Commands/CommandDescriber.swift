@@ -127,12 +127,10 @@ internal struct CommandDescriber {
   }
   
   internal func describe(_ command: CommandDescribable.Type) -> String {
-    let optionsFormat: (symbol: String, short: String)
-    
-    switch OptionsDecoder.optionsFormat {
-    case .format(let symbol, short: let short):
-      optionsFormat = (symbol, short)
-    }
+    let optionsFormat: (symbol: String, short: String) = (
+      OptionsDecoder.optionsFormat.symbol,
+      OptionsDecoder.optionsFormat.shortSymbol
+    )
     
     let subcommandSymbols = command.children.map { ($0.symbol, $0.usage) }
     let optionsSymbols = command.optionsDescriber.descriptions.map { desc -> (String, String) in

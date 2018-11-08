@@ -69,17 +69,12 @@ internal struct Help: CommandRepresentable {
     /// - Parameter commandLineArgs: The command line arguments without command symbol.
     /// - Returns: The decoded options of `Self`.
     internal static func decoded(from commandLineArgs: [String]) throws -> Options {
-      switch OptionsDecoder.optionsFormat {
-      case .format(let symbol, short: let shortSymbol):
-        let options = commandLineArgs.filter {
-          $0.hasPrefix(symbol) || $0.hasPrefix(shortSymbol)
-        }
-        if !options.isEmpty {
-          throw OptionsDecoder.Error.unrecognizedOptions(options.map {
-            let index = $0.endsIndex(matchs: symbol) ?? $0.endsIndex(matchs: shortSymbol)
-            return String($0[index!...])
-          }, decoded: nil, decoder: nil)
-        }
+      let options = commandLineArgs.filter { OptionsDecoder.optionsFormat.validate($0) }
+      if !options.isEmpty {
+        throw OptionsDecoder.Error.unrecognizedOptions(options.map {
+          let index = OptionsDecoder.optionsFormat.index(of: $0)
+          return String($0[index!...])
+        }, decoded: nil, decoder: nil)
       }
       
       return try OptionsDecoder().decode(self, from: commandLineArgs)
@@ -119,30 +114,27 @@ internal struct Help: CommandRepresentable {
     path: CommandPath,
     commandLineArgs: [String]) throws
   {
-    switch OptionsDecoder.optionsFormat {
-    case .format(let symbol, short: let short):
-      var options = options; options += commandLineArgs.compactMap {
-        if let index = $0.endsIndex(matchs: symbol) ?? $0.endsIndex(matchs: short) {
-          return Optional.some(String($0[index...])).flatMap {
-            if $0 == Options.CodingKeys.help.rawValue || $0 == String(Options.keys[.help]!) {
-              return nil
-            } else {
-              return $0
-            }
+    var options = options; options += commandLineArgs.compactMap {
+      if let index = OptionsDecoder.optionsFormat.index(of: $0) {
+        return Optional.some(String($0[index...])).flatMap {
+          if $0 == Options.CodingKeys.help.rawValue || $0 == String(Options.keys[.help]!) {
+            return nil
+          } else {
+            return $0
           }
         }
-        return nil
       }
-      
-      if
-        try validate(options: options) == true,
-        try validate(options: [path.command.symbol]) == false
-      {
-        self.path = path; defer { self.path = nil }
-        try main(.default(arguments: []))
-      } else {
-        throw CommanderError.unrecognizedOptions(options, path: path)
-      }
+      return nil
+    }
+    
+    if
+      try validate(options: options) == true,
+      try validate(options: [path.command.symbol]) == false
+    {
+      self.path = path; defer { self.path = nil }
+      try main(.default(arguments: []))
+    } else {
+      throw CommanderError.unrecognizedOptions(options, path: path)
     }
   }
   /// The main function of the command.
