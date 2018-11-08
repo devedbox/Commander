@@ -50,8 +50,8 @@ extension AnyCommandRepresentable {
   public static var children: [CommandDescribable.Type] { return subcommands }
   /// Reutrns the subcommands of the command.
   public static var subcommands: [AnyCommandRepresentable.Type] { return [] }
-  /// Is the describer top level.
-  public static var isTopLevel: Bool { return false }
+  /// The command level.
+  public static var level: CommandLevel { return .commander }
 }
 
 // MARK: - CommandRepresentable.

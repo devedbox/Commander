@@ -51,19 +51,13 @@ public protocol CommanderRepresentable: CommandDescribable, TextOutputStream {
 
 extension CommanderRepresentable {
   /// Returns the options type of the command.
-  public static var optionsDescriber: OptionsDescribable.Type {
-    return Options.self
-  }
+  public static var optionsDescriber: OptionsDescribable.Type { return Options.self }
   /// Returns the children of the insrance of `CommandDescribable`.
-  public static var children: [CommandDescribable.Type] {
-    return allCommands
-  }
+  public static var children: [CommandDescribable.Type] { return allCommands }
   /// The command symbol also name of the command.
   public static var symbol: String { return "" }
-  /// Is the describer top level.
-  public static var isTopLevel: Bool {
-    return true
-  }
+  /// The command level.
+  public static var level: CommandLevel { return .commander }
   /// Appends the given string to the stream.
   public mutating func write(_ string: String) {
     if type(of: self).outputHandler?(string) == nil {

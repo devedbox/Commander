@@ -25,6 +25,16 @@
 
 import Foundation
 
+// MARK: - CommandLevel.
+
+/// The level of command that can be described.
+public enum CommandLevel {
+  /// The top level commander.
+  case commander
+  /// The command level.
+  case cammand
+}
+
 // MARK: - CommandDescribable.
 
 public protocol CommandDescribable: ShellCompletable {
@@ -36,8 +46,8 @@ public protocol CommandDescribable: ShellCompletable {
   static var symbol: String { get }
   /// The human-readable usage description of the commands.
   static var usage: String { get }
-  /// Is the describer top level.
-  static var isTopLevel: Bool { get }
+  /// The command level.
+  static var level: CommandLevel { get }
 }
 
 // MARK: - ShellCompletable.
@@ -147,7 +157,7 @@ internal struct CommandDescriber {
     }
     let alignment = String(repeating: " ", count: count)
     
-    let subcommandsDesc = command.isTopLevel ? "[COMMAND]" : " [SUBCOMMAND]"
+    let subcommandsDesc = command.level == .commander ? "[COMMAND]" : " [SUBCOMMAND]"
     
     let subcommandsSummary = subcommandSymbols.isEmpty ? "" : "\(subcommandsDesc)"
     let optionsSummary = optionsSymbols.isEmpty ? "" : " [OPTIONS]"
@@ -155,7 +165,7 @@ internal struct CommandDescriber {
     
     let subcommandsLabel = subcommandSymbols.isEmpty ? "" : """
     \(returns(1))
-    \(intents(1))\(command.isTopLevel ? "Commands" : "Subcommands"):
+    \(intents(1))\(command.level == .commander ? "Commands" : "Subcommands"):
     \(returns(0))
     """
     let optionsLabel = optionsSymbols.isEmpty ? "" : """
@@ -185,7 +195,7 @@ internal struct CommandDescriber {
     """
     
     return """
-    \(intents(0))Usage\(command.isTopLevel ? "" : " of '\(command.symbol)'"):
+    \(intents(0))Usage\(command.level == .commander ? "" : " of '\(command.symbol)'"):
     \(returns(0))
     \(intents(1))$ \(path) \(command.symbol)\(subcommandsSummary)\(optionsSummary)\(argumentsSummary)\(returns(1))
     \(intents(2))\(command.usage)\(subcommandsOutputs)\(optionsOutputs)\(argumentsOutputs)
