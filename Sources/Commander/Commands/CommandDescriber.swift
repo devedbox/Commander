@@ -32,7 +32,7 @@ public enum CommandLevel {
   /// The top level commander.
   case commander
   /// The command level.
-  case cammand
+  case command
 }
 
 // MARK: - CommandDescribable.

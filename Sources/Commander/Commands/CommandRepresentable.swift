@@ -51,7 +51,7 @@ extension AnyCommandRepresentable {
   /// Reutrns the subcommands of the command.
   public static var subcommands: [AnyCommandRepresentable.Type] { return [] }
   /// The command level.
-  public static var level: CommandLevel { return .commander }
+  public static var level: CommandLevel { return .command }
 }
 
 // MARK: - CommandRepresentable.
