@@ -31,7 +31,6 @@ public enum BuiltIn {
   public private(set) static var help: AnyCommandRepresentable.Type = Help.self
   /// The built-in commands for the commander except help command.
   public private(set) static var commands: [AnyCommandRepresentable.Type] = [
-    List.self, // The list command to list the subcommands or options of a given command symbol.
     Complete.self // The complete command to show the complete word list of given command line parameters.
   ]
 }

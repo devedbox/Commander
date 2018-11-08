@@ -123,33 +123,6 @@ class CommandTests: XCTestCase {
     }
   }
   
-  func testListCommand() {
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "list", "--type=command"]))
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "list", "test-args", "--type=command"]))
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "list", "--type=options"]))
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "list", "test", "--type=options"]))
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "list", "--type=optionsS"]))
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "list", "test-args", "--type=optionsS"]))
-    
-    var outputs = String()
-    Commander.outputHandler = { outputs += $0.trimmingCharacters(in: .newlines) }; defer { Commander.outputHandler = nil }
-
-    try! Commander().dispatch(with: ["commander", "list", "--type=command"])
-    XCTAssertEqual(outputs.split(separator: " ").set, "help test test-args -h --help".split(separator: " ").set); outputs = ""
-
-    try! Commander().dispatch(with: ["commander", "list", "test-args", "--type=command"])
-    XCTAssertEqual(outputs.split(separator: " ").set, "test -T --target -h --help".split(separator: " ").set); outputs = ""
-    
-    try! Commander().dispatch(with: ["commander", "list", "--type=options"])
-    XCTAssertEqual(outputs.split(separator: " ").set, "--help".split(separator: " ").set); outputs = ""
-    
-    try! Commander().dispatch(with: ["commander", "list", "test", "--type=options"])
-    XCTAssertEqual(outputs.split(separator: " ").set, "--target --verbose --help".split(separator: " ").set); outputs = ""
-    
-    try! Commander().dispatch(with: ["commander", "list", "test-args", "--type=optionsS"])
-    XCTAssertEqual(outputs.split(separator: " ").set, "-T --target -h --help".split(separator: " ").set); outputs = ""
-  }
-  
   func testCompleteCommand() {
     var outputs = String()
     Commander.outputHandler = { outputs += $0.trimmingCharacters(in: .newlines) }; defer { Commander.outputHandler = nil }
