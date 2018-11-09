@@ -74,6 +74,13 @@ struct TestsArgsCommand: CommandRepresentable {
     
     public static func completions(for key: String) -> [String] {
       switch key {
+      case "--target":
+        return [
+          "target0",
+          "target1",
+          "target2",
+          "target3",
+        ]
       default:
         return ["a", "b", "c"]
       }
@@ -246,9 +253,9 @@ class CommandTests: XCTestCase {
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args --targe"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "--target --help".split(separator: " ").set); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args --target"]))
-    XCTAssertEqual(outputs.split(separator: " ").set, "a b c".split(separator: " ").set); outputs = ""
+    XCTAssertEqual(outputs.split(separator: " ").set, "target0 target1 target2 target3".split(separator: " ").set); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args --target "]))
-    XCTAssertEqual(outputs.split(separator: " ").set, "a b c".split(separator: " ").set); outputs = ""
+    XCTAssertEqual(outputs.split(separator: " ").set, "target0 target1 target2 target3".split(separator: " ").set); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args --target s"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "a b c".split(separator: " ").set); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args --help"]))
