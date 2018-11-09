@@ -50,12 +50,12 @@ public struct CommandLine {
   /// Indicates if the reading of command line is escaping.
   internal private(set) var isEscaping: Bool = false
   /// The count of the arguments excluding the command path.
-  public private(set) var argc: Int32 = -1
+  public private(set) var argc: Int32 = 0
   /// The parsed arguments.
   public private(set) var arguments: [String] = []
   
   /// Parse the given command line string.
-  public mutating func parse(_ commandLine: String) throws {
+  public mutating func parse(_ commandLine: String) {
     for char in commandLine {
       switch char {
       case "\\":
@@ -63,6 +63,10 @@ public struct CommandLine {
       case "\"", "'":
         isQuoting.toggle()
       case " ":
+        if isQuoting {
+          fallthrough
+        }
+        
         arguments.advance(); argc += 1
       default:
         isEscaping ? isEscaping.toggle() : ()
