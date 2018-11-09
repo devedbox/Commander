@@ -37,5 +37,9 @@ let package = Package(
       name: "CommanderTests",
       dependencies: ["Commander"]
     ),
+    .testTarget(
+      name: "UtilityTests",
+      dependencies: ["Utility"]
+    ),
   ]
 )

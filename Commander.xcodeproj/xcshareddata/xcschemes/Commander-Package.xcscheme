@@ -28,9 +28,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Commander::Utility"
-               BuildableName = "Utility.framework"
-               BlueprintName = "Utility"
+               BlueprintIdentifier = "Commander::Commander"
+               BuildableName = "Commander.framework"
+               BlueprintName = "Commander"
                ReferencedContainer = "container:Commander.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -42,9 +42,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Commander::Commander"
-               BuildableName = "Commander.framework"
-               BlueprintName = "Commander"
+               BlueprintIdentifier = "Commander::Utility"
+               BuildableName = "Utility.framework"
+               BlueprintName = "Utility"
                ReferencedContainer = "container:Commander.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -63,6 +63,16 @@
                BlueprintIdentifier = "Commander::CommanderTests"
                BuildableName = "CommanderTests.xctest"
                BlueprintName = "CommanderTests"
+               ReferencedContainer = "container:Commander.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Commander::UtilityTests"
+               BuildableName = "UtilityTests.xctest"
+               BlueprintName = "UtilityTests"
                ReferencedContainer = "container:Commander.xcodeproj">
             </BuildableReference>
          </TestableReference>
