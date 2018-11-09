@@ -28,6 +28,20 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Commander::Utility"
+               BuildableName = "Utility.framework"
+               BlueprintName = "Utility"
+               ReferencedContainer = "container:Commander.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "Commander::Commander"
                BuildableName = "Commander.framework"
                BlueprintName = "Commander"
@@ -40,18 +54,7 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      codeCoverageEnabled = "YES"
-      onlyGenerateCoverageForSpecifiedTargets = "YES"
       shouldUseLaunchSchemeArgsEnv = "YES">
-      <CodeCoverageTargets>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "Commander::Commander"
-            BuildableName = "Commander.framework"
-            BlueprintName = "Commander"
-            ReferencedContainer = "container:Commander.xcodeproj">
-         </BuildableReference>
-      </CodeCoverageTargets>
       <Testables>
          <TestableReference
             skipped = "NO">
