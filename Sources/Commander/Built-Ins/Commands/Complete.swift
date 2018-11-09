@@ -176,7 +176,9 @@ internal struct Complete: CommandRepresentable {
           path.command.optionsDescriber.validate(commands.last!)
         )
       {
-        logger <<< path.command.optionsDescriber.completions(for: "").joined(separator: " ") <<< "\n"
+        if path.command.optionsDescriber.isArgumentsResolvable {
+          logger <<< path.command.optionsDescriber.completions(for: "").joined(separator: " ") <<< "\n"
+        }
         return
       }
     }
