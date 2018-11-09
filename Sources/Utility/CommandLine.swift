@@ -53,7 +53,8 @@ public struct CommandLine {
   public private(set) var argc: Int32 = 0
   /// The parsed arguments.
   public private(set) var arguments: [String] = []
-  
+  /// Creates an instance of 'CommandLine'.
+  public init() { }
   /// Parse the given command line string.
   public mutating func parse(_ commandLine: String) {
     for char in commandLine {
