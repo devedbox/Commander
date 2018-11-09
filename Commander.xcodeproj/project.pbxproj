@@ -235,8 +235,8 @@
 		OBJ_17 /* Commands */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_18 /* CommandDescriber.swift */,
 				OBJ_19 /* CommandPath.swift */,
+				OBJ_18 /* CommandDescriber.swift */,
 				OBJ_20 /* CommandRepresentable.swift */,
 			);
 			path = Commands;
@@ -245,8 +245,8 @@
 		OBJ_22 /* Options */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_23 /* OptionDescription.swift */,
 				OBJ_24 /* OptionsDecoder.swift */,
+				OBJ_23 /* OptionDescription.swift */,
 				OBJ_25 /* OptionsRepresentable.swift */,
 			);
 			path = Options;
