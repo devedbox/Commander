@@ -136,7 +136,7 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "&quot;commander-sample&quot;"
+            argument = "&quot;commander-sample sample --verbose &quot;"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

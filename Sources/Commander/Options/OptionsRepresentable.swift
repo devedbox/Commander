@@ -98,6 +98,18 @@ extension OptionsDescribable {
   static var isArgumentsResolvable: Bool {
     return !(argumentType.self == Nothing.self)
   }
+  /// Returns if the given options is valid options for the options describer.
+  public static func validate(_ options: String) -> Bool {
+    let optionsFormat = OptionsDecoder.optionsFormat
+    
+    if options.endsIndex(matchs: optionsFormat.symbol) != nil {
+      return allCodingKeys.contains(optionsFormat.valueWithoutSymbol(for: options)!)
+    } else if options.endsIndex(matchs: optionsFormat.shortSymbol) != nil {
+      return keys.map { String($0.value) }.contains(optionsFormat.valueWithoutSymbol(for: options)!)
+    } else {
+      return (allCodingKeys + keys.map { String($0.value) }).contains(options)
+    }
+  }
 }
 
 // MARK: - CodingKeysRepresentable.

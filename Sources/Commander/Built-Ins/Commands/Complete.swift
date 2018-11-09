@@ -155,24 +155,37 @@ internal struct Complete: CommandRepresentable {
       return
     }
     
-    if
-      !OptionsDecoder.optionsFormat.validate(commands.last!),
-      !commands.filter({ OptionsDecoder.optionsFormat.validate($0) }).isEmpty
-    {
-      return
-    }
-    
-    var completions = try CommandPath(
+    let path = try CommandPath(
       running: command,
       at: CommandPath.runningCommanderPath
     ).run(
       with: Array(commands.dropFirst()),
       ignoresExecution: true
-    ).command.completions(for: commands.last!)
+    )
+    
+    let optionsValidate = OptionsDecoder.optionsFormat.validate
     
     if
-      OptionsDecoder.optionsFormat.validate(commands.last!),
-      !commands.dropLast().filter({ OptionsDecoder.optionsFormat.validate($0) }).isEmpty
+      let opts = Optional.some(commands.filter { optionsValidate($0) }),
+      !opts.isEmpty
+    {
+      if
+        !optionsValidate(commands.last!) ||
+        (
+          optionsValidate(commands.last!) &&
+          path.command.optionsDescriber.validate(commands.last!)
+        )
+      {
+        logger <<< path.command.optionsDescriber.completions(for: "").joined(separator: " ") <<< "\n"
+        return
+      }
+    }
+    
+    var completions = path.command.completions(for: commands.last!)
+    
+    if
+      optionsValidate(commands.last!),
+      !commands.dropLast().filter({ optionsValidate($0) }).isEmpty
     {
       completions = completions.filter {
         !($0 == help || $0 == h)

@@ -47,6 +47,17 @@ public struct SampleCommand: CommandRepresentable {
     
     public var verbose: Bool = false
     public var stringValue: String = ""
+    
+    public static func completions(for key: String) -> [String] {
+      switch key {
+      case "":
+        return [
+          "a", "b", "c"
+        ]
+      default:
+        return [ ]
+      }
+    }
   }
   
   public static let subcommands: [AnyCommandRepresentable.Type] = [

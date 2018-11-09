@@ -196,6 +196,10 @@ extension OptionsDecoder {
         return false
       }
     }
+    /// Returns the options value by removing the options symbol.
+    public func valueWithoutSymbol(for options: String) -> String? {
+      return index(of: options).map { String(options[$0...]) }
+    }
     /// Format the given string into a valid options.
     public func format(_ string: String, isShort: Bool = false) -> String {
       if isShort {
