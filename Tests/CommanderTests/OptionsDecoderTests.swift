@@ -347,6 +347,23 @@ class OptionsDecoderTests: XCTestCase {
     
     XCTAssertEqual(OptionsDecoder._Decoder._Key(index: 1).description, "Index 1 Index - 1")
     XCTAssertEqual(OptionsDecoder._Decoder._Key(intValue: 1)!.description, "1 Index - 1")
+    
+    XCTAssertTrue(ComplexArgumentsOptions.validate("bool"))
+    XCTAssertTrue(ComplexArgumentsOptions.validate("verbose"))
+    XCTAssertTrue(ComplexArgumentsOptions.validate("string"))
+    XCTAssertTrue(ComplexArgumentsOptions.validate("int"))
+    XCTAssertFalse(ComplexArgumentsOptions.validate("-bool"))
+    XCTAssertFalse(ComplexArgumentsOptions.validate("-verbose"))
+    XCTAssertFalse(ComplexArgumentsOptions.validate("-string"))
+    XCTAssertFalse(ComplexArgumentsOptions.validate("-int"))
+    XCTAssertTrue(ComplexArgumentsOptions.validate("b"))
+    XCTAssertTrue(ComplexArgumentsOptions.validate("v"))
+    XCTAssertTrue(ComplexArgumentsOptions.validate("S"))
+    XCTAssertTrue(ComplexArgumentsOptions.validate("i"))
+    XCTAssertFalse(ComplexArgumentsOptions.validate("--b"))
+    XCTAssertFalse(ComplexArgumentsOptions.validate("--v"))
+    XCTAssertFalse(ComplexArgumentsOptions.validate("--S"))
+    XCTAssertFalse(ComplexArgumentsOptions.validate("--i"))
   }
   
   func testDecodeContainers() {

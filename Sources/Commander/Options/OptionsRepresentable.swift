@@ -106,9 +106,9 @@ extension OptionsDescribable {
       return allCodingKeys.contains(optionsFormat.valueWithoutSymbol(for: options)!)
     } else if options.endsIndex(matchs: optionsFormat.shortSymbol) != nil {
       return keys.map { String($0.value) }.contains(optionsFormat.valueWithoutSymbol(for: options)!)
-    } else {
-      return (allCodingKeys + keys.map { String($0.value) }).contains(options)
     }
+    
+    return (allCodingKeys + keys.map { String($0.value) }).contains(options)
   }
 }
 

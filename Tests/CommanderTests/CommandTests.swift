@@ -33,6 +33,7 @@ var sharedOptions: TestsCommand.Options = .init(target: "", verbose: false)
 
 struct TestsCommand: CommandRepresentable {
   struct Options: OptionsRepresentable {
+    typealias ArgumentsResolver = AnyArgumentsResolver<String>
     enum CodingKeys: String, CodingKeysRepresentable {
       case target
       case verbose
@@ -70,6 +71,15 @@ struct TestsArgsCommand: CommandRepresentable {
       .target: .default(value: "Default", usage: "The target of the test command")
     ]
     let target: String
+    
+    public static func completions(for key: String) -> [String] {
+      switch key {
+      case "":
+        return ["a", "b", "c"]
+      default:
+        return []
+      }
+    }
   }
   static let subcommands: [AnyCommandRepresentable.Type] = [
     TestsCommand.self
@@ -238,9 +248,9 @@ class CommandTests: XCTestCase {
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args --targe"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "--target --help".split(separator: " ").set); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args --target"]))
-    XCTAssertEqual(outputs, ""); outputs = ""
+    XCTAssertEqual(outputs.split(separator: " ").set, "a b c".split(separator: " ").set); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args --target "]))
-    XCTAssertEqual(outputs, ""); outputs = ""
+    XCTAssertEqual(outputs.split(separator: " ").set, "a b c".split(separator: " ").set); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args --target s"]))
     XCTAssertEqual(outputs, ""); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args --help"]))

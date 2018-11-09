@@ -25,6 +25,12 @@
 //  SOFTWARE.
 //
 
+// MARK: - Return.
+
+public struct ReturnError: Swift.Error { }
+
+// MARK: - CommanderError.
+
 public enum CommanderError: Swift.Error, CustomStringConvertible {
   case invalidCommand(command: String)
   case emptyCommand

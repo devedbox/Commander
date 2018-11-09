@@ -60,13 +60,13 @@ extension CommandDescribable {
   public static func completions(for key: String) -> [String] {
     let optionsf = {
       optionsDescriber.descriptions.map {
-        OptionsDecoder.optionsFormat.symbol + $0.key
+        OptionsDecoder.optionsFormat.format($0.key)
       }
     }
     
     let shortOptionsf = {
       optionsDescriber.keys.map {
-        OptionsDecoder.optionsFormat.shortSymbol + String($0.value)
+        OptionsDecoder.optionsFormat.format(String($0.value), isShort: true)
       }
     }
     

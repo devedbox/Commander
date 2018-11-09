@@ -117,15 +117,11 @@ internal struct Complete: CommandRepresentable {
   ]
   
   internal static func main(_ options: Complete.Options) throws {
-    guard options.arguments.isSingle else {
-      return
-    }
+    try options.arguments.isSingle.false { throw ReturnError() }
     
     let arguments = options.arguments.last!.split(separator: " ").map { String($0) }
     
-    guard arguments.isEmpty == false else {
-      return
-    }
+    try arguments.isEmpty.true { throw ReturnError() }
     
     let commands = Array(arguments.dropFirst())
     
@@ -138,21 +134,24 @@ internal struct Complete: CommandRepresentable {
     }
     
     // Make an exception for 'help' command.
-    if commands.first == Help.symbol {
-      let args = Array(commands.dropFirst())
-      
-      logger <<< CommandPath.runningCommands.compactMap {
-        !(args.contains($0.symbol) || $0.symbol == Help.symbol) ? $0.symbol : nil
+    try (commands.first == Help.symbol).true {
+      logger <<< CommandPath.runningCommands.compactMap { cmd in
+        return commands.dropFirst().contains(cmd.symbol).or {
+          cmd.symbol == Help.symbol
+        }.false {
+          cmd.symbol
+        }
       }.joined(separator: " ") <<< "\n"
-      
-      return
+      throw ReturnError()
     }
     
     let help = OptionsDecoder.optionsFormat.format(Help.Options.CodingKeys.help.rawValue)
     let h = OptionsDecoder.optionsFormat.format(String(Help.Options.keys[.help]!), isShort: true)
     
-    if arguments.contains(help) || arguments.contains(h) {
-      return
+    try arguments.contains(help).or {
+      arguments.contains(h)
+    }.true {
+      throw ReturnError()
     }
     
     let path = try CommandPath(
@@ -165,30 +164,29 @@ internal struct Complete: CommandRepresentable {
     
     let optionsValidate = OptionsDecoder.optionsFormat.validate
     
-    if
-      let opts = Optional.some(commands.filter { optionsValidate($0) }),
-      !opts.isEmpty
-    {
-      if
-        !optionsValidate(commands.last!) ||
-        (
-          optionsValidate(commands.last!) &&
-          path.command.optionsDescriber.validate(commands.last!)
-        )
-      {
-        if path.command.optionsDescriber.isArgumentsResolvable {
+    try commands.filter { optionsValidate($0) }.isEmpty.false {
+      try optionsValidate(commands.last!).false {
+        path.command.optionsDescriber.isArgumentsResolvable.true {
+          logger <<< path.command.optionsDescriber.completions(for: commands.last!).joined(separator: " ") <<< "\n"
+        }
+        throw ReturnError()
+      }
+
+      try optionsValidate(commands.last!).and {
+        path.command.optionsDescriber.validate(commands.last!)
+      }.true {
+        path.command.optionsDescriber.isArgumentsResolvable.true {
           logger <<< path.command.optionsDescriber.completions(for: "").joined(separator: " ") <<< "\n"
         }
-        return
+        throw ReturnError()
       }
     }
     
     var completions = path.command.completions(for: commands.last!)
     
-    if
-      optionsValidate(commands.last!),
-      !commands.dropLast().filter({ optionsValidate($0) }).isEmpty
-    {
+    optionsValidate(commands.last!).and {
+      !commands.dropLast().filter { optionsValidate($0) }.isEmpty
+    }.true {
       completions = completions.filter {
         !($0 == help || $0 == h)
       }
