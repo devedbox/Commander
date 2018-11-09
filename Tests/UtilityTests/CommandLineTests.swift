@@ -1,10 +1,8 @@
 //
-//  UtilityTests.swift
+//  CommandLineTests.swift
 //  UtilityTests
 //
-//  Created by devedbox on 2018/10/2.
-//
-//  Copyright (c) 2018 devedbox
+//  Created by devedbox on 2018/11/9.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -26,17 +24,13 @@
 //
 
 import XCTest
-@testable import Utility
 
-final class UtilityTests: XCTestCase {
-  func testExample() {
-    // This is an example of a functional test case.
-    // Use XCTAssert and related functions to verify your tests produce the correct
-    // results.
-  }
-  
-  
-  static var allTests = [
-    ("testExample", testExample),
+class CommandLineTests: XCTestCase {
+  static let allTests = [
+    ("testParsing", testParsing),
   ]
+  
+  func testParsing() {
+    
+  }
 }

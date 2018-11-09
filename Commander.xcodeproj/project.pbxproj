@@ -24,6 +24,7 @@
 /* Begin PBXBuildFile section */
 		DC768DCC2195D9B700CE47D7 /* Bool+Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC768DCB2195D9B600CE47D7 /* Bool+Tests.swift */; };
 		DCE68E9E2195D66D00B7CA8B /* CommandLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCE68E9D2195D66D00B7CA8B /* CommandLine.swift */; };
+		DCF55E742195DFD700F9B9D4 /* CommandLineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF55E732195DFD700F9B9D4 /* CommandLineTests.swift */; };
 		OBJ_106 /* Bool+.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Bool+.swift */; };
 		OBJ_112 /* UtilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_35 /* UtilityTests.swift */; };
 		OBJ_114 /* Utility.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "Commander::Utility::Product" /* Utility.framework */; };
@@ -124,6 +125,7 @@
 		"Commander::commander-sample::Product" /* commander-sample */ = {isa = PBXFileReference; lastKnownFileType = text; path = "commander-sample"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC768DCB2195D9B600CE47D7 /* Bool+Tests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Bool+Tests.swift"; sourceTree = "<group>"; };
 		DCE68E9D2195D66D00B7CA8B /* CommandLine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandLine.swift; sourceTree = "<group>"; };
+		DCF55E732195DFD700F9B9D4 /* CommandLineTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandLineTests.swift; sourceTree = "<group>"; };
 		OBJ_12 /* BuiltIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuiltIn.swift; sourceTree = "<group>"; };
 		OBJ_14 /* Complete.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Complete.swift; sourceTree = "<group>"; };
 		OBJ_15 /* Help.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Help.swift; sourceTree = "<group>"; };
@@ -283,6 +285,7 @@
 			children = (
 				OBJ_35 /* UtilityTests.swift */,
 				DC768DCB2195D9B600CE47D7 /* Bool+Tests.swift */,
+				DCF55E732195DFD700F9B9D4 /* CommandLineTests.swift */,
 			);
 			name = UtilityTests;
 			path = Tests/UtilityTests;
@@ -494,6 +497,7 @@
 			buildActionMask = 0;
 			files = (
 				OBJ_112 /* UtilityTests.swift in Sources */,
+				DCF55E742195DFD700F9B9D4 /* CommandLineTests.swift in Sources */,
 				DC768DCC2195D9B700CE47D7 /* Bool+Tests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

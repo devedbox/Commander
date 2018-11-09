@@ -25,12 +25,32 @@
 
 import Foundation
 
+// MARK: - StdLib+.
+
+fileprivate extension Array where Element == String {
+  /// Advance by adding empty string to the container.
+  fileprivate mutating func advance() {
+    self.append("")
+  }
+  /// Append a char to the top element of the container.
+  ///
+  /// - Parameter char: The character to be appended.
+  fileprivate mutating func lastAppend(_ char: Character) {
+    isEmpty ? advance() : ()
+    append(popLast()! + String(char))
+  }
+}
+
+// MARK: - CommandLine.
+
 /// A type that parses the command line arguments.
 public struct CommandLine {
-  /// Indicates the reading of command line is quoting.
+  /// Indicates if the reading of command line is quoting.
   internal private(set) var isQuoting: Bool = false
-  /// Indicates the reading of command line is escaping.
+  /// Indicates if the reading of command line is escaping.
   internal private(set) var isEscaping: Bool = false
+  /// The count of the arguments excluding the command path.
+  public private(set) var argc: Int32 = -1
   /// The parsed arguments.
   public private(set) var arguments: [String] = []
   
@@ -38,9 +58,15 @@ public struct CommandLine {
   public mutating func parse(_ commandLine: String) throws {
     for char in commandLine {
       switch char {
-      case "\\": isEscaping = true
-      case "\"": isQuoting = true
-      default: break
+      case "\\":
+        isEscaping = true
+      case "\"", "'":
+        isQuoting.toggle()
+      case " ":
+        arguments.advance(); argc += 1
+      default:
+        isEscaping ? isEscaping.toggle() : ()
+        arguments.lastAppend(char)
       }
     }
   }
