@@ -40,7 +40,7 @@ public struct CommandLine {
       switch char {
       case "\\": isEscaping = true
       case "\"": isQuoting = true
-      default:
+      default: break
       }
     }
   }

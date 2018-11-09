@@ -52,4 +52,8 @@ extension Bool {
   public func or(_ other: () -> Bool) -> Bool {
     return self || other()
   }
+  /// Toggles the value of the receiver.
+  public mutating func toggles() {
+    self = !self
+  }
 }
