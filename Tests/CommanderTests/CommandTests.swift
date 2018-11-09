@@ -48,6 +48,23 @@ struct TestsCommand: CommandRepresentable {
     ]
     let target: String
     let verbose: Bool
+    
+    public static func completions(for key: String) -> [String] {
+      switch key {
+      case "--target", "-t":
+        return [
+          "target0",
+          "target1"
+        ]
+      case "--verbose", "-v": fallthrough
+      default:
+        return [
+          "arg0",
+          "arg1",
+          "arg2"
+        ]
+      }
+    }
   }
   
   static let symbol: String = "test"
@@ -181,11 +198,11 @@ class CommandTests: XCTestCase {
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test -"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "-t -v --target --verbose -h --help".split(separator: " ").set); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test -t"]))
-    XCTAssertEqual(outputs, ""); outputs = ""
+    XCTAssertEqual(outputs.split(separator: " ").set, "target0 target1".split(separator: " ").set); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test -t "]))
-    XCTAssertEqual(outputs, ""); outputs = ""
+    XCTAssertEqual(outputs.split(separator: " ").set, "target0 target1".split(separator: " ").set); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test -t s"]))
-    XCTAssertEqual(outputs, ""); outputs = ""
+    XCTAssertEqual(outputs.split(separator: " ").set, "arg0 arg1 arg2".split(separator: " ").set); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test -h"]))
     XCTAssertEqual(outputs, ""); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test -h "]))
@@ -205,9 +222,9 @@ class CommandTests: XCTestCase {
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test --targe"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "--target --verbose --help".split(separator: " ").set); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test --target"]))
-    XCTAssertEqual(outputs, ""); outputs = ""
+    XCTAssertEqual(outputs.split(separator: " ").set, "target0 target1".split(separator: " ").set); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test --target "]))
-    XCTAssertEqual(outputs, ""); outputs = ""
+    XCTAssertEqual(outputs.split(separator: " ").set, "target0 target1".split(separator: " ").set); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test --target -"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "-t -v --target --verbose".split(separator: " ").set); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test --target --"]))
