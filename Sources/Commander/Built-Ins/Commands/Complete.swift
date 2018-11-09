@@ -120,8 +120,7 @@ internal struct Complete: CommandRepresentable {
   internal static func main(_ options: Complete.Options) throws {
     try options.arguments.isSingle.false { throw ReturnError() }
     
-    let arguments = options.arguments.last!.split(separator: " ").map { String($0) }
-    
+    let arguments = CommandLine(options.arguments.last!).arguments
     try arguments.isEmpty.true { throw ReturnError() }
     
     let commands = Array(arguments.dropFirst())

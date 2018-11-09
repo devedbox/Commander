@@ -32,12 +32,12 @@ class CommandLineTests: XCTestCase {
   ]
   
   func testParsing() {
-    var cli = ["commander", "command", "subcommand", "--option", "-f", "value"]
+    var cli = ["commander", "command  ", "subcommand", "--option   ", "-f", "  value"]
     var commandLine = CommandLine(cli.joined(separator: " "))
     
     XCTAssertEqual(commandLine.argc, Int32(cli.count - 1))
-    XCTAssertEqual(Set(commandLine.arguments), Set(cli))
-    XCTAssertEqual(commandLine.arguments, cli)
+    XCTAssertEqual(Set(commandLine.arguments), ["commander", "command", "subcommand", "--option", "-f", "value"])
+    XCTAssertEqual(commandLine.arguments, ["commander", "command", "subcommand", "--option", "-f", "value"])
     
     cli = ["commander", "command", "subcmd", "\"args: val0 val1 val3\""]
     commandLine = CommandLine(cli.joined(separator: " "))
@@ -46,19 +46,19 @@ class CommandLineTests: XCTestCase {
     XCTAssertEqual(Set(commandLine.arguments), Set(cli.map { $0.replacingOccurrences(of: "\"", with: "") }))
     XCTAssertEqual(commandLine.arguments, cli.map { $0.replacingOccurrences(of: "\"", with: "") })
     
-    cli = ["commander", "command", "subcmd", "args:\\ val0\\ val1\\ val3"]
+    cli = ["  commander", "command ", "  subcmd", "args:\\ val0\\ val1\\ val3"]
     commandLine = CommandLine(cli.joined(separator: " "))
     
     XCTAssertEqual(commandLine.argc, 6)
     XCTAssertEqual(Set(commandLine.arguments), ["commander", "command", "subcmd", "args:", "val0", "val1", "val3"])
     XCTAssertEqual(commandLine.arguments, ["commander", "command", "subcmd", "args:", "val0", "val1", "val3"])
     
-    cli = ["commander", "command", "subcmd", "'args: val0 val1 val3'"]
+    cli = ["commander  ", " command", " subcmd", "'args: val0   val1 val3'"]
     commandLine = CommandLine(cli.joined(separator: " "))
     
     XCTAssertEqual(commandLine.argc, Int32(cli.count - 1))
-    XCTAssertEqual(Set(commandLine.arguments), Set(cli.map { $0.replacingOccurrences(of: "'", with: "") }))
-    XCTAssertEqual(commandLine.arguments, cli.map { $0.replacingOccurrences(of: "'", with: "") })
+    XCTAssertEqual(Set(commandLine.arguments), ["commander", "command", "subcmd", "args: val0   val1 val3"])
+    XCTAssertEqual(commandLine.arguments, ["commander", "command", "subcmd", "args: val0   val1 val3"])
     
   }
 }

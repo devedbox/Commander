@@ -28,11 +28,14 @@ import Foundation
 // MARK: - StdLib+.
 
 fileprivate extension Array where Element == String {
-  /// Advance by adding empty string to the container.
+  /// Advance by adding empty string to the container. Ignores if the last string is empty.
   fileprivate mutating func advance() {
+    if last?.isEmpty ?? false {
+      return
+    }
     self.append("")
   }
-  /// Append a char to the top element of the container.
+  /// Append a char to the top element of the container. Advances if the container is empty.
   ///
   /// - Parameter char: The character to be appended.
   fileprivate mutating func lastAppend(_ char: Character) {
@@ -50,7 +53,9 @@ public struct CommandLine {
   /// Indicates if the reading of command line is escaping.
   internal private(set) var isEscaping: Bool = false
   /// The count of the arguments excluding the command path.
-  public private(set) var argc: Int32 = 0
+  public var argc: Int32 {
+    return Int32(arguments.underestimatedCount) - 1
+  }
   /// The parsed arguments.
   public private(set) var arguments: [String] = []
   /// Parse the given command line string and creates an instance of 'CommandLine'.
@@ -68,11 +73,13 @@ public struct CommandLine {
           fallthrough
         }
         
-        arguments.advance(); argc += 1
+        arguments.advance()
       default:
         isEscaping ? isEscaping.toggle() : ()
         arguments.lastAppend(char)
       }
     }
+    
+    _ = arguments.last?.isEmpty ?? false ? arguments.removeLast() : ""
   }
 }
