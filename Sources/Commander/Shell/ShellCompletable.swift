@@ -23,24 +23,24 @@
 //  SOFTWARE.
 //
 
-import Foundation
+import Utility
 
 /// A protocol represents the conforming types can provide the complete list
 /// to the shell completion system.
 public protocol ShellCompletable {
   /// Returns the completions list for the specific option key.
   ///
-  /// - Parameter key: The key to be completed.
+  /// - Parameter commandLine: The command line arguments.
   /// - Returns: Returns the completion list for the given key.
-  static func completions(for key: String) -> [String]
+  static func completions(for commandLine: Utility.CommandLine) -> [String]
 }
 
 extension ShellCompletable {
   /// Returns the completions list for the specific option key.
   ///
-  /// - Parameter key: The key to be completed.
+  /// - Parameter commandLine: The command line arguments.
   /// - Returns: Returns the completion list for the given key.
-  public static func completions(for key: String) -> [String] {
+  public static func completions(for commandLine: Utility.CommandLine) -> [String] {
     return [
       // Default empty...
     ]

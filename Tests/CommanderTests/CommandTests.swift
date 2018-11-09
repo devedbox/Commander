@@ -28,6 +28,7 @@
 import XCTest
 import Foundation
 @testable import Commander
+import Utility
 
 var sharedOptions: TestsCommand.Options = .init(target: "", verbose: false)
 
@@ -49,8 +50,8 @@ struct TestsCommand: CommandRepresentable {
     let target: String
     let verbose: Bool
     
-    public static func completions(for key: String) -> [String] {
-      switch key {
+    public static func completions(for commandLine: Utility.CommandLine) -> [String] {
+      switch commandLine.arguments.last {
       case "--target", "-t":
         return [
           "target0",
@@ -89,8 +90,8 @@ struct TestsArgsCommand: CommandRepresentable {
     ]
     let target: String
     
-    public static func completions(for key: String) -> [String] {
-      switch key {
+    public static func completions(for commandLine: Utility.CommandLine) -> [String] {
+      switch commandLine.arguments.last {
       case "--target":
         return [
           "target0",

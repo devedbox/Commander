@@ -120,7 +120,8 @@ internal struct Complete: CommandRepresentable {
   internal static func main(_ options: Complete.Options) throws {
     try options.arguments.isSingle.false { throw ReturnError() }
     
-    let arguments = CommandLine(options.arguments.last!).arguments
+    let commandLine = CommandLine(options.arguments.last!)
+    let arguments = commandLine.arguments
     try arguments.isEmpty.true { throw ReturnError() }
     
     let commands = Array(arguments.dropFirst())
@@ -129,7 +130,7 @@ internal struct Complete: CommandRepresentable {
       commands.isEmpty == false,
       let command = CommandPath.runningCommands.first(where: { $0.symbol == commands.first! })
     else {
-      logger <<< CommandPath.runningCommander.completions(for: "").joined(separator: " ") <<< "\n"
+      logger <<< CommandPath.runningCommander.completions(for: commandLine).joined(separator: " ") <<< "\n"
       return
     }
     
@@ -167,13 +168,13 @@ internal struct Complete: CommandRepresentable {
     try commands.filter { optionsValidate($0) }.isEmpty.false {
       try optionsValidate(commands.last!).false {
         path.command.optionsDescriber.isArgumentsResolvable.true {
-          logger <<< path.command.optionsDescriber.completions(for: commands.last!).joined(separator: " ") <<< "\n"
+          logger <<< path.command.optionsDescriber.completions(for: commandLine).joined(separator: " ") <<< "\n"
         }
         throw ReturnError()
       }
     }
     
-    var completions = path.command.completions(for: commands.last!)
+    var completions = path.command.completions(for: commandLine)
     
     optionsValidate(commands.last!).and {
       !commands.dropLast().filter { optionsValidate($0) }.isEmpty

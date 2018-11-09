@@ -23,7 +23,7 @@
 //  SOFTWARE.
 //
 
-import Foundation
+import Utility
 
 // MARK: - CommandLevel.
 
@@ -55,9 +55,9 @@ public protocol CommandDescribable: ShellCompletable {
 extension CommandDescribable {
   /// Returns the completions list for the specific option key.
   ///
-  /// - Parameter key: The key to be completed.
+  /// - Parameter commandLine: The command line arguments.
   /// - Returns: Returns the completion list for the given key.
-  public static func completions(for key: String) -> [String] {
+  public static func completions(for commandLine: Utility.CommandLine) -> [String] {
     let optionsf = {
       optionsDescriber.descriptions.map {
         OptionsDecoder.optionsFormat.format($0.key)
@@ -76,18 +76,18 @@ extension CommandDescribable {
       }
     }
     
-    switch key {
-    case let arg where arg.hasPrefix(OptionsDecoder.optionsFormat.symbol):
+    switch commandLine.arguments.last {
+    case let arg? where arg.hasPrefix(OptionsDecoder.optionsFormat.symbol):
       let options = optionsf()
       if options.contains(arg) {
-        return optionsDescriber.completions(for: arg)
+        return optionsDescriber.completions(for: commandLine)
       } else {
         return options
       }
-    case let arg where arg.hasPrefix(OptionsDecoder.optionsFormat.shortSymbol):
+    case let arg? where arg.hasPrefix(OptionsDecoder.optionsFormat.shortSymbol):
       let shortOptions = shortOptionsf()
       if shortOptions.contains(arg) {
-        return optionsDescriber.completions(for: arg)
+        return optionsDescriber.completions(for: commandLine)
       } else {
         return shortOptions + optionsf()
       }
