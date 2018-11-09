@@ -74,10 +74,8 @@ struct TestsArgsCommand: CommandRepresentable {
     
     public static func completions(for key: String) -> [String] {
       switch key {
-      case "":
-        return ["a", "b", "c"]
       default:
-        return []
+        return ["a", "b", "c"]
       }
     }
   }
@@ -252,7 +250,7 @@ class CommandTests: XCTestCase {
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args --target "]))
     XCTAssertEqual(outputs.split(separator: " ").set, "a b c".split(separator: " ").set); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args --target s"]))
-    XCTAssertEqual(outputs, ""); outputs = ""
+    XCTAssertEqual(outputs.split(separator: " ").set, "a b c".split(separator: " ").set); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args --help"]))
     XCTAssertEqual(outputs, ""); outputs = ""
     XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args --help "]))

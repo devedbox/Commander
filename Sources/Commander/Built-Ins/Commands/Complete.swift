@@ -172,14 +172,14 @@ internal struct Complete: CommandRepresentable {
         throw ReturnError()
       }
 
-      try optionsValidate(commands.last!).and {
-        path.command.optionsDescriber.validate(commands.last!)
-      }.true {
-        path.command.optionsDescriber.isArgumentsResolvable.true {
-          logger <<< path.command.optionsDescriber.completions(for: "").joined(separator: " ") <<< "\n"
-        }
-        throw ReturnError()
-      }
+//      try optionsValidate(commands.last!).and {
+//        path.command.optionsDescriber.validate(commands.last!)
+//      }.true {
+//        path.command.optionsDescriber.isArgumentsResolvable.true {
+//          logger <<< path.command.optionsDescriber.completions(for: "").joined(separator: " ") <<< "\n"
+//        }
+//        throw ReturnError()
+//      }
     }
     
     var completions = path.command.completions(for: commands.last!)
