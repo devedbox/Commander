@@ -46,7 +46,7 @@ public protocol CommandDescribable: ShellCompletable {
   static var symbol: String { get }
   /// The human-readable usage description of the commands.
   static var usage: String { get }
-  /// The command level.
+  /// The level of the 'CommandDescribable'.
   static var level: CommandLevel { get }
 }
 
