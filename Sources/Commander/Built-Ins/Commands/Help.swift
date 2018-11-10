@@ -24,6 +24,7 @@
 //
 
 import Foundation
+import Utility
 
 // MARK: - FileHandle.
 
@@ -70,10 +71,10 @@ internal struct Help: CommandRepresentable {
     /// - Returns: The decoded options of `Self`.
     internal static func decoded(from commandLineArgs: [String]) throws -> Options {
       let options = commandLineArgs.filter { OptionsDecoder.optionsFormat.validate($0) }
-      if !options.isEmpty {
+      
+      try options.isEmpty.false {
         throw OptionsDecoder.Error.unrecognizedOptions(options.map {
-          let index = OptionsDecoder.optionsFormat.index(of: $0)
-          return String($0[index!...])
+          String($0[OptionsDecoder.optionsFormat.index(of: $0)!...])
         }, decoded: nil, decoder: nil, decodeError: nil)
       }
       
@@ -94,7 +95,7 @@ internal struct Help: CommandRepresentable {
   internal static var usage: String = "Prints the help message of the command. Usage: [help [COMMANDS]]"
   /// Returns a bool value indicates if the given options raw value is 'help' option.
   internal static func validate(options: [String]) throws -> Bool {
-    guard options.isSingle else {
+    try options.isSingle.false {
       throw CommanderError.helpExtraOptions(options: options)
     }
     
@@ -117,11 +118,15 @@ internal struct Help: CommandRepresentable {
     var options = options; options += commandLineArgs.compactMap {
       if let index = OptionsDecoder.optionsFormat.index(of: $0) {
         return Optional.some(String($0[index...])).flatMap {
-          if $0 == Options.CodingKeys.help.rawValue || $0 == String(Options.keys[.help]!) || options.contains($0) {
-            return nil
-          } else {
+          if
+            $0 != Options.CodingKeys.help.rawValue,
+            $0 != String(Options.keys[.help]!),
+            !options.contains($0)
+          {
             return $0
           }
+          
+          return nil
         }
       }
       return nil
@@ -146,13 +151,6 @@ internal struct Help: CommandRepresentable {
         logger <<< CommandDescriber(path: path).describe(command) <<< "\n"
       } else {
         logger <<< CommandDescriber(path: path).describe(CommandPath.runningCommander) <<< "\n"
-        
-        /* FIXME: Disable the subcommands' description for no prefered formats for now.
-         print(prefix, commands, "\nDescriptions:", separator: "\n  ", terminator: "\n\n", to: &stdout)
-         
-         var options = Options(help: nil, intents: 1)
-         options.arguments = Commander.commands.map { $0.symbol }
-         try self.main(options) */
       }
     } else {
       var unrecognizedCommand = [String]()

@@ -87,9 +87,9 @@ public struct CommandPath {
       return try CommandPath(
         running: subcommand,
         at: "\(paths.joined(separator: " ")) \(command.symbol)"
-        ).run(
-          with: Array(commandLineArgs.dropFirst()),
-          ignoresExecution: ignoresExecution
+      ).run(
+        with: Array(commandLineArgs.dropFirst()),
+        ignoresExecution: ignoresExecution
       )
     }
     

@@ -26,6 +26,7 @@
 //
 
 import Foundation
+import Utility
 
 /// The logger to log the output message to standard output.
 public private(set) var logger: TextOutputStream!
@@ -60,7 +61,7 @@ extension CommanderRepresentable {
   public static var level: CommandLevel { return .commander }
   /// Appends the given string to the stream.
   public mutating func write(_ string: String) {
-    if type(of: self).outputHandler?(string) == nil {
+    (type(of: self).outputHandler?(string) == nil).true {
       var stdout = FileHandle.standardOutput; print(string, terminator: "", to: &stdout)
     }
   }
@@ -76,7 +77,7 @@ extension CommanderRepresentable {
     do {
       try dispatch(with: CommandLine.arguments)
     } catch {
-      if type(of: self).errorHandler?(error) == nil {
+      (type(of: self).errorHandler?(error) == nil).true {
         var stderr = FileHandle.standardError; print(String(describing: error), to: &stderr)
       }
       return dispatchFailure()
@@ -88,7 +89,7 @@ extension CommanderRepresentable {
     do {
       try dispatch(with: CommandLine.arguments)
     } catch {
-      if type(of: self).errorHandler?(error) == nil {
+      (type(of: self).errorHandler?(error) == nil).true {
         var stderr = FileHandle.standardError; print(String(describing: error), to: &stderr)
       }
       return dispatchFailure()
@@ -121,9 +122,7 @@ extension CommanderRepresentable {
     let symbol = commands.popFirst()
     let allCommands = type(of: self).allCommands + BuiltIn.commands
     
-    let commandPath = allCommands.first {
-      $0.symbol == symbol
-    }.map {
+    let commandPath = allCommands.first { $0.symbol == symbol }.map {
       CommandPath(
         running: $0,
         at: runningPath.split(separator: "/").last!.string
@@ -175,7 +174,7 @@ extension CommanderRepresentable {
       try dispatcher.path.command.run(with: dispatcher.decoded)
       
     } catch CommanderError.unrecognizedOptions(let options, path: let path, underlyingError: let error) {
-      if Set(Options.allCodingKeys).isSuperset(of: Set(options)) {
+      try Set(Options.allCodingKeys).isSuperset(of: Set(options)).true {
         try error.map { throw $0 }
       }
       

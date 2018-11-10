@@ -29,13 +29,13 @@ extension Bool {
   /// Applying the given true closure on the subject when the value is true.
   /// Otherwise, applying none of closure on the subject.
   @discardableResult
-  public func `true`<U>(_ transform: () throws -> U) rethrows -> U? {
+  public func `true`<U>(_ transform: () throws -> U?) rethrows -> U? {
     return self ? try transform() : nil
   }
   /// Applying the given false closure on the subject when the value is false.
   /// Otherwise, applying none of closure on the subject.
   @discardableResult
-  public func `false`<U>(_ transform: () throws -> U) rethrows -> U? {
+  public func `false`<U>(_ transform: () throws -> U?) rethrows -> U? {
     return self ? nil : try transform()
   }
   /// Union with the other bool value by using '&&' operator.
