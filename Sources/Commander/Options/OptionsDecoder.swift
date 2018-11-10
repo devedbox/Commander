@@ -27,60 +27,6 @@
 
 import Foundation
 
-// MARK: -
-
-internal extension String {
-  /// Perform the exact match with the given pattern and return the index where match ends.
-  ///
-  /// - Parameter pattern: The pattern to be matched.
-  /// - Returns: The ends index.
-  internal func endsIndex(matchs pattern: String) -> Index? {
-    guard !isEmpty, endIndex >= pattern.endIndex else {
-      return nil
-    }
-    
-    var index = pattern.startIndex
-    
-    while index < pattern.endIndex, index < endIndex {
-      if pattern[index] != self[index] {
-        return nil
-      }
-      pattern.formIndex(after: &index)
-    }
-    
-    return index
-  }
-  /// Returns a bool value indicates if the string is containing only one character.
-  internal var isSingle: Bool {
-    guard !isEmpty else {
-      return false
-    }
-    return startIndex == index(before: endIndex)
-  }
-}
-
-internal extension Array where Element: RangeReplaceableCollection {
-  /// Appends the given element to the receiver's last collection element.
-  internal mutating func lastAppend(_ element: Element.Element) {
-    guard var last = popLast() else {
-      return
-    }
-    
-    last.append(element)
-    append(last)
-  }
-}
-
-internal extension Collection {
-  /// Returns a bool value indicates if the collection is containing only one element.
-  internal var isSingle: Bool {
-    guard !isEmpty else {
-      return false
-    }
-    return index(after: startIndex) == endIndex
-  }
-}
-
 // MARK: swift-corelibs-foundation
 
 internal extension DecodingError {

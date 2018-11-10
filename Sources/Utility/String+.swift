@@ -44,3 +44,35 @@ extension String {
     return merging
   }
 }
+
+// MARK: - EndsIndex.
+
+extension String {
+  /// Perform the exact match with the given pattern and return the index where match ends.
+  ///
+  /// - Parameter pattern: The pattern to be matched.
+  /// - Returns: The ends index.
+  public func endsIndex(matchs pattern: String) -> Index? {
+    guard !isEmpty, endIndex >= pattern.endIndex else {
+      return nil
+    }
+    
+    var index = pattern.startIndex
+    
+    while index < pattern.endIndex, index < endIndex {
+      if pattern[index] != self[index] {
+        return nil
+      }
+      pattern.formIndex(after: &index)
+    }
+    
+    return index
+  }
+  /// Returns a bool value indicates if the string is containing only one character.
+  public var isSingle: Bool {
+    guard !isEmpty else {
+      return false
+    }
+    return startIndex == index(before: endIndex)
+  }
+}
