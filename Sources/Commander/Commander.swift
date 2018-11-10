@@ -171,7 +171,7 @@ extension CommanderRepresentable {
       }
       
       CommandPath.runningGlobalOptions = try Options(from: dispatcher.decoder)
-      try dispatcher.path.command.run(with: dispatcher.decoded)
+      try dispatcher.path.command.dispatch(with: dispatcher.decoded)
       
     } catch CommanderError.unrecognizedOptions(let options, path: let path, underlyingError: let error) {
       try Set(Options.codingKeys).isSuperset(of: Set(options)).true {

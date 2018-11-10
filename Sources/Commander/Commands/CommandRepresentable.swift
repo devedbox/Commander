@@ -27,20 +27,20 @@
 
 // MARK: - AnyCommandRepresentable.
 
-/// A protocol represents the conforming types can run with the specific command line arguments.
+/// A protocol represents the conforming types can dispatch with the specific command line arguments.
 /// This protocol represents type-erased command types without associated types can be used as
 /// argument rather than generic constraints.
 public protocol AnyCommandRepresentable: CommandDescribable {
   /// Returns the subcommands of the command.
   static var subcommands: [AnyCommandRepresentable.Type] { get }
-  /// Run the commands with command line arguments.
+  /// Dispatch the commands with command line arguments.
   ///
   /// - Parameter commandLineArgs: The command line arguments with dropping command symbol.
-  static func run(with commandLineArgs: [String]) throws
-  /// Run the commands with decoded options.
+  static func dispatch(with commandLineArgs: [String]) throws
+  /// Dispatch the commands with decoded options.
   ///
   /// - Parameter options: The decoded options.
-  static func run(with options: Any) throws
+  static func dispatch(with options: Any) throws
 }
 
 // MARK: - CommandDescribable.
@@ -56,7 +56,7 @@ extension AnyCommandRepresentable {
 
 // MARK: - CommandRepresentable.
 
-/// A protocol represents the conforming types can run with the specific options of associated
+/// A protocol represents the conforming types can dispatch with the specific options of associated
 /// type `Options`.
 public protocol CommandRepresentable: AnyCommandRepresentable {
   /// The associated type of `Options`.
@@ -74,14 +74,14 @@ extension CommandRepresentable {
   public static var optionsDescriber: OptionsDescribable.Type {
     return Options.self
   }
-  /// Run the command with command line arguments.
-  public static func run(with commandLineArgs: [String]) throws {
+  /// Dispatch the command with command line arguments.
+  public static func dispatch(with commandLineArgs: [String]) throws {
     try self.main(try Options.decoded(from: commandLineArgs))
   }
-  /// Run the commands with decoded options.
+  /// Dispatch the commands with decoded options.
   ///
   /// - Parameter options: The decoded options.
-  public static func run(with options: Any) throws {
+  public static func dispatch(with options: Any) throws {
     if let concreteOptions = options as? Options {
       try self.main(concreteOptions)
     }

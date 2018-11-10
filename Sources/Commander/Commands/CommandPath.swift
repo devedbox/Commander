@@ -102,7 +102,7 @@ public struct CommandPath {
     type(of: self).runningCommandPath = self; defer { type(of: self).runningCommandPath = nil }
     
     do {
-      try command.run(with: commandLineArgs)
+      try command.dispatch(with: commandLineArgs)
     } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: nil, decoder: _, decodeError: let error) {
       throw CommanderError.unrecognizedOptions(options, path: self, underlyingError: error)
     } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded?, decoder: let decoder?, decodeError: _) {
