@@ -23,7 +23,7 @@
 //  SOFTWARE.
 //
 
-import Foundation
+// MARK: - BuiltIn.
 
 /// The namespace for built-in concepts and commands.
 public enum BuiltIn {

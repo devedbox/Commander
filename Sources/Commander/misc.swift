@@ -42,7 +42,7 @@ internal func dispatchSuccess() -> Result {
 #if DEBUG
   return EXIT_SUCCESS
 #else
-  return exit(EXIT_SUCCESS)
+  return EXIT_SUCCESS
 #endif
 }
 
@@ -50,7 +50,7 @@ internal func dispatchFailure() -> Result {
 #if DEBUG
   return EXIT_FAILURE
 #else
-  return exit(EXIT_FAILURE)
+  return EXIT_FAILURE
 #endif
 }
 
@@ -71,4 +71,13 @@ precedencegroup StreamPrecedence {
 @discardableResult
 public func <<< <Target: StringProtocol>(left: TextOutputStream, right: Target) -> TextOutputStream {
   var stream = left; stream.write("\(right)"); return stream
+}
+
+// MARK: - FileHandle.
+
+extension FileHandle: TextOutputStream {
+  /// Write the string to file handle.
+  public func write(_ string: String) {
+    string.data(using: .utf8).map { write($0) }
+  }
 }

@@ -23,8 +23,6 @@
 //  SOFTWARE.
 //
 
-import Foundation
-
 // MARK: - StdLib+.
 
 fileprivate extension Array where Element == String {
