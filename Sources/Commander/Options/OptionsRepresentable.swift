@@ -90,7 +90,7 @@ public protocol OptionsDescribable: Decodable, ShellCompletable {
   /// Returns the type of the argument.
   static var argumentType: Decodable.Type { get }
   /// Returns all the coding keys of the options.
-  static var allCodingKeys: [String] { get }
+  static var codingKeys: [String] { get }
 }
 
 extension OptionsDescribable {
@@ -103,12 +103,12 @@ extension OptionsDescribable {
     let optionsFormat = OptionsDecoder.optionsFormat
     
     if options.endsIndex(matchs: optionsFormat.symbol) != nil {
-      return allCodingKeys.contains(optionsFormat.valueWithoutSymbol(for: options)!)
+      return codingKeys.contains(optionsFormat.valueWithoutSymbol(for: options)!)
     } else if options.endsIndex(matchs: optionsFormat.shortSymbol) != nil {
       return keys.map { String($0.value) }.contains(optionsFormat.valueWithoutSymbol(for: options)!)
     }
     
-    return (allCodingKeys + keys.map { String($0.value) }).contains(options)
+    return (codingKeys + keys.map { String($0.value) }).contains(options)
   }
 }
 
@@ -202,7 +202,7 @@ extension OptionsRepresentable {
     return ArgumentsResolver.Argument.self
   }
   /// Returns all the coding keys of the options.
-  public static var allCodingKeys: [String] {
+  public static var codingKeys: [String] {
     return CodingKeys.allCases.map { $0.description }
   }
   /// Decode the options from the given command line arguments.
