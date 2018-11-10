@@ -187,10 +187,10 @@ internal struct Complete: CommandRepresentable {
       // If the last command line arg is not options, then
       try optionsValidate(commands.last!).false {
         // If the type of 'options' can resolve arguments, then
-        path.command.optionsDescriber.isArgumentsResolvable.true {
+        // path.command.optionsDescriber.isArgumentsResolvable.true {
           // Complete the options with 'optionsDescriber.completions(for:)'.
           logger <<< path.command.optionsDescriber.completions(for: commandLine).joined(separator: " ") <<< "\n"
-        }
+        // }
         // Returns.
         throw ReturnError()
       }
