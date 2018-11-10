@@ -60,7 +60,7 @@ public struct SampleCommand: CommandRepresentable {
     }
   }
   
-  public static let subcommands: [AnyCommandRepresentable.Type] = [
+  public static let children: [CommandDispatchable.Type] = [
     NoArgsCommand.self
   ]
   public static let symbol: String = "sample"

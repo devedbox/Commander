@@ -50,18 +50,18 @@ public struct CommandPath {
   /// The running global options of the commander.
   internal static var runningGlobalOptions: OptionsDescribable?
   /// The running commander's available commands.
-  internal static var runningCommands: [AnyCommandRepresentable.Type] = []
+  internal static var runningCommands: [CommandDispatchable.Type] = []
   
   /// The running paths of the ass
   public private(set) var paths: [String]
   /// The exact running command of the command path.
-  public private(set) var command: AnyCommandRepresentable.Type
+  public private(set) var command: CommandDispatchable.Type
   /// Creates an instance of `CommandPath` with the given command and running path.
   ///
   /// - Parameter command: The command to run at the path.
   /// - Parameter path: The path of the command to run at.
   public init(
-    running command: AnyCommandRepresentable.Type,
+    running command: CommandDispatchable.Type,
     at path: String)
   {
     self.paths = path.split(separator: " ").map { String($0) }
@@ -82,7 +82,7 @@ public struct CommandPath {
     if
       let first = commandLineArgs.first,
       OptionsDecoder.optionsFormat.index(of: first) == nil,
-      let subcommand = command.subcommands.filter({ $0.symbol == first }).first
+      let subcommand = command.children.filter({ $0.symbol == first }).first
     { // Consider a subcommand.
       return try CommandPath(
         running: subcommand,

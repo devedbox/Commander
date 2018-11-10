@@ -39,7 +39,7 @@ struct Level1Command: CommandRepresentable {
     let value: String
   }
   
-  static let subcommands: [AnyCommandRepresentable.Type] = [
+  static let children: [CommandDispatchable.Type] = [
     Level2Command.self,
     Level3Command.self,
     Level4Command.self
@@ -62,7 +62,7 @@ struct Level2Command: CommandRepresentable {
     let value: String
   }
   
-  static let subcommands: [AnyCommandRepresentable.Type] = [
+  static let children: [CommandDispatchable.Type] = [
     Level1Command.self,
     Level3Command.self,
     Level4Command.self
@@ -85,7 +85,7 @@ struct Level3Command: CommandRepresentable {
     let value: String
   }
   
-  static let subcommands: [AnyCommandRepresentable.Type] = [
+  static let children: [CommandDispatchable.Type] = [
     Level2Command.self,
     Level1Command.self,
     Level4Command.self
@@ -108,7 +108,7 @@ struct Level4Command: CommandRepresentable {
     let value: String
   }
   
-  static let subcommands: [AnyCommandRepresentable.Type] = [
+  static let children: [CommandDispatchable.Type] = [
     Level2Command.self,
     Level3Command.self,
     Level1Command.self

@@ -69,7 +69,7 @@ class MockCommander: CommanderRepresentable {
       ]
       let target: String
     }
-    static let subcommands: [AnyCommandRepresentable.Type] = [
+    static let children: [CommandDispatchable.Type] = [
       TestsCommand.self
     ]
     static let symbol: String = "test-args"
@@ -101,7 +101,7 @@ class MockCommander: CommanderRepresentable {
   }
   static var outputHandler: ((String) -> Void)? = nil
   static var errorHandler: ((Error) -> Void)? = nil
-  static var commands: [AnyCommandRepresentable.Type] = [
+  static var commands: [CommandDispatchable.Type] = [
     MockCommander.TestsCommand.self,
     MockCommander.TestsArgsCommand.self
   ]

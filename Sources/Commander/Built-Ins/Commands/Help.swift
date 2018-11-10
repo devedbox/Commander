@@ -154,7 +154,7 @@ internal struct Help: CommandRepresentable {
       }
     } else {
       var unrecognizedCommand = [String]()
-      let commands = options.arguments.compactMap { arg -> AnyCommandRepresentable.Type? in
+      let commands = options.arguments.compactMap { arg -> CommandDispatchable.Type? in
         if let command = CommandPath.runningCommands.first(where: { $0.symbol == arg }) {
           return command
         } else {

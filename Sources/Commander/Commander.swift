@@ -41,7 +41,7 @@ public protocol CommanderRepresentable: CommandDescribable, TextOutputStream {
   /// A closure of `(String) -> Void` to handle the stdout.
   static var outputHandler: ((String) -> Void)? { get }
   /// The registered available commands of the commander.
-  static var commands: [AnyCommandRepresentable.Type] { get }
+  static var commands: [CommandDispatchable.Type] { get }
   
   /// Decoding the given command line argumants as the current command's options type and disatch the
   /// command with the decided options.
@@ -66,7 +66,7 @@ extension CommanderRepresentable {
     }
   }
   /// Returns all commands of commander with registered commands along with built-in commands.
-  internal static var allCommands: [AnyCommandRepresentable.Type] {
+  internal static var allCommands: [CommandDispatchable.Type] {
     return [BuiltIn.help] + commands
   }
   /// Decoding the current command line arguments of `CommandLine.arguments` as the current command's
@@ -193,7 +193,7 @@ public final class Commander: CommanderRepresentable {
   /// A closure of `(String) -> Void` to handle the stdout.
   public static var outputHandler: ((String) -> Void)?
   /// The registered available commands of the commander.
-  public static var commands: [AnyCommandRepresentable.Type] = []
+  public static var commands: [CommandDispatchable.Type] = []
   /// The human-readable usage description of the commands.
   public static var usage: String = ""
   /// Creates the instance of `Commander`.

@@ -25,14 +25,76 @@
 //  SOFTWARE.
 //
 
-// MARK: - AnyCommandRepresentable.
+import Utility
+
+// MARK: - CommandLevel.
+
+/// The level of command that can be described.
+public enum CommandLevel {
+  /// The top level commander.
+  case commander
+  /// The command level.
+  case command
+}
+
+// MARK: - CommandDescribable.
+
+public protocol CommandDescribable: ShellCompletable {
+  /// Returns the options type of the instance of `CommandDescribable`.
+  static var optionsDescriber: OptionsDescribable.Type { get }
+  /// Returns the children of the insrance of `CommandDescribable`.
+  static var children: [CommandDescribable.Type] { get }
+  /// The command symbol also name of the command.
+  static var symbol: String { get }
+  /// The human-readable usage description of the commands.
+  static var usage: String { get }
+  /// The level of the 'CommandDescribable'.
+  static var level: CommandLevel { get }
+}
+
+// MARK: - ShellCompletable.
+
+extension CommandDescribable {
+  /// Returns the completions list for the specific option key.
+  ///
+  /// - Parameter commandLine: The command line arguments.
+  /// - Returns: Returns the completion list for the given key.
+  public static func completions(for commandLine: Utility.CommandLine) -> [String] {
+    let optionsf = {
+      optionsDescriber.descriptions.map {
+        OptionsDecoder.optionsFormat.format($0.key)
+      }
+    }
+    let shortOptionsf = {
+      optionsDescriber.keys.map {
+        OptionsDecoder.optionsFormat.format(String($0.value), isShort: true)
+      }
+    }
+    let commandsf = { children.map { $0.symbol } }
+    
+    switch commandLine.arguments.last {
+    case let arg? where arg.hasPrefix(OptionsDecoder.optionsFormat.symbol):
+      let options = optionsf()
+      
+      return options.contains(arg) ? optionsDescriber.completions(for: commandLine) : options
+    case let arg? where arg.hasPrefix(OptionsDecoder.optionsFormat.shortSymbol):
+      let shortOptions = shortOptionsf()
+      
+      return shortOptions.contains(arg) ? optionsDescriber.completions(for: commandLine) : shortOptions + optionsf()
+    default:
+      return optionsf() + shortOptionsf() + commandsf()
+    }
+  }
+}
+
+// MARK: - CommandDispatchable.
 
 /// A protocol represents the conforming types can dispatch with the specific command line arguments.
 /// This protocol represents type-erased command types without associated types can be used as
 /// argument rather than generic constraints.
-public protocol AnyCommandRepresentable: CommandDescribable {
+public protocol CommandDispatchable: CommandDescribable {
   /// Returns the subcommands of the command.
-  static var subcommands: [AnyCommandRepresentable.Type] { get }
+  static var children: [CommandDispatchable.Type] { get }
   /// Dispatch the commands with command line arguments.
   ///
   /// - Parameter commandLineArgs: The command line arguments with dropping command symbol.
@@ -45,12 +107,14 @@ public protocol AnyCommandRepresentable: CommandDescribable {
 
 // MARK: - CommandDescribable.
 
-extension AnyCommandRepresentable {
+extension CommandDispatchable {
   /// Returns the children of the insrance of `CommandDescribable`.
-  public static var children: [CommandDescribable.Type] { return subcommands }
+  public static var children: [CommandDescribable.Type] {
+    return self.children as [CommandDispatchable.Type]
+  }
   /// Reutrns the subcommands of the command.
-  public static var subcommands: [AnyCommandRepresentable.Type] { return [] }
-  /// The level of the 'AnyCommandRepresentable'.
+  // public static var children: [CommandDispatchable.Type] { return [] }
+  /// The level of the 'CommandDispatchable'.
   public static var level: CommandLevel { return .command }
 }
 
@@ -58,7 +122,7 @@ extension AnyCommandRepresentable {
 
 /// A protocol represents the conforming types can dispatch with the specific options of associated
 /// type `Options`.
-public protocol CommandRepresentable: AnyCommandRepresentable {
+public protocol CommandRepresentable: CommandDispatchable {
   /// The associated type of `Options`.
   associatedtype Options: OptionsRepresentable
   /// The main entry of the command.
@@ -74,6 +138,8 @@ extension CommandRepresentable {
   public static var optionsDescriber: OptionsDescribable.Type {
     return Options.self
   }
+  /// Returns the children of the insrance of `CommandDescribable`.
+  public static var children: [CommandDispatchable.Type] { return [] }
   /// Dispatch the command with command line arguments.
   public static func dispatch(with commandLineArgs: [String]) throws {
     try self.main(try Options.decoded(from: commandLineArgs))

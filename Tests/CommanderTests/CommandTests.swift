@@ -104,7 +104,7 @@ struct TestsArgsCommand: CommandRepresentable {
       }
     }
   }
-  static let subcommands: [AnyCommandRepresentable.Type] = [
+  static let children: [CommandDispatchable.Type] = [
     TestsCommand.self
   ]
   static let symbol: String = "test-args"

@@ -28,9 +28,9 @@ import Foundation
 /// The namespace for built-in concepts and commands.
 public enum BuiltIn {
   /// The built-in help command.
-  public private(set) static var help: AnyCommandRepresentable.Type = Help.self
+  public private(set) static var help: CommandDispatchable.Type = Help.self
   /// The built-in commands for the commander except help command.
-  public private(set) static var commands: [AnyCommandRepresentable.Type] = [
+  public private(set) static var commands: [CommandDispatchable.Type] = [
     Complete.self // The complete command to show the complete word list of given command line parameters.
   ]
 }
