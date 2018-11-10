@@ -23,23 +23,7 @@
 //  SOFTWARE.
 //
 
-// MARK: - Merging.
-
-extension String {
-  internal func merging(_ other: String) -> String {
-    var merging: String
-    let merged: String
-    
-    if self.endIndex > other.endIndex {
-      merging = self; merged = other
-    } else {
-      merging = other; merged = self
-    }
-    
-    merging.replaceSubrange(merged.startIndex..<merged.endIndex, with: merged)
-    return merging
-  }
-}
+import Utility
 
 // MARK: - CommandDescriber.
 

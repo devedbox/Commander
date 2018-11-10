@@ -27,6 +27,8 @@
 		DCF55E742195DFD700F9B9D4 /* CommandLineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF55E732195DFD700F9B9D4 /* CommandLineTests.swift */; };
 		DCFA658A2196E06E0014D2FF /* Optional+.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCFA65892196E06E0014D2FF /* Optional+.swift */; };
 		DCFA658C2196E18C0014D2FF /* Optional+Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCFA658B2196E18C0014D2FF /* Optional+Tests.swift */; };
+		DCFA6596219727100014D2FF /* String+.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCFA6595219727100014D2FF /* String+.swift */; };
+		DCFA6598219727D30014D2FF /* String+Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCFA6597219727D30014D2FF /* String+Tests.swift */; };
 		OBJ_106 /* Bool+.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Bool+.swift */; };
 		OBJ_112 /* UtilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_35 /* UtilityTests.swift */; };
 		OBJ_114 /* Utility.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "Commander::Utility::Product" /* Utility.framework */; };
@@ -130,6 +132,8 @@
 		DCF55E732195DFD700F9B9D4 /* CommandLineTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandLineTests.swift; sourceTree = "<group>"; };
 		DCFA65892196E06E0014D2FF /* Optional+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Optional+.swift"; sourceTree = "<group>"; };
 		DCFA658B2196E18C0014D2FF /* Optional+Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Optional+Tests.swift"; sourceTree = "<group>"; };
+		DCFA6595219727100014D2FF /* String+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+.swift"; sourceTree = "<group>"; };
+		DCFA6597219727D30014D2FF /* String+Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Tests.swift"; sourceTree = "<group>"; };
 		OBJ_12 /* BuiltIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuiltIn.swift; sourceTree = "<group>"; };
 		OBJ_14 /* Complete.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Complete.swift; sourceTree = "<group>"; };
 		OBJ_15 /* Help.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Help.swift; sourceTree = "<group>"; };
@@ -290,6 +294,7 @@
 				OBJ_35 /* UtilityTests.swift */,
 				DC768DCB2195D9B600CE47D7 /* Bool+Tests.swift */,
 				DCFA658B2196E18C0014D2FF /* Optional+Tests.swift */,
+				DCFA6597219727D30014D2FF /* String+Tests.swift */,
 				DCF55E732195DFD700F9B9D4 /* CommandLineTests.swift */,
 			);
 			name = UtilityTests;
@@ -348,6 +353,7 @@
 			children = (
 				OBJ_9 /* Bool+.swift */,
 				DCFA65892196E06E0014D2FF /* Optional+.swift */,
+				DCFA6595219727100014D2FF /* String+.swift */,
 				DCE68E9D2195D66D00B7CA8B /* CommandLine.swift */,
 			);
 			name = Utility;
@@ -512,6 +518,7 @@
 			files = (
 				OBJ_106 /* Bool+.swift in Sources */,
 				DCFA658A2196E06E0014D2FF /* Optional+.swift in Sources */,
+				DCFA6596219727100014D2FF /* String+.swift in Sources */,
 				DCE68E9E2195D66D00B7CA8B /* CommandLine.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -521,6 +528,7 @@
 			buildActionMask = 0;
 			files = (
 				OBJ_112 /* UtilityTests.swift in Sources */,
+				DCFA6598219727D30014D2FF /* String+Tests.swift in Sources */,
 				DCF55E742195DFD700F9B9D4 /* CommandLineTests.swift in Sources */,
 				DC768DCC2195D9B700CE47D7 /* Bool+Tests.swift in Sources */,
 				DCFA658C2196E18C0014D2FF /* Optional+Tests.swift in Sources */,
