@@ -26,6 +26,26 @@
 import Foundation
 import Utility
 
+// MARK: - Help.Options.
+
+extension Help.Options {
+  /// Validates and returns the result of given command line indicates if the
+  /// command line contains help command's options.
+  fileprivate static func validte(_ commandLine: Utility.CommandLine) -> Bool {
+    return commandLine.arguments.contains {
+      $0 == OptionsDecoder.optionsFormat.format(CodingKeys.help.rawValue) ||
+      $0 == OptionsDecoder.optionsFormat.format(String(keys[.help]!), isShort: true)
+    }
+  }
+  /// Filters and excludes the help options from the given container.
+  fileprivate static func exclude(from commands: [String]) -> [String] {
+    return commands.filter {
+      $0 != OptionsDecoder.optionsFormat.format(CodingKeys.help.rawValue) &&
+      $0 != OptionsDecoder.optionsFormat.format(String(keys[.help]!), isShort: true)
+    }
+  }
+}
+
 // MARK: - Complete.Generate
 
 extension Complete {
@@ -94,7 +114,9 @@ extension Complete.Generate {
   }
 }
 
-/// The command to add bash-completion scripts of the commander
+/// The command to generate and provide the completion word list to the bash/zsh completion system.
+///
+/// - Precondition: The given arguments must be single and the single element(String) must not be empty.
 internal struct Complete: CommandRepresentable {
   internal struct Options: OptionsRepresentable {
     internal typealias ArgumentsResolver = AnyArgumentsResolver<String>
@@ -134,54 +156,56 @@ internal struct Complete: CommandRepresentable {
       return
     }
     
-    // Make an exception for 'help' command.
+    // MARK: Built-in 'Help'.
+    // If the command is built-in 'help' command, then complete with the first level commands of
+    // commander.
     try (commands.first == Help.symbol).true {
       logger <<< CommandPath.runningCommands.compactMap { cmd in
-        return commands.dropFirst().contains(cmd.symbol).or {
-          cmd.symbol == Help.symbol
-        }.false {
+        commands.dropFirst().contains(cmd.symbol).or { cmd.symbol == Help.symbol }.false {
           cmd.symbol
         }
       }.joined(separator: " ") <<< "\n"
       throw ReturnError()
     }
+    // If the command line contains the options of built-in 'help' command's options, then complete
+    // with empty list.
+    try Help.Options.validte(commandLine).true { throw ReturnError() }
     
-    let help = OptionsDecoder.optionsFormat.format(Help.Options.CodingKeys.help.rawValue)
-    let h = OptionsDecoder.optionsFormat.format(String(Help.Options.keys[.help]!), isShort: true)
+    // MARK: CommandPath.
     
-    try arguments.contains(help).or {
-      arguments.contains(h)
-    }.true {
-      throw ReturnError()
-    }
-    
-    let path = try CommandPath(
-      running: command,
-      at: CommandPath.runningCommanderPath
-    ).run(
+    let path = try CommandPath(running: command, at: CommandPath.runningCommanderPath).run(
       with: Array(commands.dropFirst()),
       ignoresExecution: true
     )
     
+    // The options validator to validates the given string is options or not.
     let optionsValidate = OptionsDecoder.optionsFormat.validate
     
+    // MARK: Options Completion.
+    // If the command line contains options, then
     try commands.filter { optionsValidate($0) }.isEmpty.false {
+      // If the last command line arg is not options, then
       try optionsValidate(commands.last!).false {
+        // If the type of 'options' can resolve arguments, then
         path.command.optionsDescriber.isArgumentsResolvable.true {
+          // Complete the options with 'optionsDescriber.completions(for:)'.
           logger <<< path.command.optionsDescriber.completions(for: commandLine).joined(separator: " ") <<< "\n"
         }
+        // Returns.
         throw ReturnError()
       }
     }
     
+    // MARK: Commands Completion.
+    // Completes the commands with 'command.completions(for:)'.
     var completions = path.command.completions(for: commandLine)
-    
+    // If the last arg is not an options, and
     optionsValidate(commands.last!).and {
+      // If the commands contains options, then
       !commands.dropLast().filter { optionsValidate($0) }.isEmpty
     }.true {
-      completions = completions.filter {
-        !($0 == help || $0 == h)
-      }
+      // Excludes the built-in 'help' command's options.
+      completions = Help.Options.exclude(from: completions)
     }
     
     logger <<< completions.joined(separator: " ") <<< "\n"
