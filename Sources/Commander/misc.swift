@@ -42,7 +42,7 @@ internal func dispatchSuccess() -> Result {
 #if DEBUG
   return EXIT_SUCCESS
 #else
-  return EXIT_SUCCESS
+  return exit(EXIT_SUCCESS)
 #endif
 }
 
@@ -50,7 +50,7 @@ internal func dispatchFailure() -> Result {
 #if DEBUG
   return EXIT_FAILURE
 #else
-  return EXIT_FAILURE
+  return exit(EXIT_FAILURE)
 #endif
 }
 
