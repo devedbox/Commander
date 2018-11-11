@@ -78,7 +78,7 @@ public struct CommandPath {
   /// - Parameter ignoresExecution: Should ignore the execution of the command path.
   /// - Returns: Returns the exact running path.
   @discardableResult
-  internal func run(with commandLineArgs: [String], ignoresExecution: Bool = false) throws -> CommandPath {
+  internal func run(with commandLineArgs: [String], skipping: Bool = false) throws -> CommandPath {
     if
       let first = commandLineArgs.first,
       OptionsDecoder.optionsFormat.index(of: first) == nil,
@@ -89,11 +89,11 @@ public struct CommandPath {
         at: "\(paths.joined(separator: " ")) \(command.symbol)"
       ).run(
         with: Array(commandLineArgs.dropFirst()),
-        ignoresExecution: ignoresExecution
+        skipping: skipping
       )
     }
     
-    guard ignoresExecution == false else {
+    guard skipping == false else {
       return self
     }
     

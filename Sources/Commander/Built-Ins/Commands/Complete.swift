@@ -174,7 +174,7 @@ internal struct Complete: CommandRepresentable {
     
     let path = try CommandPath(running: command, at: CommandPath.runningCommanderPath).run(
       with: Array(commands.dropFirst()),
-      ignoresExecution: true
+      skipping: true
     )
     
     // The options validator to validates the given string is options or not.
