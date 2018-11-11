@@ -23,7 +23,9 @@
 //  SOFTWARE.
 //
 
-import Foundation
+import Utility
+
+// MARK: - Shell.
 
 /// The type of 'shell' to perform shell-specificed actions.
 public enum Shell: String, Codable {
@@ -31,4 +33,28 @@ public enum Shell: String, Codable {
   case bash
   /// The Z shell. Usually located at '/bin/zsh'.
   case zsh
+}
+
+// MARK: - ShellCompletable.
+
+/// A protocol represents the conforming types can provide the complete list
+/// to the shell completion system.
+public protocol ShellCompletable {
+  /// Returns the completions list for the specific option key.
+  ///
+  /// - Parameter commandLine: The command line arguments.
+  /// - Returns: Returns the completion list for the given key.
+  static func completions(for commandLine: Utility.CommandLine) -> [String]
+}
+
+extension ShellCompletable {
+  /// Returns the completions list for the specific option key.
+  ///
+  /// - Parameter commandLine: The command line arguments.
+  /// - Returns: Returns the completion list for the given key.
+  public static func completions(for commandLine: Utility.CommandLine) -> [String] {
+    return [
+      // Default empty...
+    ]
+  }
 }

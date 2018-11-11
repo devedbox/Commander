@@ -49,7 +49,6 @@
 		OBJ_64 /* OptionsDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_24 /* OptionsDecoder.swift */; };
 		OBJ_65 /* OptionsRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_25 /* OptionsRepresentable.swift */; };
 		OBJ_66 /* Shell.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_27 /* Shell.swift */; };
-		OBJ_67 /* ShellCompletable.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_28 /* ShellCompletable.swift */; };
 		OBJ_68 /* misc.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_29 /* misc.swift */; };
 		OBJ_70 /* Utility.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "Commander::Utility::Product" /* Utility.framework */; };
 		OBJ_78 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_6 /* Package.swift */; };
@@ -148,7 +147,6 @@
 		OBJ_24 /* OptionsDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionsDecoder.swift; sourceTree = "<group>"; };
 		OBJ_25 /* OptionsRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionsRepresentable.swift; sourceTree = "<group>"; };
 		OBJ_27 /* Shell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shell.swift; sourceTree = "<group>"; };
-		OBJ_28 /* ShellCompletable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellCompletable.swift; sourceTree = "<group>"; };
 		OBJ_29 /* misc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = misc.swift; sourceTree = "<group>"; };
 		OBJ_31 /* SampleCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleCommand.swift; sourceTree = "<group>"; };
 		OBJ_32 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
@@ -215,10 +213,10 @@
 				OBJ_29 /* misc.swift */,
 				OBJ_21 /* Error.swift */,
 				OBJ_16 /* Commander.swift */,
+				OBJ_27 /* Shell.swift */,
 				OBJ_11 /* Built-Ins */,
 				OBJ_17 /* Commands */,
 				OBJ_22 /* Options */,
-				OBJ_26 /* Shell */,
 			);
 			name = Commander;
 			path = Sources/Commander;
@@ -260,15 +258,6 @@
 				OBJ_25 /* OptionsRepresentable.swift */,
 			);
 			path = Options;
-			sourceTree = "<group>";
-		};
-		OBJ_26 /* Shell */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_27 /* Shell.swift */,
-				OBJ_28 /* ShellCompletable.swift */,
-			);
-			path = Shell;
 			sourceTree = "<group>";
 		};
 		OBJ_30 /* commander-sample */ = {
@@ -564,7 +553,6 @@
 				OBJ_64 /* OptionsDecoder.swift in Sources */,
 				OBJ_65 /* OptionsRepresentable.swift in Sources */,
 				OBJ_66 /* Shell.swift in Sources */,
-				OBJ_67 /* ShellCompletable.swift in Sources */,
 				OBJ_68 /* misc.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
