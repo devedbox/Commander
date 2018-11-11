@@ -331,24 +331,37 @@ extension OptionsDecoder {
       
       switch self {
       case .flatContainer(splitter: let splitter, keyValuePairsSplitter: let keyValuePairsSplitter):
-        if string.contains(splitter) || string.contains(keyValuePairsSplitter) {
-          let elements = string.split(separator: splitter)
-          if string.contains(keyValuePairsSplitter) {
-            dictContainer = try elements.reduce([:], { result, next -> [String: Value] in
-              let keyValuePairs = next.split(separator: keyValuePairsSplitter)
-              guard keyValuePairs.count == 2 else {
-                throw Error.invalidKeyValuePairs(pairs: keyValuePairs.map { String($0) })
-              }
-              let value: Value = .string(String(keyValuePairs[1]))
-              return result.merging([String(keyValuePairs[0]): value]) { _ , new in new }
-            })
-          } else {
-            arrayContainer = elements.map { Value(stringValue: String($0)) }
-          }
-        } else { // Consider an array with single element.
+        let elements = string.split(delimiter: splitter)
+        
+        guard !elements.isEmpty else {
           arrayContainer = [Value(stringValue: string)]
+          break
         }
-        break
+        
+        var values: [[String]] = []
+        let keyValuePairs: [String: Value] = try elements.reduce([:]) {
+          let pairs = $1.split(delimiter: keyValuePairsSplitter)
+          
+          if pairs.isSingle {
+            values.append(pairs)
+            return $0
+          }
+          guard pairs.index(after: pairs.index(after: pairs.startIndex)) == pairs.endIndex else {
+            throw Error.invalidKeyValuePairs(pairs: pairs)
+          }
+          
+          return $0.merging([pairs[0]: .string(pairs[1])]) { $1 }
+        }
+        
+        if !keyValuePairs.isEmpty, !values.isEmpty {
+          throw Error.invalidKeyValuePairs(pairs: values.first!)
+        }
+        
+        if keyValuePairs.isEmpty {
+          arrayContainer = elements.map { Value(stringValue: String($0)) }
+        } else {
+          dictContainer = keyValuePairs
+        }
       case .json:
         throw Value.Error.jsonObjectFormatIsNotSupported
       }

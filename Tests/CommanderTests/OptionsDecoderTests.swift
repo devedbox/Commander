@@ -774,11 +774,23 @@ class OptionsDecoderTests: XCTestCase {
   
   func testDecodeErrors() {
     XCTAssertNoThrow(try OptionsDecoder().decode(KeyedOptions.self, from: ["--dict", "key1=val1,key2=val2"]))
+    XCTAssertNoThrow(try OptionsDecoder().decode(KeyedOptions.self, from: ["--dict", "key1=val1", "key2=val2"]))
+    XCTAssertNoThrow(try OptionsDecoder().decode(KeyedOptions.self, from: ["--dict", "key1=val1\\\\=33,key2=val2"]))
     do {
       _ = try OptionsDecoder().decode(KeyedOptions.self, from: ["--dict", "key1=val1=3,key2=val2"])
       XCTFail()
     } catch OptionsDecoder.Error.invalidKeyValuePairs(pairs: let pairs) {
       XCTAssertEqual(Set(pairs), ["key1", "val1", "3"])
+      XCTAssertFalse(OptionsDecoder.Error.invalidKeyValuePairs(pairs: pairs).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      _ = try OptionsDecoder().decode(KeyedOptions.self, from: ["--dict", "key1=val1,key2val2"])
+      XCTFail()
+    } catch OptionsDecoder.Error.invalidKeyValuePairs(pairs: let pairs) {
+      XCTAssertEqual(Set(pairs), ["key2val2"])
       XCTAssertFalse(OptionsDecoder.Error.invalidKeyValuePairs(pairs: pairs).description.isEmpty)
     } catch {
       XCTFail()

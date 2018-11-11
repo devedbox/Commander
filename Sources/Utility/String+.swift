@@ -102,11 +102,11 @@ extension String {
     
     while let char = iterator.next() {
       switch char {
-      case "\\":
+      case "\\" where !isEscaping:
         isEscaping = true
       case "\"", "'":
         isQuoting.toggle()
-      case delimiter:
+      case delimiter where !isEscaping:
         if isQuoting {
           fallthrough
         }
