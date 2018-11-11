@@ -28,9 +28,9 @@
 import Foundation
 import Commander
 
-Commander.commands = [
+BuiltIn.Commander.commands = [
   SampleCommand.self,
   NoArgsCommand.self
 ]
-Commander.usage = "The sample usage command of 'Commander'"
-Commander().dispatch()
+BuiltIn.Commander.usage = "The sample usage command of 'Commander'"
+BuiltIn.Commander().dispatch()

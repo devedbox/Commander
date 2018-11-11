@@ -184,18 +184,3 @@ extension CommanderRepresentable {
     }
   }
 }
-
-// MARK: - Commander.
-
-public final class Commander: CommanderRepresentable {
-  /// A closure of `(Error) -> Void` to handle the stderror.
-  public static var errorHandler: ((Swift.Error) -> Void)?
-  /// A closure of `(String) -> Void` to handle the stdout.
-  public static var outputHandler: ((String) -> Void)?
-  /// The registered available commands of the commander.
-  public static var commands: [CommandDispatchable.Type] = []
-  /// The human-readable usage description of the commands.
-  public static var usage: String = ""
-  /// Creates the instance of `Commander`.
-  public init() { }
-}

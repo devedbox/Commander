@@ -100,7 +100,7 @@ class MockCommander: CommanderRepresentable {
     let verbose: Bool
   }
   static var outputHandler: ((String) -> Void)? = nil
-  static var errorHandler: ((Error) -> Void)? = nil
+  static var errorHandler: ((Swift.Error) -> Void)? = nil
   static var commands: [CommandDispatchable.Type] = [
     MockCommander.TestsCommand.self,
     MockCommander.TestsArgsCommand.self
@@ -147,7 +147,7 @@ class GlobalOptionsTests: XCTestCase {
     do {
       try MockCommander().dispatch(with: ["commander", "test", "-C=path", "--verbose", "-s", "-r"])
       XCTFail()
-    } catch CommanderError.unrecognizedOptions(let options, path: let path, underlyingError: let error) {
+    } catch Commander.Error.unrecognizedOptions(let options, path: let path, underlyingError: let error) {
       XCTAssertEqual(options.set, ["s", "r"])
       XCTAssertTrue(path.command == MockCommander.TestsCommand.self)
       XCTAssertEqual(path.paths.set, ["commander"])

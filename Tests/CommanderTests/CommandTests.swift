@@ -122,32 +122,32 @@ class CommandTests: XCTestCase {
   ]
   
   override func setUp() {
-    Commander.commands = [
+    BuiltIn.Commander.commands = [
       TestsCommand.self,
       TestsArgsCommand.self
     ]
-    Commander.usage = "Mocked usage"
+    BuiltIn.Commander.usage = "Mocked usage"
   }
   
   func testCommand() {
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test", "--verbose", "--target", "The target"]))
-    Commander().dispatch()
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "test", "--verbose", "--target", "The target"]))
+    BuiltIn.Commander().dispatch()
     XCTAssertEqual(dispatchFailure(), EXIT_FAILURE)
     
     do {
-      try Commander().dispatch(with: ["commander"])
+      try BuiltIn.Commander().dispatch(with: ["commander"])
       XCTFail()
-    } catch CommanderError.emptyCommand {
+    } catch Commander.Error.emptyCommand {
       XCTAssertTrue(true)
-      XCTAssertFalse(Error.emptyCommand.description.isEmpty)
+      XCTAssertFalse(Commander.Error.emptyCommand.description.isEmpty)
     } catch {
       XCTFail()
     }
     
     do {
-      try Commander().dispatch(with: ["commander", "command"])
+      try BuiltIn.Commander().dispatch(with: ["commander", "command"])
       XCTFail()
-    } catch CommanderError.invalidCommand(command: let command) {
+    } catch Commander.Error.invalidCommand(command: let command) {
       XCTAssertTrue(true)
       XCTAssertEqual(command, "command")
       XCTAssertFalse(Error.invalidCommand(command: command).description.isEmpty)
@@ -158,150 +158,150 @@ class CommandTests: XCTestCase {
   
   func testCompleteCommand() {
     var outputs = String()
-    Commander.outputHandler = { outputs += $0.trimmingCharacters(in: .newlines) }; defer { Commander.outputHandler = nil }
+    BuiltIn.Commander.outputHandler = { outputs += $0.trimmingCharacters(in: .newlines) }; defer { BuiltIn.Commander.outputHandler = nil }
     
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "generate", "--shell=bash"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "generate", "--shell=bash"]))
     XCTAssertEqual(outputs.isEmpty, false); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "generate", "--shell=zsh"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "generate", "--shell=zsh"]))
     XCTAssertEqual(outputs.isEmpty, false); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete"]))
     XCTAssertEqual(outputs, ""); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", ""]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", ""]))
     XCTAssertEqual(outputs, ""); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "help test test-args -h --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander h"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander h"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "help test test-args -h --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander he"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander he"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "help test test-args -h --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander hel"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander hel"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "help test test-args -h --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander help"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander help"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "test test-args".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander help "]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander help "]))
     XCTAssertEqual(outputs.split(separator: " ").set, "test test-args".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander help t"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander help t"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "test test-args".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander help test"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander help test"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "test-args".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander help test-args"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander help test-args"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "test".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander help test test-args"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander help test test-args"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander te"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander te"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "help test test-args -h --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander tes"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander tes"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "help test test-args -h --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "-t -v --target --verbose -h --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test "]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test "]))
     XCTAssertEqual(outputs.split(separator: " ").set, "-t -v --target --verbose -h --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test -"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test -"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "-t -v --target --verbose -h --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test -t"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test -t"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "target0 target1".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test -t "]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test -t "]))
     XCTAssertEqual(outputs.split(separator: " ").set, "target0 target1".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test -t s"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test -t s"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "arg0 arg1 arg2".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test -h"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test -h"]))
     XCTAssertEqual(outputs, ""); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test -h "]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test -h "]))
     XCTAssertEqual(outputs, ""); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test -h -"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test -h -"]))
     XCTAssertEqual(outputs, ""); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test --"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test --"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "--target --verbose --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test --t"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test --t"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "--target --verbose --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test --ta"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test --ta"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "--target --verbose --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test --tar"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test --tar"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "--target --verbose --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test --targ"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test --targ"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "--target --verbose --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test --targe"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test --targe"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "--target --verbose --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test --target"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test --target"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "target0 target1".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test --target "]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test --target "]))
     XCTAssertEqual(outputs.split(separator: " ").set, "target0 target1".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test --target -"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test --target -"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "-t -v --target --verbose".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test --target --"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test --target --"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "--target --verbose".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test --help"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test --help"]))
     XCTAssertEqual(outputs, ""); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test --help "]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test --help "]))
     XCTAssertEqual(outputs, ""); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test --help -"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test --help -"]))
     XCTAssertEqual(outputs, ""); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test -h"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test -h"]))
     XCTAssertEqual(outputs, ""); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test -h "]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test -h "]))
     XCTAssertEqual(outputs, ""); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test -h -"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test -h -"]))
     XCTAssertEqual(outputs, ""); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test-"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "help test test-args -h --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-a"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test-a"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "help test test-args -h --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-ar"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test-ar"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "help test test-args -h --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-arg"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test-arg"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "help test test-args -h --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test-args"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "test -T --target -h --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args "]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test-args "]))
     XCTAssertEqual(outputs.split(separator: " ").set, "test -T --target -h --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args u"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test-args u"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "test -T --target -h --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args -"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test-args -"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "-T --target -h --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args --"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test-args --"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "--target --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args --t"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test-args --t"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "--target --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args --ta"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test-args --ta"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "--target --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args --tar"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test-args --tar"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "--target --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args --targ"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test-args --targ"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "--target --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args --targe"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test-args --targe"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "--target --help".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args --target"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test-args --target"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "target0 target1 target2 target3".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args --target "]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test-args --target "]))
     XCTAssertEqual(outputs.split(separator: " ").set, "target0 target1 target2 target3".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args --target s"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test-args --target s"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "a b c".split(separator: " ").set); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args --help"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test-args --help"]))
     XCTAssertEqual(outputs, ""); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args --help "]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test-args --help "]))
     XCTAssertEqual(outputs, ""); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args --help -"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test-args --help -"]))
     XCTAssertEqual(outputs, ""); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args -h"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test-args -h"]))
     XCTAssertEqual(outputs, ""); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args -h "]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test-args -h "]))
     XCTAssertEqual(outputs, ""); outputs = ""
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "complete", "commander test-args -h -"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander test-args -h -"]))
     XCTAssertEqual(outputs, ""); outputs = ""
   }
   
   func testHelpCommand() {    
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "help"]))
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "--help"]))
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "-h"]))
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "help", "test"]))
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test", "-h"]))
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test", "--help"]))
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "help", "test-args"]))
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test-args", "-h"]))
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test-args", "test", "-h"]))
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test-args", "--help"]))
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test-args", "test", "--help"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "help"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "--help"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "-h"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "help", "test"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "test", "-h"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "test", "--help"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "help", "test-args"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "test-args", "-h"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "test-args", "test", "-h"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "test-args", "--help"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "test-args", "test", "--help"]))
     
     XCTAssertTrue(try! Help.validate(options: ["h"]))
     XCTAssertTrue(try! Help.validate(options: ["help"]))
@@ -309,7 +309,7 @@ class CommandTests: XCTestCase {
     do {
       _ = try Help.validate(options: ["h", "h"])
       XCTFail()
-    } catch Error.extraOptions(options: let options) {
+    } catch Commander.Error.extraOptions(options: let options) {
       XCTAssertEqual(options.set, ["h", "h"])
       XCTAssertFalse(Error.extraOptions(options: options).description.isEmpty)
     } catch {
@@ -317,9 +317,9 @@ class CommandTests: XCTestCase {
     }
     
     do {
-      try Commander().dispatch(with: ["commander", "test", "-h", "-t"])
+      try BuiltIn.Commander().dispatch(with: ["commander", "test", "-h", "-t"])
       XCTFail()
-    } catch Error.extraOptions(options: let options) {
+    } catch Commander.Error.extraOptions(options: let options) {
       XCTAssertEqual(options.set, ["help", "t"])
       XCTAssertFalse(Error.extraOptions(options: options).description.isEmpty)
     } catch {
@@ -327,9 +327,9 @@ class CommandTests: XCTestCase {
     }
     
     do {
-      try Commander().dispatch(with: ["commander", "test", "-h", "--target"])
+      try BuiltIn.Commander().dispatch(with: ["commander", "test", "-h", "--target"])
       XCTFail()
-    } catch Error.extraOptions(options: let options) {
+    } catch Commander.Error.extraOptions(options: let options) {
       XCTAssertEqual(options.set, ["help", "target"])
       XCTAssertFalse(Error.extraOptions(options: options).description.isEmpty)
     } catch {
@@ -337,9 +337,9 @@ class CommandTests: XCTestCase {
     }
     
     do {
-      try Commander().dispatch(with: ["commander", "test", "-h", "-v"])
+      try BuiltIn.Commander().dispatch(with: ["commander", "test", "-h", "-v"])
       XCTFail()
-    } catch Error.extraOptions(options: let options) {
+    } catch Commander.Error.extraOptions(options: let options) {
       XCTAssertEqual(options.set, ["help", "v"])
       XCTAssertFalse(Error.extraOptions(options: options).description.isEmpty)
     } catch {
@@ -347,9 +347,9 @@ class CommandTests: XCTestCase {
     }
     
     do {
-      try Commander().dispatch(with: ["commander", "test", "-h", "--verbose"])
+      try BuiltIn.Commander().dispatch(with: ["commander", "test", "-h", "--verbose"])
       XCTFail()
-    } catch Error.extraOptions(options: let options) {
+    } catch Commander.Error.extraOptions(options: let options) {
       XCTAssertEqual(options.set, ["help", "verbose"])
       XCTAssertFalse(Error.extraOptions(options: options).description.isEmpty)
     } catch {
@@ -357,9 +357,9 @@ class CommandTests: XCTestCase {
     }
     
     do {
-      try Commander().dispatch(with: ["commander", "test", "-h", "-v", "-t"])
+      try BuiltIn.Commander().dispatch(with: ["commander", "test", "-h", "-v", "-t"])
       XCTFail()
-    } catch Error.extraOptions(options: let options) {
+    } catch Commander.Error.extraOptions(options: let options) {
       XCTAssertEqual(options.set, ["help", "v", "t"])
       XCTAssertFalse(Error.extraOptions(options: options).description.isEmpty)
     } catch {
@@ -367,9 +367,9 @@ class CommandTests: XCTestCase {
     }
     
     do {
-      try Commander().dispatch(with: ["commander", "test", "--help", "-t"])
+      try BuiltIn.Commander().dispatch(with: ["commander", "test", "--help", "-t"])
       XCTFail()
-    } catch Error.extraOptions(options: let options) {
+    } catch Commander.Error.extraOptions(options: let options) {
       XCTAssertEqual(options.set, ["help", "t"])
       XCTAssertFalse(Error.extraOptions(options: options).description.isEmpty)
     } catch {
@@ -377,9 +377,9 @@ class CommandTests: XCTestCase {
     }
     
     do {
-      try Commander().dispatch(with: ["commander", "test", "--help", "--target"])
+      try BuiltIn.Commander().dispatch(with: ["commander", "test", "--help", "--target"])
       XCTFail()
-    } catch Error.extraOptions(options: let options) {
+    } catch Commander.Error.extraOptions(options: let options) {
       XCTAssertEqual(options.set, ["help", "target"])
       XCTAssertFalse(Error.extraOptions(options: options).description.isEmpty)
     } catch {
@@ -387,9 +387,9 @@ class CommandTests: XCTestCase {
     }
     
     do {
-      try Commander().dispatch(with: ["commander", "test", "--help", "-v"])
+      try BuiltIn.Commander().dispatch(with: ["commander", "test", "--help", "-v"])
       XCTFail()
-    } catch Error.extraOptions(options: let options) {
+    } catch Commander.Error.extraOptions(options: let options) {
       XCTAssertEqual(options.set, ["help", "v"])
       XCTAssertFalse(Error.extraOptions(options: options).description.isEmpty)
     } catch {
@@ -397,9 +397,9 @@ class CommandTests: XCTestCase {
     }
     
     do {
-      try Commander().dispatch(with: ["commander", "test", "--help", "--verbose"])
+      try BuiltIn.Commander().dispatch(with: ["commander", "test", "--help", "--verbose"])
       XCTFail()
-    } catch Error.extraOptions(options: let options) {
+    } catch Commander.Error.extraOptions(options: let options) {
       XCTAssertEqual(options.set, ["help", "verbose"])
       XCTAssertFalse(Error.extraOptions(options: options).description.isEmpty)
     } catch {
@@ -407,9 +407,9 @@ class CommandTests: XCTestCase {
     }
     
     do {
-      try Commander().dispatch(with: ["commander", "test", "--help", "-v", "-t"])
+      try BuiltIn.Commander().dispatch(with: ["commander", "test", "--help", "-v", "-t"])
       XCTFail()
-    } catch Error.extraOptions(options: let options) {
+    } catch Commander.Error.extraOptions(options: let options) {
       XCTAssertEqual(options.set, ["help", "v", "t"])
       XCTAssertFalse(Error.extraOptions(options: options).description.isEmpty)
     } catch {
@@ -417,9 +417,9 @@ class CommandTests: XCTestCase {
     }
     
     do {
-      try Commander().dispatch(with: ["commander", "test", "-t", "-h"])
+      try BuiltIn.Commander().dispatch(with: ["commander", "test", "-t", "-h"])
       XCTFail()
-    } catch Error.extraOptions(options: let options) {
+    } catch Commander.Error.extraOptions(options: let options) {
       XCTAssertEqual(options.set, ["help", "t"])
       XCTAssertFalse(Error.extraOptions(options: options).description.isEmpty)
     } catch {
@@ -427,9 +427,9 @@ class CommandTests: XCTestCase {
     }
     
     do {
-      try Commander().dispatch(with: ["commander", "test", "--target", "-h"])
+      try BuiltIn.Commander().dispatch(with: ["commander", "test", "--target", "-h"])
       XCTFail()
-    } catch Error.extraOptions(options: let options) {
+    } catch Commander.Error.extraOptions(options: let options) {
       XCTAssertEqual(options.set, ["help", "target"])
       XCTAssertFalse(Error.extraOptions(options: options).description.isEmpty)
     } catch {
@@ -437,9 +437,9 @@ class CommandTests: XCTestCase {
     }
     
     do {
-      try Commander().dispatch(with: ["commander", "test", "-v", "-h"])
+      try BuiltIn.Commander().dispatch(with: ["commander", "test", "-v", "-h"])
       XCTFail()
-    } catch Error.extraOptions(options: let options) {
+    } catch Commander.Error.extraOptions(options: let options) {
       XCTAssertEqual(options.set, ["help", "v"])
       XCTAssertFalse(Error.extraOptions(options: options).description.isEmpty)
     } catch {
@@ -447,9 +447,9 @@ class CommandTests: XCTestCase {
     }
     
     do {
-      try Commander().dispatch(with: ["commander", "test", "--verbose", "-h"])
+      try BuiltIn.Commander().dispatch(with: ["commander", "test", "--verbose", "-h"])
       XCTFail()
-    } catch Error.extraOptions(options: let options) {
+    } catch Commander.Error.extraOptions(options: let options) {
       XCTAssertEqual(options.set, ["help", "verbose"])
       XCTAssertFalse(Error.extraOptions(options: options).description.isEmpty)
     } catch {
@@ -457,9 +457,9 @@ class CommandTests: XCTestCase {
     }
     
     do {
-      try Commander().dispatch(with: ["commander", "test", "-v", "-t", "-h"])
+      try BuiltIn.Commander().dispatch(with: ["commander", "test", "-v", "-t", "-h"])
       XCTFail()
-    } catch Error.extraOptions(options: let options) {
+    } catch Commander.Error.extraOptions(options: let options) {
       XCTAssertEqual(options.set, ["help", "v", "t"])
       XCTAssertFalse(Error.extraOptions(options: options).description.isEmpty)
     } catch {
@@ -467,9 +467,9 @@ class CommandTests: XCTestCase {
     }
     
     do {
-      try Commander().dispatch(with: ["commander", "test", "-t", "--help"])
+      try BuiltIn.Commander().dispatch(with: ["commander", "test", "-t", "--help"])
       XCTFail()
-    } catch Error.extraOptions(options: let options) {
+    } catch Commander.Error.extraOptions(options: let options) {
       XCTAssertEqual(options.set, ["help", "t"])
       XCTAssertFalse(Error.extraOptions(options: options).description.isEmpty)
     } catch {
@@ -477,9 +477,9 @@ class CommandTests: XCTestCase {
     }
     
     do {
-      try Commander().dispatch(with: ["commander", "test", "--target", "--help"])
+      try BuiltIn.Commander().dispatch(with: ["commander", "test", "--target", "--help"])
       XCTFail()
-    } catch Error.extraOptions(options: let options) {
+    } catch Commander.Error.extraOptions(options: let options) {
       XCTAssertEqual(options.set, ["help", "target"])
       XCTAssertFalse(Error.extraOptions(options: options).description.isEmpty)
     } catch {
@@ -487,9 +487,9 @@ class CommandTests: XCTestCase {
     }
     
     do {
-      try Commander().dispatch(with: ["commander", "test", "-v", "--help"])
+      try BuiltIn.Commander().dispatch(with: ["commander", "test", "-v", "--help"])
       XCTFail()
-    } catch Error.extraOptions(options: let options) {
+    } catch Commander.Error.extraOptions(options: let options) {
       XCTAssertEqual(options.set, ["help", "v"])
       XCTAssertFalse(Error.extraOptions(options: options).description.isEmpty)
     } catch {
@@ -497,9 +497,9 @@ class CommandTests: XCTestCase {
     }
     
     do {
-      try Commander().dispatch(with: ["commander", "test", "--verbose", "--help"])
+      try BuiltIn.Commander().dispatch(with: ["commander", "test", "--verbose", "--help"])
       XCTFail()
-    } catch Error.extraOptions(options: let options) {
+    } catch Commander.Error.extraOptions(options: let options) {
       XCTAssertEqual(options.set, ["help", "verbose"])
       XCTAssertFalse(Error.extraOptions(options: options).description.isEmpty)
     } catch {
@@ -507,9 +507,9 @@ class CommandTests: XCTestCase {
     }
     
     do {
-      try Commander().dispatch(with: ["commander", "test", "-t", "-v", "--help"])
+      try BuiltIn.Commander().dispatch(with: ["commander", "test", "-t", "-v", "--help"])
       XCTFail()
-    } catch Error.extraOptions(options: let options) {
+    } catch Commander.Error.extraOptions(options: let options) {
       XCTAssertEqual(options.set, ["help", "v", "t"])
       XCTAssertFalse(Error.extraOptions(options: options).description.isEmpty)
     } catch {
@@ -517,9 +517,9 @@ class CommandTests: XCTestCase {
     }
     
     do {
-      try Commander().dispatch(with: ["commander", "help", "--help"])
+      try BuiltIn.Commander().dispatch(with: ["commander", "help", "--help"])
       XCTFail()
-    } catch CommanderError.unrecognizedOptions(let options, path: let path, underlyingError: let error) {
+    } catch Commander.Error.unrecognizedOptions(let options, path: let path, underlyingError: let error) {
       XCTAssertTrue(true)
       XCTAssertEqual(options, ["help"])
       XCTAssertFalse(Error.unrecognizedOptions(options, path: path, underlyingError: error).description.isEmpty)
@@ -528,9 +528,9 @@ class CommandTests: XCTestCase {
     }
     
     do {
-      try Commander().dispatch(with: ["commander", "help", "-h"])
+      try BuiltIn.Commander().dispatch(with: ["commander", "help", "-h"])
       XCTFail()
-    } catch CommanderError.unrecognizedOptions(let options, path: let path, underlyingError: let error) {
+    } catch Commander.Error.unrecognizedOptions(let options, path: let path, underlyingError: let error) {
       XCTAssertTrue(true)
       XCTAssertEqual(options, ["h"])
       XCTAssertFalse(Error.unrecognizedOptions(options, path: path, underlyingError: error).description.isEmpty)
@@ -539,9 +539,9 @@ class CommandTests: XCTestCase {
     }
     
     do {
-      try Commander().dispatch(with: ["commander", "help", "command"])
+      try BuiltIn.Commander().dispatch(with: ["commander", "help", "command"])
       XCTFail()
-    } catch Error.unrecognizedCommands(commands: let commands) {
+    } catch Commander.Error.unrecognizedCommands(commands: let commands) {
       XCTAssertTrue(true)
       XCTAssertEqual(commands, ["command"])
       XCTAssertFalse(Error.unrecognizedCommands(commands: commands).description.isEmpty)
@@ -550,9 +550,9 @@ class CommandTests: XCTestCase {
     }
     
     do {
-      try Commander().dispatch(with: ["commander", "fake", "-s"])
+      try BuiltIn.Commander().dispatch(with: ["commander", "fake", "-s"])
       XCTFail()
-    } catch CommanderError.invalidCommand(command: let command) {
+    } catch Commander.Error.invalidCommand(command: let command) {
       XCTAssertTrue(true)
       XCTAssertEqual(command, "fake")
       XCTAssertFalse(Error.invalidCommand(command: command).description.isEmpty)
@@ -562,14 +562,14 @@ class CommandTests: XCTestCase {
   }
   
   func testSubcommands() {
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test-args"]))
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test-args", "test", "--verbose"]))
-    XCTAssertNoThrow(try Commander().dispatch(with: ["commander", "test-args", "test", "-v", "--target", "The target"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "test-args"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "test-args", "test", "--verbose"]))
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "test-args", "test", "-v", "--target", "The target"]))
     
     do {
-      try Commander().dispatch(with: ["commander"])
+      try BuiltIn.Commander().dispatch(with: ["commander"])
       XCTFail()
-    } catch CommanderError.emptyCommand {
+    } catch Commander.Error.emptyCommand {
       XCTAssertTrue(true)
       XCTAssertFalse(Error.emptyCommand.description.isEmpty)
     } catch {
@@ -577,9 +577,9 @@ class CommandTests: XCTestCase {
     }
     
     do {
-      try Commander().dispatch(with: ["commander", "command"])
+      try BuiltIn.Commander().dispatch(with: ["commander", "command"])
       XCTFail()
-    } catch CommanderError.invalidCommand(command: let command) {
+    } catch Commander.Error.invalidCommand(command: let command) {
       XCTAssertTrue(true)
       XCTAssertEqual(command, "command")
       XCTAssertFalse(Error.invalidCommand(command: command).description.isEmpty)
