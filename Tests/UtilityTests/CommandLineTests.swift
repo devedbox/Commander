@@ -53,6 +53,13 @@ class CommandLineTests: XCTestCase {
     XCTAssertEqual(Set(commandLine.arguments), ["commander", "command", "subcmd", "args: val0 val1 val3"])
     XCTAssertEqual(commandLine.arguments, ["commander", "command", "subcmd", "args: val0 val1 val3"])
     
+    cli = ["  commander", "command ", "  subcmd", "\\\"args:\\ val0\\ val1\\ val3\\\""]
+    commandLine = CommandLine(cli.joined(separator: " "))
+    
+    XCTAssertEqual(commandLine.argc, 3)
+    XCTAssertEqual(Set(commandLine.arguments), ["commander", "command", "subcmd", "\"args: val0 val1 val3\""])
+    XCTAssertEqual(commandLine.arguments, ["commander", "command", "subcmd", "\"args: val0 val1 val3\""])
+    
     cli = ["commander  ", " command", " subcmd", "'args: val0   val1 val3'"]
     commandLine = CommandLine(cli.joined(separator: " "))
     

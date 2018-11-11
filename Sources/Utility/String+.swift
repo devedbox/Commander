@@ -102,15 +102,11 @@ extension String {
     
     while let char = iterator.next() {
       switch char {
-      case "\\" where !isEscaping:
-        isEscaping = true
-      case "\"", "'":
-        isQuoting.toggle()
+      case "\\"      where !isEscaping: isEscaping = true
+      case "\""      where !isEscaping: fallthrough
+      case "'"       where !isEscaping: isQuoting.toggle()
       case delimiter where !isEscaping:
-        if isQuoting {
-          fallthrough
-        }
-        
+        if isQuoting { fallthrough }
         if let last = results.last, last.isEmpty, omittingEmptySubsequences {
           break
         }
@@ -118,7 +114,6 @@ extension String {
         results.append(String())
       default:
         isEscaping ? isEscaping.toggle() : ()
-        
         results.isEmpty ? results.append(String()) : ()
         results.append(results.popLast()! + String(char))
       }
