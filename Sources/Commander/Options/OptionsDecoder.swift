@@ -334,32 +334,26 @@ extension OptionsDecoder {
         let elements = string.split(delimiter: splitter)
         
         guard !elements.isEmpty else {
-          arrayContainer = [Value(stringValue: string)]
-          break
+          arrayContainer = [Value(stringValue: string)]; break
         }
         
         var values: [[String]] = []
         let keyValuePairs: [String: Value] = try elements.reduce([:]) {
           let pairs = $1.split(delimiter: keyValuePairsSplitter)
           
-          if pairs.isSingle {
-            values.append(pairs)
-            return $0
-          }
+          if pairs.isSingle { values.append(pairs); return $0 }
           guard pairs.index(after: pairs.index(after: pairs.startIndex)) == pairs.endIndex else {
             throw Error.invalidKeyValuePairs(pairs: pairs)
           }
-          
           return $0.merging([pairs[0]: .string(pairs[1])]) { $1 }
-        }
-        
-        if !keyValuePairs.isEmpty, !values.isEmpty {
-          throw Error.invalidKeyValuePairs(pairs: values.first!)
         }
         
         if keyValuePairs.isEmpty {
           arrayContainer = elements.map { Value(stringValue: String($0)) }
         } else {
+          if !values.isEmpty {
+            throw Error.invalidKeyValuePairs(pairs: values.first!)
+          }
           dictContainer = keyValuePairs
         }
       case .json:
