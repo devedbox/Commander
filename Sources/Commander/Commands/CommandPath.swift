@@ -107,7 +107,7 @@ public struct CommandPath {
       throw CommanderError.unrecognizedOptions(options, path: self, underlyingError: error)
     } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded?, decoder: let decoder?, decodeError: _) {
       throw Dispatcher(path: self, options: options, decoded: decoded, decoder: decoder)
-    } catch is ReturnError {
+    } catch Signal.return {
       return self
     } catch {
       throw error

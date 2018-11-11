@@ -139,11 +139,11 @@ internal struct Complete: CommandRepresentable {
   ]
   
   internal static func main(_ options: Complete.Options) throws {
-    try options.arguments.isSingle.false { throw ReturnError() }
+    try options.arguments.isSingle.false { throw Signal.return }
     
     let commandLine = CommandLine(options.arguments.last!)
     let arguments = commandLine.arguments
-    try arguments.isEmpty.true { throw ReturnError() }
+    try arguments.isEmpty.true { throw Signal.return }
     
     let commands = Array(arguments.dropFirst())
     
@@ -164,11 +164,11 @@ internal struct Complete: CommandRepresentable {
           cmd.symbol
         }
       }.joined(separator: " ") <<< "\n"
-      throw ReturnError()
+      throw Signal.return
     }
     // If the command line contains the options of built-in 'help' command's options, then complete
     // with empty list.
-    try Help.Options.validte(commandLine).true { throw ReturnError() }
+    try Help.Options.validte(commandLine).true { throw Signal.return }
     
     // MARK: CommandPath.
     
@@ -191,7 +191,7 @@ internal struct Complete: CommandRepresentable {
           logger <<< path.command.optionsDescriber.completions(for: commandLine).joined(separator: " ") <<< "\n"
         // }
         // Returns.
-        throw ReturnError()
+        throw Signal.return
       }
     }
     

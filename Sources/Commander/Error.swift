@@ -27,7 +27,11 @@
 
 // MARK: - Return.
 
-public struct ReturnError: Swift.Error { }
+/// The error type represents the error is a common signal and can be handled.
+public enum Signal: Swift.Error {
+  /// Case 'return' indicates the 'return' signal.
+  case `return`
+}
 
 // MARK: - CommanderError.
 
