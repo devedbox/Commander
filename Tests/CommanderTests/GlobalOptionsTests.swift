@@ -151,7 +151,7 @@ class GlobalOptionsTests: XCTestCase {
       XCTAssertEqual(options.set, ["s", "r"])
       XCTAssertTrue(path.command == MockCommander.TestsCommand.self)
       XCTAssertEqual(path.paths.set, ["commander"])
-      XCTAssertFalse(CommanderError.unrecognizedOptions(options, path: path, underlyingError: error).description.isEmpty)
+      XCTAssertFalse(Error.unrecognizedOptions(options, path: path, underlyingError: error).description.isEmpty)
     } catch {
       XCTFail()
     }

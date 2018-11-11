@@ -28,7 +28,7 @@
 /// A type represents the running paths of the specific command of `AnyCommandRepresetnable.Type`.
 public struct CommandPath {
   /// The error info of the command path to redispatch with the.
-  internal struct Dispatcher: Error {
+  internal struct Dispatcher: Swift.Error {
     /// Running command path.
     internal let path: CommandPath
     /// The unrecognized options keys.
@@ -104,7 +104,7 @@ public struct CommandPath {
     do {
       try command.dispatch(with: commandLineArgs)
     } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: nil, decoder: _, decodeError: let error) {
-      throw CommanderError.unrecognizedOptions(options, path: self, underlyingError: error)
+      throw Error.unrecognizedOptions(options, path: self, underlyingError: error)
     } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded?, decoder: let decoder?, decodeError: _) {
       throw Dispatcher(path: self, options: options, decoded: decoded, decoder: decoder)
     } catch Signal.return {

@@ -146,9 +146,9 @@ extension CommanderRepresentable {
         }
       } else {
         if let commandSymbol = symbol {
-          throw CommanderError.invalidCommand(command: commandSymbol)
+          throw Error.invalidCommand(command: commandSymbol)
         } else {
-          throw CommanderError.emptyCommand
+          throw Error.emptyCommand
         }
       }
     }
@@ -163,7 +163,7 @@ extension CommanderRepresentable {
       
       let unrecognizedOptions = dispatcher.options.filter { Options.CodingKeys(rawValue: $0) == nil }
       guard unrecognizedOptions.isEmpty else {
-        throw CommanderError.unrecognizedOptions(
+        throw Error.unrecognizedOptions(
           unrecognizedOptions,
           path: dispatcher.path,
           underlyingError: nil
@@ -173,7 +173,7 @@ extension CommanderRepresentable {
       CommandPath.runningGlobalOptions = try Options(from: dispatcher.decoder)
       try dispatcher.path.command.dispatch(with: dispatcher.decoded)
       
-    } catch CommanderError.unrecognizedOptions(let options, path: let path, underlyingError: let error) {
+    } catch Error.unrecognizedOptions(let options, path: let path, underlyingError: let error) {
       try Set(Options.codingKeys).isSuperset(of: Set(options)).true {
         try error.map { throw $0 }
       }
@@ -189,7 +189,7 @@ extension CommanderRepresentable {
 
 public final class Commander: CommanderRepresentable {
   /// A closure of `(Error) -> Void` to handle the stderror.
-  public static var errorHandler: ((Error) -> Void)?
+  public static var errorHandler: ((Swift.Error) -> Void)?
   /// A closure of `(String) -> Void` to handle the stdout.
   public static var outputHandler: ((String) -> Void)?
   /// The registered available commands of the commander.

@@ -33,9 +33,9 @@ public enum Signal: Swift.Error {
   case `return`
 }
 
-// MARK: - CommanderError.
+// MARK: - Error.
 
-public enum CommanderError: Swift.Error, CustomStringConvertible {
+public enum Error: Swift.Error, CustomStringConvertible {
   case invalidCommand(command: String)
   case emptyCommand
   case unrecognizedCommands(commands: [String])

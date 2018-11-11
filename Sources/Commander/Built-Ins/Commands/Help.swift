@@ -86,7 +86,7 @@ internal struct Help: CommandRepresentable {
   /// Returns a bool value indicates if the given options raw value is 'help' option.
   internal static func validate(options: [String]) throws -> Bool {
     try options.isSingle.false {
-      throw CommanderError.extraOptions(options: options)
+      throw Error.extraOptions(options: options)
     }
     
     if
@@ -129,7 +129,7 @@ internal struct Help: CommandRepresentable {
       self.path = path; defer { self.path = nil }
       try main(.default(arguments: []))
     } else {
-      throw CommanderError.unrecognizedOptions(options, path: path, underlyingError: nil)
+      throw Error.unrecognizedOptions(options, path: path, underlyingError: nil)
     }
   }
   /// The main function of the command.
@@ -154,7 +154,7 @@ internal struct Help: CommandRepresentable {
       }
       
       guard unrecognizedCommand.isEmpty else {
-        throw CommanderError.unrecognizedCommands(commands: unrecognizedCommand)
+        throw Error.unrecognizedCommands(commands: unrecognizedCommand)
       }
       
       logger <<< commands.map { CommandDescriber(path: path).describe($0) }.joined(separator: "\n\n") <<< "\n"
