@@ -23,33 +23,10 @@
 //  SOFTWARE.
 //
 
-// MARK: - StdLib+.
-
-fileprivate extension Array where Element == String {
-  /// Advance by adding empty string to the container. Ignores if the last string is empty.
-  fileprivate mutating func advance() {
-    if last?.isEmpty ?? false {
-      return
-    }
-    self.append("")
-  }
-  /// Append a char to the top element of the container. Advances if the container is empty.
-  ///
-  /// - Parameter char: The character to be appended.
-  fileprivate mutating func lastAppend(_ char: Character) {
-    isEmpty ? advance() : ()
-    append(popLast()! + String(char))
-  }
-}
-
 // MARK: - CommandLine.
 
 /// A type that parses the command line arguments.
 public struct CommandLine {
-  /// Indicates if the reading of command line is quoting.
-  internal private(set) var isQuoting: Bool = false
-  /// Indicates if the reading of command line is escaping.
-  internal private(set) var isEscaping: Bool = false
   /// The count of the arguments excluding the command path.
   public var argc: Int32 {
     return Int32(arguments.underestimatedCount) - 1
@@ -60,24 +37,6 @@ public struct CommandLine {
   ///
   /// - Parameter commandLine: The command line raw string value.
   public init(_ commandLine: String) {
-    for char in commandLine {
-      switch char {
-      case "\\":
-        isEscaping = true
-      case "\"", "'":
-        isQuoting.toggle()
-      case " ":
-        if isQuoting {
-          fallthrough
-        }
-        
-        arguments.advance()
-      default:
-        isEscaping ? isEscaping.toggle() : ()
-        arguments.lastAppend(char)
-      }
-    }
-    
-    _ = arguments.last?.isEmpty ?? false ? arguments.removeLast() : ""
+    arguments = commandLine.split(delimiter: " ")
   }
 }

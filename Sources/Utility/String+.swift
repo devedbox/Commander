@@ -76,3 +76,58 @@ extension String {
     return startIndex == index(before: endIndex)
   }
 }
+
+// MARK: - Delimiters.
+
+extension String {
+  /// Splits the receiver string with the given delimiter and returns the results.
+  ///
+  /// - Note:
+  ///   - The delimiters can be escaped with character '\'.
+  ///   - The quoted string will be treated as raw string without split.
+  ///
+  /// - Parameter delimiter: The delimiter to split the receiver string.
+  /// - Parameter omittingEmptySubsequences: If `false`, an empty subsequence is
+  ///     returned in the result for each consecutive pair of `separator`
+  ///     elements in the collection and for each instance of `separator` at
+  ///     the start or end of the collection. If `true`, only nonempty
+  ///     subsequences are returned. The default value is `true`.
+  ///
+  /// - Returns: Returns the results strings.
+  public func split(delimiter: Character, omittingEmptySubsequences: Bool = true) -> [String] {
+    var isEscaping: Bool = false
+    var isQuoting: Bool = false
+    var iterator = makeIterator()
+    var results: [String] = []
+    
+    while let char = iterator.next() {
+      switch char {
+      case "\\":
+        isEscaping = true
+      case "\"", "'":
+        isQuoting.toggle()
+      case delimiter:
+        if isQuoting {
+          fallthrough
+        }
+        
+        if let last = results.last, last.isEmpty, omittingEmptySubsequences {
+          break
+        }
+        
+        results.append(String())
+      default:
+        isEscaping ? isEscaping.toggle() : ()
+        
+        results.isEmpty ? results.append(String()) : ()
+        results.append(results.popLast()! + String(char))
+      }
+    }
+    
+    if let last = results.last, last.isEmpty, omittingEmptySubsequences {
+      results.removeLast()
+    }
+    
+    return results
+  }
+}
