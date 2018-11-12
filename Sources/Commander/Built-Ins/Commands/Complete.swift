@@ -111,6 +111,40 @@ extension Complete.Generate {
     _\(commander)
     """
   }
+  
+  internal static var fishCompletion: String {
+    let commanderPath = CommandPath.runningCommanderPath!
+    let commander = commanderPath.split(separator: "/").last!
+    
+    func gemComps(_ command: CommandDescribable.Type, parent: CommandDescribable.Type? = nil) -> String {
+      var scripts = ""
+      
+      if command.level == .commander {
+        scripts += """
+        function __fish_\(commander)_needs_command
+          set cmd (commandline -opc)
+          if [ (count $cmd) -eq 1 ]
+            return 0
+          end
+            return 1
+          end
+        end
+        
+        complete -f -n '__fish_\(commander)_needs_command' -a '(\(commanderPath) complete "\(commander)")'
+        """
+      } else {
+        scripts += """
+        
+        """
+        for cmd in command.children {
+          scripts += gemComps(cmd, parent: command)
+        }
+      }
+      
+      return scripts
+    }
+    return gemComps(CommandPath.runningCommander)
+  }
 }
 
 /// The command to generate and provide the completion word list to the bash/zsh completion system.
@@ -137,6 +171,19 @@ internal struct Complete: CommandRepresentable {
   internal static let children: [CommandDispatchable.Type] = [
     Generate.self
   ]
+  
+  /// Dispatch the commands with command line arguments.
+  ///
+  /// - Parameter commandLineArgs: The command line arguments with dropping command symbol.
+  static func dispatch(with commandLineArgs: [String]) throws {
+    var options = try Options.decoded(from: commandLineArgs)
+    if options.arguments.count > 1 {
+      if let index = commandLineArgs.firstIndex(where: { $0 == symbol }) {
+        options.arguments = Array(commandLineArgs[index...])
+      }
+    }
+    try self.main(options)
+  }
   
   internal static func main(_ options: Complete.Options) throws {
     try options.arguments.isSingle.false { throw Signal.return }
