@@ -129,32 +129,24 @@ extension CommanderRepresentable {
       )
     }
     
-    if commandPath == nil {
-      if
-        case .format(let optionsSymbol, short: let shortSymbol) = OptionsDecoder.optionsFormat,
-        let isOptionsSymbol = symbol?.hasPrefix(optionsSymbol),
-        let isShortSymbol = symbol?.hasPrefix(shortSymbol),
-        isOptionsSymbol || isShortSymbol
-      {
-        if
-          commands.isEmpty,
-          let options = symbol,
-          options == "\(optionsSymbol)\(Help.Options.CodingKeys.help.rawValue)"
-       || options == "\(shortSymbol)\(Help.Options.keys[.help]!)"
-        {
-          try Help.main(.init())
-        }
-      } else {
-        if let commandSymbol = symbol {
-          throw Error.invalidCommand(command: commandSymbol)
-        } else {
+    do {
+      if try commandPath?.run(with: Array(commands)) == nil {
+        guard let symbol = symbol else {
           throw Error.emptyCommand
         }
+        
+        if OptionsDecoder.optionsFormat.validate(symbol) {
+          if Help.Options.validate(symbol) {
+            try Help.main(
+              OptionsDecoder().decode(Help.Options.self, from: [symbol] + Array(commands))
+            )
+          } else {
+            throw Error.invalidOptions(options: symbol)
+          }
+        } else {
+          throw Error.invalidCommand(command: symbol)
+        }
       }
-    }
-    
-    do {
-      try commandPath?.run(with: Array(commands))
     } catch let dispatcher as CommandPath.Dispatcher {
       guard Options.self != Nothing.self else {
         try Help.resolve(dispatcher.options, path: dispatcher.path, commandLineArgs: commandLineArgs)

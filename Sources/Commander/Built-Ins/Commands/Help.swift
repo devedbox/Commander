@@ -36,7 +36,6 @@ internal struct Help: CommandRepresentable {
     /// The coding keys of `Options`.
     internal enum CodingKeys: String, CodingKeysRepresentable {
       case help
-      case intents
     }
     internal static let keys: [Options.CodingKeys: Character] = [.help: "h"]
     /// Returns the description of the options.
@@ -45,14 +44,11 @@ internal struct Help: CommandRepresentable {
     ]
     
     internal let help: Bool?
-    internal let intents: Int?
     
     internal init(
-      help: Bool = false,
-      intents: Int = 0)
+      help: Bool = false)
     {
       self.help = help
-      self.intents = intents
     }
     
     /// Decode the options from the given command line arguments.
@@ -86,7 +82,7 @@ internal struct Help: CommandRepresentable {
   /// Returns a bool value indicates if the given options raw value is 'help' option.
   internal static func validate(options: [String]) throws -> Bool {
     try options.isSingle.false {
-      throw Error.extraOptions(options: options)
+      throw Error.unexpectedOptions(options: options)
     }
     
     if

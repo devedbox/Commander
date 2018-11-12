@@ -37,21 +37,24 @@ public enum Signal: Swift.Error {
 
 public enum Error: Swift.Error, CustomStringConvertible {
   case invalidCommand(command: String)
+  case invalidOptions(options: String)
   case emptyCommand
   case unrecognizedCommands(commands: [String])
-  case extraOptions(options: [String])
+  case unexpectedOptions(options: [String])
   case unrecognizedOptions([String], path: CommandPath, underlyingError: Swift.Error?)
   
   public var description: String {
     switch self {
     case .invalidCommand(command: let command):
       return "Invalid command given error: '\(command)'. See 'help' for more information."
+    case .invalidOptions(options: let options):
+      return "Invalid options given error: '\(options)'. See 'help' for more information."
     case .emptyCommand:
       return "None of command is given. See 'help' for more information."
     case .unrecognizedCommands(commands: let commands):
       return "Unrecognized command error: '\(commands.joined(separator: " "))'."
-    case .extraOptions(options: let options):
-      return "Invalid help options format error: Expecting 'help' or 'h' alone but giving '\(options.joined(separator: " "))'."
+    case .unexpectedOptions(options: let options):
+      return "Invalid options format error: Expecting 'help' or 'h' alone but giving '\(options.joined(separator: " "))'."
     case .unrecognizedOptions(let options, let path, underlyingError: _):
       return "Unrecognized options for command '\(path.command.symbol)': '\(options.joined(separator: " "))'."
     }
