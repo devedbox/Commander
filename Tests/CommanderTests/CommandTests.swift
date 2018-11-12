@@ -307,6 +307,46 @@ class CommandTests: XCTestCase {
     XCTAssertTrue(try! Help.validate(options: ["help"]))
     
     do {
+      try BuiltIn.Commander().dispatch(with: ["commander", "-h", "-t"])
+      XCTFail()
+    } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded, decoder: let decoder, decodeError: let error) {
+      XCTAssertEqual(options.set, ["t"])
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options, decoded: decoded, decoder: decoder, decodeError: error).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      try BuiltIn.Commander().dispatch(with: ["commander", "--help", "-t"])
+      XCTFail()
+    } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded, decoder: let decoder, decodeError: let error) {
+      XCTAssertEqual(options.set, ["t"])
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options, decoded: decoded, decoder: decoder, decodeError: error).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      try BuiltIn.Commander().dispatch(with: ["commander", "-h", "t", "a"])
+      XCTFail()
+    } catch OptionsDecoder.Error.unrecognizedArguments(let args) {
+      XCTAssertEqual((args as! [String]).set, ["t", "a"])
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedArguments(args).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
+      try BuiltIn.Commander().dispatch(with: ["commander", "--help", "t", "a"])
+      XCTFail()
+    } catch OptionsDecoder.Error.unrecognizedArguments(let args) {
+      XCTAssertEqual((args as! [String]).set, ["t", "a"])
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedArguments(args).description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    
+    do {
       _ = try Help.validate(options: ["h", "h"])
       XCTFail()
     } catch Commander.Error.unexpectedOptions(options: let options) {

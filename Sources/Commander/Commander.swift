@@ -137,9 +137,11 @@ extension CommanderRepresentable {
         
         if OptionsDecoder.optionsFormat.validate(symbol) {
           if Help.Options.validate(symbol) {
-            try Help.main(
-              OptionsDecoder().decode(Help.Options.self, from: [symbol] + Array(commands))
-            )
+            let options = try OptionsDecoder().decode(Help.Options.self, from: [symbol] + Array(commands))
+            guard options.arguments.isEmpty else {
+              throw OptionsDecoder.Error.unrecognizedArguments(options.arguments)
+            }
+            try Help.main(options)
           } else {
             throw Error.invalidOptions(options: symbol)
           }
