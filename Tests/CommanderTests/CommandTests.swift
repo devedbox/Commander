@@ -165,6 +165,8 @@ class CommandTests: XCTestCase {
     XCTAssertEqual(outputs.isEmpty, false); outputs = ""
     XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "generate", "--shell=zsh"]))
     XCTAssertEqual(outputs.isEmpty, false); outputs = ""
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "generate", "--shell=fish"]))
+    XCTAssertEqual(outputs.isEmpty, false); outputs = ""
     XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete"]))
     XCTAssertEqual(outputs, ""); outputs = ""
     XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", ""]))
@@ -188,6 +190,8 @@ class CommandTests: XCTestCase {
     XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander help test-args"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "test".split(separator: " ").set); outputs = ""
     XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander help test test-args"]))
+    XCTAssertEqual(outputs.split(separator: " ").set, "".split(separator: " ").set); outputs = ""
+    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander", "help", "test", "test-args"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "".split(separator: " ").set); outputs = ""
     XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "commander te"]))
     XCTAssertEqual(outputs.split(separator: " ").set, "help test test-args -h --help".split(separator: " ").set); outputs = ""

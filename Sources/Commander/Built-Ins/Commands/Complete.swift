@@ -71,6 +71,8 @@ extension Complete {
         logger <<< bashCompletion
       case .zsh:
         logger <<< zshCompletion
+      case .fish:
+        logger <<< fishCompletion
       }
     }
   }

@@ -33,6 +33,8 @@ public enum Shell: String, Codable {
   case bash
   /// The Z shell. Usually located at '/bin/zsh'.
   case zsh
+  /// The fish, a smart and user-friendly command lin shell. Usually located at '/bin/fish'.
+  case fish
 }
 
 // MARK: - ShellCompletable.
