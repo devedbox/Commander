@@ -132,6 +132,7 @@ class CommandTests: XCTestCase {
   func testCommand() {
     XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "test", "--verbose", "--target", "The target"]))
     BuiltIn.Commander().dispatch()
+    XCTAssertEqual(dispatchSuccess(), EXIT_SUCCESS)
     XCTAssertEqual(dispatchFailure(), EXIT_FAILURE)
     
     do {
@@ -303,8 +304,10 @@ class CommandTests: XCTestCase {
     XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "test-args", "--help"]))
     XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "test-args", "test", "--help"]))
     
-    XCTAssertTrue(try! Help.validate(options: ["h"]))
-    XCTAssertTrue(try! Help.validate(options: ["help"]))
+    XCTAssertTrue(Help.Options.validate("h"))
+    XCTAssertTrue(Help.Options.validate("help"))
+    XCTAssertTrue(Help.Options.validate("-h"))
+    XCTAssertTrue(Help.Options.validate("--help"))
     
     do {
       try BuiltIn.Commander().dispatch(with: ["commander", "-h", "-t"])
@@ -347,21 +350,11 @@ class CommandTests: XCTestCase {
     }
     
     do {
-      _ = try Help.validate(options: ["h", "h"])
-      XCTFail()
-    } catch Commander.Error.unexpectedOptions(options: let options) {
-      XCTAssertEqual(options.set, ["h", "h"])
-      XCTAssertFalse(Error.unexpectedOptions(options: options).description.isEmpty)
-    } catch {
-      XCTFail()
-    }
-    
-    do {
       try BuiltIn.Commander().dispatch(with: ["commander", "test", "-h", "-t"])
       XCTFail()
-    } catch Commander.Error.unexpectedOptions(options: let options) {
-      XCTAssertEqual(options.set, ["help", "t"])
-      XCTAssertFalse(Error.unexpectedOptions(options: options).description.isEmpty)
+    } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded, decoder: let deocder, decodeError: let error) {
+      XCTAssertEqual(options.set, ["t"])
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options, decoded: decoded, decoder: deocder, decodeError: error).description.isEmpty)
     } catch {
       XCTFail()
     }
@@ -369,9 +362,9 @@ class CommandTests: XCTestCase {
     do {
       try BuiltIn.Commander().dispatch(with: ["commander", "test", "-h", "--target"])
       XCTFail()
-    } catch Commander.Error.unexpectedOptions(options: let options) {
-      XCTAssertEqual(options.set, ["help", "target"])
-      XCTAssertFalse(Error.unexpectedOptions(options: options).description.isEmpty)
+    } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded, decoder: let deocder, decodeError: let error) {
+      XCTAssertEqual(options.set, ["target"])
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options, decoded: decoded, decoder: deocder, decodeError: error).description.isEmpty)
     } catch {
       XCTFail()
     }
@@ -379,9 +372,9 @@ class CommandTests: XCTestCase {
     do {
       try BuiltIn.Commander().dispatch(with: ["commander", "test", "-h", "-v"])
       XCTFail()
-    } catch Commander.Error.unexpectedOptions(options: let options) {
-      XCTAssertEqual(options.set, ["help", "v"])
-      XCTAssertFalse(Error.unexpectedOptions(options: options).description.isEmpty)
+    } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded, decoder: let deocder, decodeError: let error) {
+      XCTAssertEqual(options.set, ["v"])
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options, decoded: decoded, decoder: deocder, decodeError: error).description.isEmpty)
     } catch {
       XCTFail()
     }
@@ -389,9 +382,9 @@ class CommandTests: XCTestCase {
     do {
       try BuiltIn.Commander().dispatch(with: ["commander", "test", "-h", "--verbose"])
       XCTFail()
-    } catch Commander.Error.unexpectedOptions(options: let options) {
-      XCTAssertEqual(options.set, ["help", "verbose"])
-      XCTAssertFalse(Error.unexpectedOptions(options: options).description.isEmpty)
+    } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded, decoder: let deocder, decodeError: let error) {
+      XCTAssertEqual(options.set, ["verbose"])
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options, decoded: decoded, decoder: deocder, decodeError: error).description.isEmpty)
     } catch {
       XCTFail()
     }
@@ -399,9 +392,9 @@ class CommandTests: XCTestCase {
     do {
       try BuiltIn.Commander().dispatch(with: ["commander", "test", "-h", "-v", "-t"])
       XCTFail()
-    } catch Commander.Error.unexpectedOptions(options: let options) {
-      XCTAssertEqual(options.set, ["help", "v", "t"])
-      XCTAssertFalse(Error.unexpectedOptions(options: options).description.isEmpty)
+    } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded, decoder: let deocder, decodeError: let error) {
+      XCTAssertEqual(options.set, ["t", "v"])
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options, decoded: decoded, decoder: deocder, decodeError: error).description.isEmpty)
     } catch {
       XCTFail()
     }
@@ -409,9 +402,9 @@ class CommandTests: XCTestCase {
     do {
       try BuiltIn.Commander().dispatch(with: ["commander", "test", "--help", "-t"])
       XCTFail()
-    } catch Commander.Error.unexpectedOptions(options: let options) {
-      XCTAssertEqual(options.set, ["help", "t"])
-      XCTAssertFalse(Error.unexpectedOptions(options: options).description.isEmpty)
+    } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded, decoder: let deocder, decodeError: let error) {
+      XCTAssertEqual(options.set, ["t"])
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options, decoded: decoded, decoder: deocder, decodeError: error).description.isEmpty)
     } catch {
       XCTFail()
     }
@@ -419,9 +412,9 @@ class CommandTests: XCTestCase {
     do {
       try BuiltIn.Commander().dispatch(with: ["commander", "test", "--help", "--target"])
       XCTFail()
-    } catch Commander.Error.unexpectedOptions(options: let options) {
-      XCTAssertEqual(options.set, ["help", "target"])
-      XCTAssertFalse(Error.unexpectedOptions(options: options).description.isEmpty)
+    } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded, decoder: let deocder, decodeError: let error) {
+      XCTAssertEqual(options.set, ["target"])
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options, decoded: decoded, decoder: deocder, decodeError: error).description.isEmpty)
     } catch {
       XCTFail()
     }
@@ -429,9 +422,9 @@ class CommandTests: XCTestCase {
     do {
       try BuiltIn.Commander().dispatch(with: ["commander", "test", "--help", "-v"])
       XCTFail()
-    } catch Commander.Error.unexpectedOptions(options: let options) {
-      XCTAssertEqual(options.set, ["help", "v"])
-      XCTAssertFalse(Error.unexpectedOptions(options: options).description.isEmpty)
+    } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded, decoder: let deocder, decodeError: let error) {
+      XCTAssertEqual(options.set, ["v"])
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options, decoded: decoded, decoder: deocder, decodeError: error).description.isEmpty)
     } catch {
       XCTFail()
     }
@@ -439,9 +432,9 @@ class CommandTests: XCTestCase {
     do {
       try BuiltIn.Commander().dispatch(with: ["commander", "test", "--help", "--verbose"])
       XCTFail()
-    } catch Commander.Error.unexpectedOptions(options: let options) {
-      XCTAssertEqual(options.set, ["help", "verbose"])
-      XCTAssertFalse(Error.unexpectedOptions(options: options).description.isEmpty)
+    } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded, decoder: let deocder, decodeError: let error) {
+      XCTAssertEqual(options.set, ["verbose"])
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options, decoded: decoded, decoder: deocder, decodeError: error).description.isEmpty)
     } catch {
       XCTFail()
     }
@@ -449,9 +442,9 @@ class CommandTests: XCTestCase {
     do {
       try BuiltIn.Commander().dispatch(with: ["commander", "test", "--help", "-v", "-t"])
       XCTFail()
-    } catch Commander.Error.unexpectedOptions(options: let options) {
-      XCTAssertEqual(options.set, ["help", "v", "t"])
-      XCTAssertFalse(Error.unexpectedOptions(options: options).description.isEmpty)
+    } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded, decoder: let deocder, decodeError: let error) {
+      XCTAssertEqual(options.set, ["t", "v"])
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options, decoded: decoded, decoder: deocder, decodeError: error).description.isEmpty)
     } catch {
       XCTFail()
     }
@@ -459,9 +452,9 @@ class CommandTests: XCTestCase {
     do {
       try BuiltIn.Commander().dispatch(with: ["commander", "test", "-t", "-h"])
       XCTFail()
-    } catch Commander.Error.unexpectedOptions(options: let options) {
-      XCTAssertEqual(options.set, ["help", "t"])
-      XCTAssertFalse(Error.unexpectedOptions(options: options).description.isEmpty)
+    } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded, decoder: let deocder, decodeError: let error) {
+      XCTAssertEqual(options.set, ["t"])
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options, decoded: decoded, decoder: deocder, decodeError: error).description.isEmpty)
     } catch {
       XCTFail()
     }
@@ -469,9 +462,9 @@ class CommandTests: XCTestCase {
     do {
       try BuiltIn.Commander().dispatch(with: ["commander", "test", "--target", "-h"])
       XCTFail()
-    } catch Commander.Error.unexpectedOptions(options: let options) {
-      XCTAssertEqual(options.set, ["help", "target"])
-      XCTAssertFalse(Error.unexpectedOptions(options: options).description.isEmpty)
+    } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded, decoder: let deocder, decodeError: let error) {
+      XCTAssertEqual(options.set, ["target"])
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options, decoded: decoded, decoder: deocder, decodeError: error).description.isEmpty)
     } catch {
       XCTFail()
     }
@@ -479,9 +472,9 @@ class CommandTests: XCTestCase {
     do {
       try BuiltIn.Commander().dispatch(with: ["commander", "test", "-v", "-h"])
       XCTFail()
-    } catch Commander.Error.unexpectedOptions(options: let options) {
-      XCTAssertEqual(options.set, ["help", "v"])
-      XCTAssertFalse(Error.unexpectedOptions(options: options).description.isEmpty)
+    } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded, decoder: let deocder, decodeError: let error) {
+      XCTAssertEqual(options.set, ["v"])
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options, decoded: decoded, decoder: deocder, decodeError: error).description.isEmpty)
     } catch {
       XCTFail()
     }
@@ -489,9 +482,9 @@ class CommandTests: XCTestCase {
     do {
       try BuiltIn.Commander().dispatch(with: ["commander", "test", "--verbose", "-h"])
       XCTFail()
-    } catch Commander.Error.unexpectedOptions(options: let options) {
-      XCTAssertEqual(options.set, ["help", "verbose"])
-      XCTAssertFalse(Error.unexpectedOptions(options: options).description.isEmpty)
+    } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded, decoder: let deocder, decodeError: let error) {
+      XCTAssertEqual(options.set, ["verbose"])
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options, decoded: decoded, decoder: deocder, decodeError: error).description.isEmpty)
     } catch {
       XCTFail()
     }
@@ -499,9 +492,9 @@ class CommandTests: XCTestCase {
     do {
       try BuiltIn.Commander().dispatch(with: ["commander", "test", "-v", "-t", "-h"])
       XCTFail()
-    } catch Commander.Error.unexpectedOptions(options: let options) {
-      XCTAssertEqual(options.set, ["help", "v", "t"])
-      XCTAssertFalse(Error.unexpectedOptions(options: options).description.isEmpty)
+    } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded, decoder: let deocder, decodeError: let error) {
+      XCTAssertEqual(options.set, ["t", "v"])
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options, decoded: decoded, decoder: deocder, decodeError: error).description.isEmpty)
     } catch {
       XCTFail()
     }
@@ -509,9 +502,9 @@ class CommandTests: XCTestCase {
     do {
       try BuiltIn.Commander().dispatch(with: ["commander", "test", "-t", "--help"])
       XCTFail()
-    } catch Commander.Error.unexpectedOptions(options: let options) {
-      XCTAssertEqual(options.set, ["help", "t"])
-      XCTAssertFalse(Error.unexpectedOptions(options: options).description.isEmpty)
+    } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded, decoder: let deocder, decodeError: let error) {
+      XCTAssertEqual(options.set, ["t"])
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options, decoded: decoded, decoder: deocder, decodeError: error).description.isEmpty)
     } catch {
       XCTFail()
     }
@@ -519,9 +512,9 @@ class CommandTests: XCTestCase {
     do {
       try BuiltIn.Commander().dispatch(with: ["commander", "test", "--target", "--help"])
       XCTFail()
-    } catch Commander.Error.unexpectedOptions(options: let options) {
-      XCTAssertEqual(options.set, ["help", "target"])
-      XCTAssertFalse(Error.unexpectedOptions(options: options).description.isEmpty)
+    } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded, decoder: let deocder, decodeError: let error) {
+      XCTAssertEqual(options.set, ["target"])
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options, decoded: decoded, decoder: deocder, decodeError: error).description.isEmpty)
     } catch {
       XCTFail()
     }
@@ -529,9 +522,9 @@ class CommandTests: XCTestCase {
     do {
       try BuiltIn.Commander().dispatch(with: ["commander", "test", "-v", "--help"])
       XCTFail()
-    } catch Commander.Error.unexpectedOptions(options: let options) {
-      XCTAssertEqual(options.set, ["help", "v"])
-      XCTAssertFalse(Error.unexpectedOptions(options: options).description.isEmpty)
+    } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded, decoder: let deocder, decodeError: let error) {
+      XCTAssertEqual(options.set, ["v"])
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options, decoded: decoded, decoder: deocder, decodeError: error).description.isEmpty)
     } catch {
       XCTFail()
     }
@@ -539,9 +532,9 @@ class CommandTests: XCTestCase {
     do {
       try BuiltIn.Commander().dispatch(with: ["commander", "test", "--verbose", "--help"])
       XCTFail()
-    } catch Commander.Error.unexpectedOptions(options: let options) {
-      XCTAssertEqual(options.set, ["help", "verbose"])
-      XCTAssertFalse(Error.unexpectedOptions(options: options).description.isEmpty)
+    } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded, decoder: let deocder, decodeError: let error) {
+      XCTAssertEqual(options.set, ["verbose"])
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options, decoded: decoded, decoder: deocder, decodeError: error).description.isEmpty)
     } catch {
       XCTFail()
     }
@@ -549,9 +542,9 @@ class CommandTests: XCTestCase {
     do {
       try BuiltIn.Commander().dispatch(with: ["commander", "test", "-t", "-v", "--help"])
       XCTFail()
-    } catch Commander.Error.unexpectedOptions(options: let options) {
-      XCTAssertEqual(options.set, ["help", "v", "t"])
-      XCTAssertFalse(Error.unexpectedOptions(options: options).description.isEmpty)
+    } catch OptionsDecoder.Error.unrecognizedOptions(let options, decoded: let decoded, decoder: let deocder, decodeError: let error) {
+      XCTAssertEqual(options.set, ["t", "v"])
+      XCTAssertFalse(OptionsDecoder.Error.unrecognizedOptions(options, decoded: decoded, decoder: deocder, decodeError: error).description.isEmpty)
     } catch {
       XCTFail()
     }

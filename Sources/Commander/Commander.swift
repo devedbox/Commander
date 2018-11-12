@@ -75,7 +75,7 @@ extension CommanderRepresentable {
   @discardableResult
   public func dispatch() -> Result {
     do {
-      try dispatch(with: CommandLine.arguments)
+      try dispatch(with: Swift.CommandLine.arguments)
     } catch {
       (type(of: self).errorHandler?(error) == nil).true {
         var stderr = FileHandle.standardError; print(String(describing: error), to: &stderr)
@@ -87,7 +87,7 @@ extension CommanderRepresentable {
 #else
   public func dispatch() -> Result {
     do {
-      try dispatch(with: CommandLine.arguments)
+      try dispatch(with: Swift.CommandLine.arguments)
     } catch {
       (type(of: self).errorHandler?(error) == nil).true {
         var stderr = FileHandle.standardError; print(String(describing: error), to: &stderr)
@@ -136,15 +136,7 @@ extension CommanderRepresentable {
         }
         
         if OptionsDecoder.optionsFormat.validate(symbol) {
-          if Help.Options.validate(symbol) {
-            let options = try OptionsDecoder().decode(Help.Options.self, from: [symbol] + Array(commands))
-            guard options.arguments.isEmpty else {
-              throw OptionsDecoder.Error.unrecognizedArguments(options.arguments)
-            }
-            try Help.main(options)
-          } else {
-            throw Error.invalidOptions(options: symbol)
-          }
+          try Help.resolve([symbol], path: nil, commandLineArgs: commandLineArgs)
         } else {
           throw Error.invalidCommand(command: symbol)
         }

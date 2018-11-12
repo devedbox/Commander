@@ -25,6 +25,7 @@
 
 import XCTest
 @testable import Commander
+@testable import Utility
 
 class MockCommander: CommanderRepresentable {
   struct TestsCommand: CommandRepresentable {
@@ -115,6 +116,8 @@ class GlobalOptionsTests: XCTestCase {
   ]
   
   func testGlobalOptions() {
+    XCTAssertTrue(MockCommander.Options.completions(for: Utility.CommandLine("")).isEmpty)
+    
     XCTAssertNoThrow(try MockCommander().dispatch(with: ["commander", "test", "-C=path"]))
     XCTAssertNoThrow(try MockCommander().dispatch(with: ["commander", "test", "-C=path", "-v"]))
     XCTAssertNoThrow(try MockCommander().dispatch(with: ["commander", "test", "--mock-dir", "path"]))
@@ -149,8 +152,8 @@ class GlobalOptionsTests: XCTestCase {
       XCTFail()
     } catch Commander.Error.unrecognizedOptions(let options, path: let path, underlyingError: let error) {
       XCTAssertEqual(options.set, ["s", "r"])
-      XCTAssertTrue(path.command == MockCommander.TestsCommand.self)
-      XCTAssertEqual(path.paths.set, ["commander"])
+      XCTAssertTrue(path?.command == MockCommander.TestsCommand.self)
+      XCTAssertEqual(path?.paths.set, ["commander"])
       XCTAssertFalse(Error.unrecognizedOptions(options, path: path, underlyingError: error).description.isEmpty)
     } catch {
       XCTFail()
