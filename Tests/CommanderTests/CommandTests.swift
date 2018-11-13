@@ -165,8 +165,17 @@ class CommandTests: XCTestCase {
     XCTAssertEqual(outputs.isEmpty, false); outputs = ""
     XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "generate", "--shell=zsh"]))
     XCTAssertEqual(outputs.isEmpty, false); outputs = ""
-    XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "generate", "--shell=fish"]))
-    XCTAssertEqual(outputs.isEmpty, false); outputs = ""
+    XCTAssertThrowsError(try BuiltIn.Commander().dispatch(with: ["commander", "complete", "generate", "--shell=fish"]))
+    do {
+      try BuiltIn.Commander().dispatch(with: ["commander", "complete", "generate", "--shell=fish"])
+      XCTFail()
+    } catch Complete.Generate.Error.fishCompletionIsNotSupportedForNow {
+      XCTAssertTrue(true)
+      XCTAssertFalse(Complete.Generate.Error.fishCompletionIsNotSupportedForNow.description.isEmpty)
+    } catch {
+      XCTFail()
+    }
+    XCTAssertEqual(outputs.isEmpty, true); outputs = ""
     XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete"]))
     XCTAssertEqual(outputs, ""); outputs = ""
     XCTAssertNoThrow(try BuiltIn.Commander().dispatch(with: ["commander", "complete", ""]))
