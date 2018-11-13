@@ -245,7 +245,7 @@ extension OptionsDecoder {
         guard let container = stringValue.flatMap({
           try? OptionsDecoder.objectFormat.value(for: $0)
         }) else {
-          return unwrapped
+          return (unwrapped is Bool?) ? nil : unwrapped
         }
         
         if case let dict? = container.dictionaryValue, dict == dictionaryValue {
@@ -255,7 +255,7 @@ extension OptionsDecoder {
           return stringValue
         }
         
-        return unwrapped
+        return (unwrapped is Bool?) ? nil : unwrapped
       }
       
       internal var singleArrayString: Value? {
