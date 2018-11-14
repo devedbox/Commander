@@ -2,11 +2,34 @@
 
 ![test](https://travis-ci.com/devedbox/Commander.svg?branch=master)[![codecov](https://codecov.io/gh/devedbox/Commander/branch/master/graph/badge.svg)](https://codecov.io/gh/devedbox/Commander)![license](https://img.shields.io/badge/license-MIT-blue.svg)![lang](https://img.shields.io/badge/language-swift-orange.svg)[![Maintainability](https://api.codeclimate.com/v1/badges/83ff78d95f31412070e1/maintainability)](https://codeclimate.com/github/devedbox/Commander/maintainability)
 
-Commander is a Swift framework for decoding command-line arguments by integrating with Swift Standard Library Protocols e.g. Encodable & Decodable. With Commander, you just need to focus on writing options model of commands, the rest works will be handled by Commander.
+Commander is a Swift framework for decoding command-line arguments by integrating with Swift standard library protocols Decodable & Decoder. Commander can help you to write structured cli program by declaring the structure of `command` and `options` of that command without writing any codes to parse the cli arguments. With Commander, you just need to focus on writing `options` structure of commands, the rest works will be handled by Commander automatically.
 
-## Test Coverage Graph
+## Features
 
-![coverage graph](https://codecov.io/gh/devedbox/Commander/commit/1a15f7be4db03125027641205529e0e5d5050b21/graphs/sunburst.svg)
+- [x] Structured-CLI, commands and options are all structured by declaration a `struct` or `class`.
+- [x] Options types are type-safe by implementing `Decodable` protocol.
+- [x] Automatically generate help message for the `commander` or `command`.
+- [x] Bash/zsh <Tab> auto-complete scripts supported.
+- [x] Swift 4 compatibility
+- [x] Zero dependency
+- [x] Supports Linux and `swift build`
+
+## Requirements
+
+- Mac OS X 10.10+ / Ubuntu 14.10
+- Xcode 10
+- Swift 4.2
+---
+
+## Installation
+
+### [Swift Package Manager](https://github.com/apple/swift-package-manager)
+
+```swift
+dependencies: [
+  .package(url: "https://github.com/devedbox/Commander.git", "0.5.6..<100.0.0")
+]
+```
 
 ## Example
 
@@ -61,7 +84,7 @@ Commander.usage = "The sample usage command of 'Commander'"
 Commander().dispatch() // Call this to dispatch and run the command
 ```
 
-After which, arguments can be resolved by declaration of  `ArgumentsResolver`:
+After which, arguments can be resolved by declaration of `ArgumentsResolver`:
 
 ```swift
 public typealias ArgumentsResolver = AnyArgumentsResolver<T> // T must be Decodable
@@ -75,6 +98,10 @@ public static func main(_ options: Options) throws {
 ```
 
 It's easy and fun!!!
+
+## Test Coverage Graph
+
+![coverage graph](https://codecov.io/gh/devedbox/Commander/commit/1a15f7be4db03125027641205529e0e5d5050b21/graphs/sunburst.svg)
 
 ## License
 
