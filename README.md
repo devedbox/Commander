@@ -19,7 +19,10 @@ Commander is a Swift framework for decoding command-line arguments by integratin
 - Mac OS X 10.10+ / Ubuntu 14.10
 - Xcode 10
 - Swift 4.2
----
+
+## Test Coverage Graph
+
+![coverage graph](https://codecov.io/gh/devedbox/Commander/commit/1a15f7be4db03125027641205529e0e5d5050b21/graphs/sunburst.svg)
 
 ## Installation
 
@@ -31,6 +34,7 @@ dependencies: [
   .package(url: "https://github.com/devedbox/Commander.git", "0.5.6..<100.0.0")
 ]
 ```
+
 ----
 
 ## Usage
@@ -173,10 +177,6 @@ commander-sample sample --verbose --string-value String arg1 arg2
 ```
 
 It's easy and fun!!!
-
-## Test Coverage Graph
-
-![coverage graph](https://codecov.io/gh/devedbox/Commander/commit/1a15f7be4db03125027641205529e0e5d5050b21/graphs/sunburst.svg)
 
 ## License
 
