@@ -31,6 +31,10 @@ Commander is a Swift framework for decoding command-line arguments by integratin
     - [Providing A Default Value](#providing-a-default-value)
   - [Arguments](#arguments)
   - [Completions](#completions)
+    - [Installing Completion Scripts](#installing-completion-scripts)
+      - [Bash](#bash)
+      - [Zsh](#zsh)
+    - [Write Your Own Completion](#write-your-own-completion)
 - [Example](#example)
   - [Execution](#execution)
 - [License](#license)
@@ -286,6 +290,89 @@ commander hello --verbose -- "Hello world" "Will be dropped"
 ```
 
 ## Completions
+
+Commander provided the api to write auto-completion in bash/zsh, the requirement is declared in protocol `ShellCompletable`. The `CommandDescribable` and `OptionsDescribable` is inherited from `ShellCompletable` by default.
+
+To implemente auto-completion, you just need to write:
+```swift
+import Commander.Utility
+// Options:
+public static func completions(for commandLine: Utility.CommandLine) -> [String] {
+  switch key {
+  case "--string-value":
+    return [
+      "a", "b", "c"
+    ]
+  default:
+    return [ ]
+  }
+}
+```
+
+In terminal, type this:
+
+```bash
+commander sample --string-value <Tab>
+# a	b	c
+```
+
+### Installing Completion Scripts
+
+Commander can generate auto-completion scripts for you, you can run the built-in command `complete generate` to generate the scripts according to the shell type. Currently available shells are:
+
+- bash
+- zsh
+
+#### Bash
+
+1. run in terminal：`commander complete generate --shell=bash > ./bash_completion`
+2. then：`source ./bash_completion`即可
+3. Or, install the scripts to the login scripts of bash.
+
+#### Zsh
+
+1. run in terminal：`commander complete generate --shell=zsh > ~/zsh_completions/_commander`
+2. add contents to `~/.zshrc`:
+```zsh 
+fpath=(~/zsh_completions $fpath)
+autoload -U +X compinit && compinit
+autoload -U +X bashcompinit && bashcompinit
+```
+3. restart you terminal
+
+### Write Your Own Completion
+
+`CommandDescribable` already provided the default implementation of completion, by default, CommandDescribable provides the subcommands alongwith options as the completions for shell, you can override the default implementation to provide your custom completions to Commander.
+
+`OptionsDescribable` returns an empty completions by default, OptionsDescribable will be called during the calling of CommandDescribable automatically, You must override the implementation of OptionsDescribable to provide your completions or an empty completions will be used.
+
+This is an example to provide `git branchs` completions to shell:
+
+```swift
+import Commander.Utility
+
+public static func completions(for commandLine: Utility.CommandLine) -> [String] {
+  let current = commandLine.arguments.last
+  let previous = commandLine.arguments.dropLast().last
+
+  switch current {
+  default:
+    let outputs = ShellIn("git branch -r").execute().output.flatMap {
+      String(data: $0, encoding: .utf8)
+    } ?? ""
+
+    return outputs.split(whereSeparator: {
+      " *->\n".contains($0)
+    }).map {
+      if $0.hasPrefix("origin/") {
+        return String(String($0)["origin/".endIndex...])
+      } else {
+        return String($0)
+      }
+    }
+  }
+}
+```
 
 # Example
 
