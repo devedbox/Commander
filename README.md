@@ -9,10 +9,10 @@ Commander is a Swift framework for decoding command-line arguments by integratin
 - [x] Structured-CLI, commands and options are all structured by declaration a `struct` or `class`.
 - [x] Options types are type-safe by implementing `Decodable` protocol.
 - [x] Automatically generate help message for the `commander` or `command`.
-- [x] Bash/zsh <Tab> auto-complete scripts supported.
-- [x] Swift 4 compatibility
-- [x] Zero dependency
-- [x] Supports Linux and `swift build`
+- [x] Shell <Tab> completion supported. Bash/zsh <Tab> auto-complete scripts supported.
+- [x] Swift 4 compatibility.
+- [x] Zero dependency.
+- [x] Supports Linux and `swift build`.
 
 ## Requirements
 
@@ -23,13 +23,74 @@ Commander is a Swift framework for decoding command-line arguments by integratin
 
 ## Installation
 
-### [Swift Package Manager](https://github.com/apple/swift-package-manager)
+### With [SPM](https://github.com/apple/swift-package-manager)
 
 ```swift
+// swift-tools-version:4.2
 dependencies: [
   .package(url: "https://github.com/devedbox/Commander.git", "0.5.6..<100.0.0")
 ]
 ```
+----
+
+## Usage
+
+Commander supports a main commander alongwith the commands of that commander, and each command has its own subcommands and options.
+
+Using a Commander is simple, you just need to declare the `commands`, `usage` of the commander, and then call `Commander().dispatch()`, the Commander will automatically decode the command line arguments and dispatch the decoded options to the specific command given by command line.
+
+Just as simple as following:
+
+```swift
+import Commander
+
+BuiltIn.Commander.commands = [
+  SampleCommand.self,
+  NoArgsCommand.self
+]
+BuiltIn.Commander.usage = "The sample usage command of 'Commander'"
+BuiltIn.Commander().dispatch()
+```
+### Command
+
+In Commander, a command is a type(`class` or `struct`) that conforms to protocol `CommandRepresentable`. The protocol *CommandRepresentable* declare the infos of the conforming commands:
+
+- `Options`: The associated type of command's options.
+- `symbol`: The symbol of the command used by command line shell.
+- `usage`: The usage help message for that command.
+- `children`: The subcommands of that command.
+
+#### Creates a Command
+
+```swift
+public struct Command: CommandRepresentable {
+  public struct Options: OptionsRepresentable {
+    public enum CodingKeys: String, CodingKeysRepresentable {
+      case verbose
+    }
+    
+    public static let descriptions: [SampleCommand.Options.CodingKeys : OptionDescription] = [
+      .verbose: .usage("Prints the logs of the command"),
+    ]
+    
+    public var verbose: Bool = false
+  }
+  
+  public static let symbol: String = "sample"
+  public static let usage: String = "Show sample usage of commander"
+  
+  public static func main(_ options: Options) throws {
+    print(options)
+    print("arguments: \(options.arguments)")
+  }
+}
+```
+
+This command is named 'sample' and takes option '--verbose'
+
+### Options
+### Arguments
+### Completions
 
 ## Example
 
@@ -95,6 +156,20 @@ And you can fetch the arguments by:
 public static func main(_ options: Options) throws {
   print("arguments: \(options.arguments)") // 'arguments' is being declared in OptionsRepresentable 
 }
+```
+
+### Execution
+
+From shell:
+
+```bash
+commander-sample sample --verbose --string-value String arg1 arg2
+# 
+# Options(verbose: true, stringValue: "String")
+# arguments: ["arg1", "arg2"]
+#
+#
+# string-value
 ```
 
 It's easy and fun!!!
