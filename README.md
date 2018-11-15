@@ -4,6 +4,8 @@
 
 Commander is a Swift framework for decoding command-line arguments by integrating with Swift standard library protocols Decodable & Decoder. Commander can help you to write **structured cli** program by declaring the structure of `command` and `options` of that command without writing any codes to parse the cli arguments. With Commander, you just need to focus on writing `options` structure of commands, the rest works will be handled by Commander automatically.
 
+![logo](Resources/sample.png)
+
 # Table Of Contents
 
 - [Features](#features)
