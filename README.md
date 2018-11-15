@@ -325,20 +325,20 @@ Commander can generate auto-completion scripts for you, you can run the built-in
 
 #### Bash
 
-1. run in terminal：`commander complete generate --shell=bash > ./bash_completion`
-2. then：`source ./bash_completion`即可
-3. Or, install the scripts to the login scripts of bash.
+- run in terminal：`commander complete generate --shell=bash > ./bash_completion`
+- then：`source ./bash_completion`
+- or, install the scripts to the login scripts of bash for good at `~/.profile`
 
 #### Zsh
 
-1. run in terminal：`commander complete generate --shell=zsh > ~/zsh_completions/_commander`
-2. add contents to `~/.zshrc`:
-```zsh 
-fpath=(~/zsh_completions $fpath)
-autoload -U +X compinit && compinit
-autoload -U +X bashcompinit && bashcompinit
-```
-3. restart you terminal
+- run in terminal：`commander complete generate --shell=zsh > ~/zsh_completions/_commander`
+- add contents to `~/.zshrc`:
+  ```zsh 
+  fpath=(~/zsh_completions $fpath)
+  autoload -U +X compinit && compinit
+  autoload -U +X bashcompinit && bashcompinit
+  ```
+- restart you terminal
 
 ### Write Your Own Completion
 
