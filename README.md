@@ -17,7 +17,7 @@ Commander is a Swift framework for decoding command-line arguments by integratin
   - [Key-Value Pairs](#key-value-pairs)
     - [Single Value](#single-value)
     - [Multiple Values](#multiple-values)
-  - [Arguments](#arguments)
+  - [Argument](#argument)
 - [Value Types](#value-types)
 - [Usage](#usage)
   - [Command](#command)
@@ -96,7 +96,7 @@ commander command --dict key1=val1 --dict key2=val2 --dict key3=val3
 commander command -d key1=val1 -d key2=val2 -d key3=val3
 ```
 
-## Arguments
+## Argument
 
 In Commander，The position of arguments is not settled, they can be arywhere but the arguments must be continuous:
 
