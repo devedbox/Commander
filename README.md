@@ -64,7 +64,7 @@ In Commander, a command is a type(`class` or `struct`) that conforms to protocol
 - `usage`: The usage help message for that command.
 - `children`: The subcommands of that command.
 
-#### Creating a Command
+#### Creating A Command
 
 ```swift
 public struct Hello: CommandRepresentable {
@@ -91,7 +91,7 @@ public struct Hello: CommandRepresentable {
 }
 ```
 
-#### Dispatching a command
+#### Dispatching A Command
 
 Once a command has been created, it can be dispathed against a list of arguments, usually taken from CommandLine.arguments with droping of the symbol of command itself.
 
@@ -103,11 +103,26 @@ Command.dispatch(with: arguments.dropFirst())
 
 As a real dispatching of command, you don't need to dispatch the command manually, the dispatching will be handled by Commander automatically.
 
+#### Adding Subcommands
+
+Adding subcommands in Commander is by declaring the `children` of type `[CommandDescribable.Type]`:
+
+```swift
+public struct Hello: CommandRepresentable {
+  ...
+  public static let children: [CommandDescribable.Type] = [
+    Subcommand1.self,
+    Subcommand2.self
+  ]
+  ...
+}
+```
+
 ### Options
 
 The `Options` is the same as command, is a type(`class` or `struct`) that conforms to protocol `OptionsRepresentable` which inherited from `Decodable` and can be treated as a simple data model, will be decoed by the built in code type `OptionsDecoder` in Commander.
 
-#### Declaring an options
+#### Declaring An Options
 
 As mentioned earlier in *[Creating a Command](#Creating-a-Command)*, declaring an options type is extremely easy, just another data model represents the raw string in command line arguments:
 
@@ -125,7 +140,7 @@ public struct Options: OptionsRepresentable {
 }
 ```
 
-#### Changing option symbol
+#### Changing Option Symbol
 
 As declared as `public var verbose: Bool`, we can use symbol in command line with `--verbose` accordingly, but how to use another different symbol in command line to wrap `verbose` such as `--is-verbose`? In Commander, we can just do as this:
 
@@ -135,7 +150,7 @@ public enum CodingKeys: String, CodingKeysRepresentable {
 }
 ```
 
-#### Providing a short key
+#### Providing A Short Key
 
 Sometimes in develping command line tools, using a pattern like `-v` is necessary and helpful. In Commander, providing a short key for option is easy, we just need to declare a key-value pairs of type `[CodingKeys: Character]` in `Options.keys`:
 
@@ -149,7 +164,7 @@ public struct Options: OptionsRepresentable {
 }
 ```
 
-#### Providing a default value
+#### Providing A Default Value
 
 When we difine a flag option in our command, provide a default value for flag is required because if we miss typing the flag in command line, the value of that flag means `false`. Providing default value in Commander is by add declaration in `Options.descritions` as this:
 
@@ -163,9 +178,22 @@ public struct Options: OptionsRepresentable {
 }
 ```
 
-### Values
+### Value Types
+
+As we all know, all the arguments from `CommandLine.arguments` is `String` type, in Commander, the available value types are:
+
+- Bool: `commander command --verbose`
+- Int(8, 16, 32, 64...): `commander command --int 100`
+- String: `commander command --string "this is a string value"`
+- Array: `commander command --array val1,val2,val3`
+- Dictionary: `commander command --dict key1=val1,key2=val2,key3=val3`
+
+Array object is delimited by character `,` and Dict object is delimited by character `=` and `,`.
 
 ### Arguments
+
+
+
 ### Completions
 
 ## Example
