@@ -4,8 +4,6 @@
 
 Commander is a Swift framework for decoding command-line arguments by integrating with Swift standard library protocols Decodable & Decoder. Commander can help you to write **structured cli** program by declaring the structure of `command` and `options` of that command without writing any codes to parse the cli arguments. With Commander, you just need to focus on writing `options` structure of commands, the rest works will be handled by Commander automatically.
 
-![logo](Resources/sample.png)
-
 # Table Of Contents
 
 - [Features](#features)
@@ -13,6 +11,12 @@ Commander is a Swift framework for decoding command-line arguments by integratin
 - [Test Coverage Graph](#test-coverage-graph)
 - [Installation](#installation)
   - [Swift Package Manager](#with-spm)
+- [Patterns](#patterns)
+  - [Key-Value Pairs](#key-value-pairs)
+    - [Single Value](#single-value)
+    - [Multiple Values](#multiple-values)
+  - [Arguments](#arguments)
+- [Value Types](#value-types)
 - [Usage](#usage)
   - [Command](#command)
     - [Creating A Command](#creating-a-command)
@@ -25,12 +29,6 @@ Commander is a Swift framework for decoding command-line arguments by integratin
     - [Providing A Default Value](#providing-a-default-value)
   - [Arguments](#arguments)
   - [Completions](#completions)
-  - [Value Types](#value-types)
-  - [Patterns](#patterns)
-    - [Key-Value Pairs](#key-value-pairs)
-      - [Single Value](#single-value)
-      - [Multiple Values](#multiple-values)
-    - [Arguments](#arguments)
 - [Example](#example)
   - [Execution](#execution)
 - [License](#license)
@@ -65,6 +63,63 @@ dependencies: [
   .package(url: "https://github.com/devedbox/Commander.git", "0.5.6..<100.0.0")
 ]
 ```
+
+----
+
+# Patterns
+
+## Key-Value Pairs
+
+### Single Value
+
+```bash
+commander command --key value --key1=value1
+commander command --bool
+commander command -k value -K=value1
+commander command -z=value # {"z": "value"}
+commander command -z # {"z": true}
+commander command -zop # {"z": true, "o": true, "p": true}
+```
+
+### Multiple Values
+
+```bash
+commander command --array val1,val2,val3
+commander command -a val1,val2,val3
+commander command --dict key1=val1,key2=val2,key3=val3
+commander command -d key1=val1,key2=val2,key3=val3
+commander command --array val1 --array val2 --array val3
+commander command -a val1 -a val2 -a val3
+commander command --dict key1=val1 --dict key2=val2 --dict key3=val3
+commander command -d key1=val1 -d key2=val2 -d key3=val3
+```
+
+## Arguments
+
+In Commander，The position of arguments is not settled, they can be arywhere but the arguments must be continuous:
+
+```bash
+commander command args... --options                   # before options
+commander command --options args...                   # after options
+commander command --options args... --options         # between options
+commander command arg0... --options arg1... --options # Error
+```
+
+Use `--` to mark the ends of options and begins of arguments, but, this is normally optional in Commander:
+
+`commander command --options -- args...`
+
+# Value Types
+
+As we all know, all the arguments from `CommandLine.arguments` is `String` type, in Commander, the available value types are:
+
+- Bool: `commander command --verbose`
+- Int(8, 16, 32, 64...): `commander command --int 100`
+- String: `commander command --string "this is a string value"`
+- Array: `commander command --array val1,val2,val3`
+- Dictionary: `commander command --dict key1=val1,key2=val2,key3=val3`
+
+Array object is delimited by character `,` and Dict object is delimited by character `=` and `,`.
 
 ----
 
@@ -230,60 +285,9 @@ commander hello --verbose -- "Hello world" "Will be dropped"
 
 ## Completions
 
-## Value Types
-
-As we all know, all the arguments from `CommandLine.arguments` is `String` type, in Commander, the available value types are:
-
-- Bool: `commander command --verbose`
-- Int(8, 16, 32, 64...): `commander command --int 100`
-- String: `commander command --string "this is a string value"`
-- Array: `commander command --array val1,val2,val3`
-- Dictionary: `commander command --dict key1=val1,key2=val2,key3=val3`
-
-Array object is delimited by character `,` and Dict object is delimited by character `=` and `,`.
-
-## Patterns
-
-### Key-Value Pairs
-
-#### Single Value
-
-```bash
-commander command --key value --key1=value1
-commander command --bool
-commander command -k value -K=value1
-commander command -z=value # {"z": "value"}
-commander command -z # {"z": true}
-commander command -zop # {"z": true, "o": true, "p": true}
-```
-
-#### Multiple Values
-
-```bash
-commander command --array val1,val2,val3
-commander command -a val1,val2,val3
-commander command --dict key1=val1,key2=val2,key3=val3
-commander command -d key1=val1,key2=val2,key3=val3
-commander command --array val1 --array val2 --array val3
-commander command -a val1 -a val2 -a val3
-commander command --dict key1=val1 --dict key2=val2 --dict key3=val3
-commander command -d key1=val1 -d key2=val2 -d key3=val3
-```
-
-### Arguments
-
-In Commander，The position of arguments is not settled, they can be arywhere but the arguments must be continuous:
-
-- before options：`commander command args... --options`
-- after options：`commander command --options args...`
-- between options：`commander command --options args... --options`
-- error：`commander command arg0... --options arg1... --options`
-
-Use `--` to mark the ends of options and begins of arguments, but, this is normally optional in Commander:
-
-`commander command --options -- args...`
-
 # Example
+
+![logo](Resources/sample.png)
 
 With Commander, a command and its associated options could be defined as follows:
 
