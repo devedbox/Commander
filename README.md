@@ -320,6 +320,9 @@ commander-sample --help # or, commander-sample help
 #
 #     -h, --help  Prints the help message of the command. Usage: [[--help|-h][COMMAND --help][COMMAND -h]]
 ```
+
+For specific commands, run as this:
+
 ```bash
 commander-sample help sample # or, commander-sample sample --help
 # Usage of 'sample':
