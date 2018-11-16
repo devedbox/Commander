@@ -7,11 +7,12 @@
   <a href="https://codecov.io/gh/devedbox/Commander">
     <img src="https://codecov.io/gh/devedbox/Commander/branch/master/graph/badge.svg">
   </a>
-  <img src="https://img.shields.io/badge/license-MIT-blue.svg">
-  <img src="https://img.shields.io/badge/language-swift-orange.svg">
   <a href="https://codeclimate.com/github/devedbox/Commander/maintainability">
     <img src="https://api.codeclimate.com/v1/badges/83ff78d95f31412070e1/maintainability">
   </a>
+  <img src="https://img.shields.io/badge/license-MIT-blue.svg">
+  <img src="https://img.shields.io/badge/language-swift-orange.svg">
+  <img src="https://img.shields.io/github/tag-date/devedbox/Commander.svg?label=spm-ver">
 </p>
 
 <p align="center">
@@ -24,9 +25,6 @@
   <a href="https://github.com/devedbox/Commander/network">
     <img src="https://img.shields.io/github/forks/devedbox/Commander.svg?style=social&label=Fork">
   </a>
-  
-  <img src="https://img.shields.io/github/watchers/devedbox/Commander.svg?style=social&label=Watch&link=https%3A%2F%2Fgithub.com%2Fdevedbox%2FCommander%2Fwatch&link=https%3A%2F%2Fgithub.com%2Fdevedbox%2FCommander%2Fwatchers">
-  <img src="https://img.shields.io/github/stars/devedbox/Commander.svg?style=social&label=Star&link=https%3A%2F%2Fgithub.com%2Fdevedbox%2FCommander%2Fstar&link=https%3A%2F%2Fgithub.com%2Fdevedbox%2FCommander%2Fstargazers">
 </p>
 
 Commander is a Swift framework for decoding command-line arguments by integrating with Swift standard library protocols Decodable & Decoder. Commander can help you to write **structured cli** program by declaring the structure of `command` and `options` of that command without writing any codes to parse the cli arguments. With Commander, you just need to focus on writing `options` structure of commands, the rest works will be handled by Commander automatically.
