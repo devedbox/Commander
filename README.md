@@ -37,6 +37,7 @@ Commander is a Swift framework for decoding command-line arguments by integratin
 # Table Of Contents
 
 - [Features](#features)
+- [Example](#example)
 - [Requirements](#requirements)
 - [Test Coverage Graph](#test-coverage-graph)
 - [Installation](#installation)
@@ -64,9 +65,19 @@ Commander is a Swift framework for decoding command-line arguments by integratin
       - [Bash](#bash)
       - [Zsh](#zsh)
     - [Write Your Own Completion](#write-your-own-completion)
-- [Example](#example)
-  - [Execution](#execution)
 - [License](#license)
+
+----
+
+<p align="center">
+  <a href="https://github.com/devedbox/Commander#features">
+    <b>Features</b>
+  </a>
+  <body>  -  </body>
+  <a href="https://github.com/devedbox/Commander#example">
+    <b>Example</b>
+  </a>
+</p>
 
 # Features
 
@@ -77,6 +88,102 @@ Commander is a Swift framework for decoding command-line arguments by integratin
 - [x] Swift 4 compatibility.
 - [x] Zero dependency and pure Swift.
 - [x] Supports Linux and `swift build`.
+  
+# Example
+
+With Commander, a command and its associated options could be defined as follows:
+
+```swift
+import Commander
+
+public struct SampleCommand: CommandRepresentable {
+  public struct Options: OptionsRepresentable {
+    public typealias ArgumentsResolver = AnyArgumentsResolver<String>
+    public enum CodingKeys: String, CodingKeysRepresentable {
+      case verbose = "verbose"
+      case stringValue = "string-value"
+    }
+
+    public static let keys: [Options.CodingKeys : Character] = [
+      .verbose: "v",
+      .stringValue: "s"
+    ]
+
+    public static let descriptions: [Options.CodingKeys : OptionDescription] = [
+      .verbose: .usage("Prints the logs of the command"),
+      .stringValue: .usage("Pass a value of String to the command")
+    ]
+
+    public var verbose: Bool = false
+    public var stringValue: String = ""
+  }
+
+  public static let symbol: String = "sample"
+  public static let usage: String = "Show sample usage of commander"
+
+  public static func main(_ options: Options) throws {
+    print(options)
+    print("arguments: \(options.arguments)")
+    print("\n\n\(Options.CodingKeys.stringValue.stringValue)")
+  }
+}
+```
+
+Then, configuring the available commands would like this: 
+
+```swift
+import Commander
+
+BuildIn.Commander.commands = [
+  SampleCommand.self,
+  NoArgsCommand.self
+]
+BuiltIn.Commander.usage = "The sample usage command of 'Commander'"
+BuiltIn.Commander().dispatch() // Call this to dispatch and run the command
+```
+
+After which, arguments can be resolved by declaration of `ArgumentsResolver`:
+
+```swift
+public typealias ArgumentsResolver = AnyArgumentsResolver<T> // T must be Decodable
+```
+
+And you can fetch the arguments by:
+```swift
+public static func main(_ options: Options) throws {
+  print("arguments: \(options.arguments)") // 'arguments' is being declared in OptionsRepresentable 
+}
+```
+
+At last, run from shell:
+
+```bash
+commander-sample sample --verbose --string-value String arg1 arg2
+# 
+# Options(verbose: true, stringValue: "String")
+# arguments: ["arg1", "arg2"]
+#
+#
+# string-value
+```
+
+It's easy and fun!!!
+
+----
+
+<p align="center">
+  <a href="https://github.com/devedbox/Commander#requirements">
+    <b>Requirements</b>
+  </a>
+  <body>  -  </body>
+  <a href="https://github.com/devedbox/Commander#test-coverage-graph">
+    <b>Test Coverage Graph</b>
+  </a>
+  <body>  -  </body>
+  <a href="https://github.com/devedbox/Commander#installation">
+    <b>Installation</b>
+  </a>
+</p>
 
 # Requirements
 
@@ -102,6 +209,16 @@ dependencies: [
 ```
 
 ----
+
+<p align="center">
+  <a href="https://github.com/devedbox/Commander#features">
+    <b>Patterns</b>
+  </a>
+  <body>  -  </body>
+  <a href="https://github.com/devedbox/Commander#value-types">
+    <b>Value Types</b>
+  </a>
+</p>
 
 # Patterns
 
@@ -159,6 +276,16 @@ As we all know, all the arguments from `CommandLine.arguments` is `String` type,
 Array object is delimited by character `,` and Dict object is delimited by character `=` and `,`.
 
 ----
+
+<p align="center">
+  <a href="https://github.com/devedbox/Commander#usage">
+    <b>Advanced Usage</b>
+  </a>
+  <body>  -  </body>
+  <a href="https://github.com/devedbox/Commander#license">
+    <b>License</b>
+  </a>
+</p>
 
 # Usage
 
@@ -479,88 +606,6 @@ public static func completions(for commandLine: Utility.CommandLine) -> [String]
   }
 }
 ```
-
-# Example
-
-With Commander, a command and its associated options could be defined as follows:
-
-```swift
-import Commander
-
-public struct SampleCommand: CommandRepresentable {
-  public struct Options: OptionsRepresentable {
-    public typealias ArgumentsResolver = AnyArgumentsResolver<String>
-    public enum CodingKeys: String, CodingKeysRepresentable {
-      case verbose = "verbose"
-      case stringValue = "string-value"
-    }
-
-    public static let keys: [Options.CodingKeys : Character] = [
-      .verbose: "v",
-      .stringValue: "s"
-    ]
-
-    public static let descriptions: [Options.CodingKeys : OptionDescription] = [
-      .verbose: .usage("Prints the logs of the command"),
-      .stringValue: .usage("Pass a value of String to the command")
-    ]
-
-    public var verbose: Bool = false
-    public var stringValue: String = ""
-  }
-
-  public static let symbol: String = "sample"
-  public static let usage: String = "Show sample usage of commander"
-
-  public static func main(_ options: Options) throws {
-    print(options)
-    print("arguments: \(options.arguments)")
-    print("\n\n\(Options.CodingKeys.stringValue.stringValue)")
-  }
-}
-```
-
-Then, configuring the available commands would like this: 
-
-```swift
-import Commander
-
-Commander.commands = [
-  SampleCommand.self,
-  NoArgsCommand.self
-]
-Commander.usage = "The sample usage command of 'Commander'"
-Commander().dispatch() // Call this to dispatch and run the command
-```
-
-After which, arguments can be resolved by declaration of `ArgumentsResolver`:
-
-```swift
-public typealias ArgumentsResolver = AnyArgumentsResolver<T> // T must be Decodable
-```
-
-And you can fetch the arguments by:
-```swift
-public static func main(_ options: Options) throws {
-  print("arguments: \(options.arguments)") // 'arguments' is being declared in OptionsRepresentable 
-}
-```
-
-## Execution
-
-From shell:
-
-```bash
-commander-sample sample --verbose --string-value String arg1 arg2
-# 
-# Options(verbose: true, stringValue: "String")
-# arguments: ["arg1", "arg2"]
-#
-#
-# string-value
-```
-
-It's easy and fun!!!
 
 # License
 
