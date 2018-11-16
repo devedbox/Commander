@@ -1,12 +1,34 @@
-![logo](Resources/logo.svg)
+<p align="center">
+  <img src="Resources/logo.svg">
+</p>
 
-![test](https://travis-ci.com/devedbox/Commander.svg?branch=master)[![codecov](https://codecov.io/gh/devedbox/Commander/branch/master/graph/badge.svg)](https://codecov.io/gh/devedbox/Commander)![license](https://img.shields.io/badge/license-MIT-blue.svg)![lang](https://img.shields.io/badge/language-swift-orange.svg)[![Maintainability](https://api.codeclimate.com/v1/badges/83ff78d95f31412070e1/maintainability)](https://codeclimate.com/github/devedbox/Commander/maintainability)
+<p align="center">
+  <img src="https://travis-ci.com/devedbox/Commander.svg?branch=master">
+  <a href="https://codecov.io/gh/devedbox/Commander">
+    <img src="https://codecov.io/gh/devedbox/Commander/branch/master/graph/badge.svg">
+  </a>
+  <img src="https://img.shields.io/badge/license-MIT-blue.svg">
+  <img src="https://img.shields.io/badge/language-swift-orange.svg">
+  <a href="https://codeclimate.com/github/devedbox/Commander/maintainability">
+    <img src="https://api.codeclimate.com/v1/badges/83ff78d95f31412070e1/maintainability">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/devedbox/Commander/watchers">
+    <img src="https://img.shields.io/github/watchers/devedbox/Commander.svg?style=social&label=Watch">
+  </a>
+  <a href="https://github.com/devedbox/Commander/stargazers">
+    <img src="https://img.shields.io/github/stars/devedbox/Commander.svg?style=social&label=Star">
+  </a>
+  <a href="https://github.com/devedbox/Commander/network">
+    <img src="https://img.shields.io/github/forks/devedbox/Commander.svg?style=social&label=Fork">
+  </a>
+</p>
 
 Commander is a Swift framework for decoding command-line arguments by integrating with Swift standard library protocols Decodable & Decoder. Commander can help you to write **structured cli** program by declaring the structure of `command` and `options` of that command without writing any codes to parse the cli arguments. With Commander, you just need to focus on writing `options` structure of commands, the rest works will be handled by Commander automatically.
 
-[![GitHub Watches](https://img.shields.io/github/watchers/devedbox/Commander.svg?style=social&label=Watch&maxAge=2592000)](https://github.com/devedbox/Commander/watchers)[![GitHub Starts](https://img.shields.io/github/stars/devedbox/Commander.svg?style=social&label=Star&maxAge=2592000)](https://github.com/devedbox/Commander/stargazers)[![GitHub Forks](https://img.shields.io/github/forks/devedbox/Commander.svg?style=social&label=Fork&maxAge=2592000)](https://github.com/devedbox/Commander/network)
-
-![sample](Resources/sample.png)
+<p align="center"><img src="Resources/sample.png"></p>
 
 # Table Of Contents
 
@@ -60,7 +82,9 @@ Commander is a Swift framework for decoding command-line arguments by integratin
 
 # Test Coverage Graph
 
-![coverage graph](https://codecov.io/gh/devedbox/Commander/commit/1a15f7be4db03125027641205529e0e5d5050b21/graphs/sunburst.svg)
+<p align="center">
+  <img src="https://codecov.io/gh/devedbox/Commander/commit/1a15f7be4db03125027641205529e0e5d5050b21/graphs/sunburst.svg">
+</p>
 
 # Installation
 
