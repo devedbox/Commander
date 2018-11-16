@@ -12,7 +12,7 @@
   </a>
   <img src="https://img.shields.io/badge/license-MIT-blue.svg">
   <img src="https://img.shields.io/badge/language-swift-orange.svg">
-  <img src="https://img.shields.io/github/tag-date/devedbox/Commander.svg?label=spm-ver">
+  <img src="https://img.shields.io/github/tag-date/devedbox/Commander.svg?label=spm-ver&colorB=lightgray">
 </p>
 
 <p align="center">
@@ -22,7 +22,7 @@
   <a href="https://github.com/devedbox/Commander/stargazers">
     <img src="https://img.shields.io/github/stars/devedbox/Commander.svg?style=social&label=Star">
   </a>
-  <a href="https://github.com/devedbox/Commander/network">
+  <a href="https://github.com/devedbox/Commander/fork">
     <img src="https://img.shields.io/github/forks/devedbox/Commander.svg?style=social&label=Fork">
   </a>
 </p>
