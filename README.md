@@ -70,13 +70,9 @@ Commander is a Swift framework for decoding command-line arguments by integratin
 ----
 
 <p align="center">
-  <a href="https://github.com/devedbox/Commander#features">
-    <b>Features</b>
-  </a>
+  <a href="https://github.com/devedbox/Commander#features"><b>Features</b></a>
   <body>  -  </body>
-  <a href="https://github.com/devedbox/Commander#example">
-    <b>Example</b>
-  </a>
+  <a href="https://github.com/devedbox/Commander#example"><b>Example</b></a>
 </p>
 
 # Features
@@ -172,17 +168,11 @@ It's easy and fun!!!
 ----
 
 <p align="center">
-  <a href="https://github.com/devedbox/Commander#requirements">
-    <b>Requirements</b>
-  </a>
+  <a href="https://github.com/devedbox/Commander#requirements"><b>Requirements</b></a>
   <body>  -  </body>
-  <a href="https://github.com/devedbox/Commander#test-coverage-graph">
-    <b>Test Coverage Graph</b>
-  </a>
+  <a href="https://github.com/devedbox/Commander#test-coverage-graph"><b>Test Coverage Graph</b></a>
   <body>  -  </body>
-  <a href="https://github.com/devedbox/Commander#installation">
-    <b>Installation</b>
-  </a>
+  <a href="https://github.com/devedbox/Commander#installation"><b>Installation</b></a>
 </p>
 
 # Requirements
@@ -211,13 +201,9 @@ dependencies: [
 ----
 
 <p align="center">
-  <a href="https://github.com/devedbox/Commander#features">
-    <b>Patterns</b>
-  </a>
+  <a href="https://github.com/devedbox/Commander#features"><b>Patterns</b></a>
   <body>  -  </body>
-  <a href="https://github.com/devedbox/Commander#value-types">
-    <b>Value Types</b>
-  </a>
+  <a href="https://github.com/devedbox/Commander#value-types"><b>Value Types</b></a>
 </p>
 
 # Patterns
@@ -278,13 +264,9 @@ Array object is delimited by character `,` and Dict object is delimited by chara
 ----
 
 <p align="center">
-  <a href="https://github.com/devedbox/Commander#usage">
-    <b>Advanced Usage</b>
-  </a>
+  <a href="https://github.com/devedbox/Commander#usage"><b>Advanced Usage</b></a>
   <body>  -  </body>
-  <a href="https://github.com/devedbox/Commander#license">
-    <b>License</b>
-  </a>
+  <a href="https://github.com/devedbox/Commander#license"><b>License</b></a>
 </p>
 
 # Usage
