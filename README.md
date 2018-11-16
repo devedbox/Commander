@@ -28,6 +28,12 @@
   <a href="https://github.com/devedbox/Commander/fork">
     <img src="https://img.shields.io/github/forks/devedbox/Commander.svg?style=social&label=Fork">
   </a>
+  <a href="https://twitter.com/intent/follow?screen_name=devedbox">
+    <img src="https://img.shields.io/twitter/follow/devedbox.svg?style=social&label=Follow%20%40devedbox">
+  </a>
+  <a href="https://twitter.com/intent/tweet?text=Creates+type-safe+and+structured+command-line+interface+program+in+Swift+using+library+Commander+with+joy!&url=https%3a%2f%2fgithub.com%2fdevedbox%2fCommander&hashtags=github,swiftlang,commandline,iosdev,commander&original_referer=http%3A%2F%2Fgithub.com%2F&tw_p=tweetbutton">
+    <img src="https://img.shields.io/twitter/url/http/shields.io.svg?style=social">
+  </a>
 </p>
 
 Commander is a Swift framework for decoding command-line arguments by integrating with Swift standard library protocols Decodable & Decoder. Commander can help you to write **structured cli** program by declaring the structure of `command` and `options` of that command without writing any codes to parse the cli arguments. With Commander, you just need to focus on writing `options` structure of commands, the rest works will be handled by Commander automatically.
