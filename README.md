@@ -13,6 +13,9 @@
   <img src="https://img.shields.io/badge/license-MIT-blue.svg">
   <img src="https://img.shields.io/badge/language-swift-orange.svg">
   <img src="https://img.shields.io/github/tag-date/devedbox/Commander.svg?label=spm-ver&colorB=lightgray">
+  <a href="https://gitter.im/devedbox/Commander?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge">
+    <img src="https://badges.gitter.im/devedbox/Commander.svg">
+  </a>
 </p>
 
 <p align="center">
