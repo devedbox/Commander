@@ -136,12 +136,12 @@ Then, configuring the available commands would like this:
 ```swift
 import Commander
 
-BuildIn.Commander.commands = [
+Commander.commands = [
   SampleCommand.self,
   NoArgsCommand.self
 ]
-BuiltIn.Commander.usage = "The sample usage command of 'Commander'"
-BuiltIn.Commander().dispatch() // Call this to dispatch and run the command
+Commander.usage = "The sample usage command of 'Commander'"
+Commander().dispatch() // Call this to dispatch and run the command
 ```
 
 After which, arguments can be resolved by declaration of `ArgumentsResolver`:
@@ -286,12 +286,12 @@ Just as simple as following:
 ```swift
 import Commander
 
-BuiltIn.Commander.commands = [
+Commander.commands = [
   SampleCommand.self,
   NoArgsCommand.self
 ]
-BuiltIn.Commander.usage = "The sample usage command of 'Commander'"
-BuiltIn.Commander().dispatch()
+Commander.usage = "The sample usage command of 'Commander'"
+Commander().dispatch()
 ```
 ## Command
 
