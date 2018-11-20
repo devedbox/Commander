@@ -31,7 +31,7 @@
   <a href="https://twitter.com/intent/follow?screen_name=devedbox">
     <img src="https://img.shields.io/twitter/follow/devedbox.svg?style=social&label=Follow%20%40devedbox">
   </a>
-  <a href="https://twitter.com/intent/tweet?text=Creates+type-safe+and+structured+command-line+interface+program+in+Swift+using+library+Commander+with+joy!&url=https%3a%2f%2fgithub.com%2fdevedbox%2fCommander&hashtags=github,swiftlang,commandline,iosdev,commander&original_referer=http%3A%2F%2Fgithub.com%2F&tw_p=tweetbutton">
+  <a href="https://twitter.com/intent/tweet?text=Commander+makes+it+easy+to+build+type-safe+and+structured+command-line+interface+program+in+Swift!&url=https%3a%2f%2fgithub.com%2fdevedbox%2fCommander&hashtags=github,swiftlang,commandline,iosdev,commander&original_referer=http%3A%2F%2Fgithub.com%2F&tw_p=tweetbutton">
     <img src="https://img.shields.io/twitter/url/http/shields.io.svg?style=social">
   </a>
 </p>
