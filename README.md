@@ -86,10 +86,10 @@ Commander is a Swift framework for decoding command-line arguments by integratin
 - [x] Structured-CLI, commands and options are all structured by declaration of `struct` or `class`.
 - [x] Options types are type-safe by implementing `Decodable` protocol.
 - [x] Automatically generate help message for the `commander` or `command`.
-- [x] Shell <Tab> completion supported. Bash/zsh <Tab> auto-complete scripts supported.
-- [x] Swift 4 compatibility.
+- [x] Shell `<Tab>` completion supported. **Bash/Zsh** `<Tab>` auto-complete scripts supported.
+- [x] Swift 4.x compatibility.
 - [x] Zero dependency and pure Swift.
-- [x] Supports Linux and `swift build`.
+- [x] Supports Linux with `swift build`.
   
 # Example
 
