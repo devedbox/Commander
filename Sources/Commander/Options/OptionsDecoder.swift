@@ -164,33 +164,33 @@ extension OptionsDecoder {
 // MARK: - ObjectFormat.
 
 fileprivate extension Dictionary where Value == OptionsDecoder.ObjectFormat.Value {
-  fileprivate var unwrapped: Any? {
+  var unwrapped: Any? {
     return mapValues { $0.unwrapped }
   }
 }
 
 fileprivate extension Dictionary where Key == String, Value == [OptionsDecoder.ObjectFormat.Value] {
-  fileprivate var lastKeyedArguments: (key: Key, value: Value)? {
+  var lastKeyedArguments: (key: Key, value: Value)? {
     return self.first { $0.key.hasSuffix("-\(count-1)") }
   }
   
-  fileprivate var lastArguments: Value? {
+  var lastArguments: Value? {
     return lastKeyedArguments?.1
   }
   
-  fileprivate mutating func lastAppendEmptyContainer(for key: String) {
+  mutating func lastAppendEmptyContainer(for key: String) {
     self["\(key)-\(count)"] = []
   }
 }
 
 fileprivate extension Array where Element == OptionsDecoder.ObjectFormat.Value {
-  fileprivate var unwrapped: Any? {
+  var unwrapped: Any? {
     return compactMap { $0.unwrapped }
   }
 }
 
 fileprivate extension Encodable {
-  fileprivate var wrapped: OptionsDecoder.ObjectFormat.Value? {
+  var wrapped: OptionsDecoder.ObjectFormat.Value? {
     if
       let jsonData = try? JSONEncoder().encode(self),
       let jsonObject = try? JSONSerialization.jsonObject(with: jsonData, options: [])
