@@ -35,7 +35,7 @@ public private(set) var logger: TextOutputStream!
 
 public protocol CommanderRepresentable: CommandDescribable, TextOutputStream {
   /// The associated type of `Options`.
-  associatedtype Options: OptionsRepresentable = NoneOptions
+  associatedtype Options: OptionsRepresentable = DefaultOptions.None
   /// A closure of `(Error) -> Void` to handle the stderror.
   static var errorHandler: ((Swift.Error) -> Swift.Void)? { get }
   /// A closure of `(String) -> Void` to handle the stdout.
@@ -142,7 +142,7 @@ extension CommanderRepresentable {
         }
       }
     } catch let dispatcher as CommandPath.Dispatcher {
-      guard Options.self != NoneOptions.self else {
+      guard Options.self != DefaultOptions.None.self else {
         try Help.resolve(dispatcher.options, path: dispatcher.path, commandLineArgs: commandLineArgs)
         return
       }

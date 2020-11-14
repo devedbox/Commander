@@ -50,43 +50,6 @@ public struct AnyArgumentsResolver<T: Decodable>: ArgumentsResolvable {
   public typealias Argument = T
 }
 
-// MARK: - NoneOptionsRepresentable.
-
-/// The protocol represents the conforming type means none and cannot be decoded.
-public protocol NoneOptionsRepresentable: OptionsRepresentable { }
-
-/// The concrete type conforms `Nothingness` represents the options and arguments is
-/// not resolvable. Used by the `OptionsRepresentable` as default argument type and
-/// by the `CommanderRepresentable` as default options type.
-public struct NoneOptions: NoneOptionsRepresentable {
-  /// The coding key type of `CodingKey & StringRawRepresentable` for decoding.
-  public struct CodingKeys: CodingKeysRepresentable {
-    
-    public typealias AllCases = [CodingKeys]
-    public static var allCases: [CodingKeys] = []
-    
-    public var stringValue: String
-    public var intValue: Int?
-    
-    public init?(stringValue: String) { self.stringValue = stringValue }
-    public init?(intValue: Int) { self.init(stringValue: String(intValue)) }
-    public init?(rawValue: String) { self.init(stringValue: rawValue) }
-  }
-  /// The short keys of the options' coding keys.
-  public static let keys: [CodingKeys : Character] = [:]
-  /// The extends option keys for the `Options`.
-  public static let descriptions: [CodingKeys : OptionDescription] = [:]
-  /// Creates a new instance by decoding from the given decoder.
-  ///
-  /// This initializer throws an error if reading from the decoder fails, or
-  /// if the data read is corrupted or otherwise invalid.
-  ///
-  /// - Parameter decoder: The decoder to read data from.
-  public init(from decoder: Decoder) throws {
-    throw OptionsDecoder.Error.unresolvableArguments
-  }
-}
-
 // MARK: - OptionsDescribable.
 
 /// A protocol represents the conforming types can describe the options of commands by getting
@@ -105,7 +68,7 @@ public protocol OptionsDescribable: Decodable, ShellCompletable {
 extension OptionsDescribable {
   /// Returns a bool value indicates if the arguments can be resolved.
   static var isArgumentsResolvable: Bool {
-    return !(argumentType.self == NoneOptions.self)
+    return !(argumentType.self == DefaultOptions.None.self || argumentType.self == DefaultOptions.Empty.self)
   }
   /// Returns if the given options is valid options for the options describer.
   public static func validate(_ options: String) -> Bool {
@@ -146,9 +109,9 @@ public protocol OptionsRepresentable: OptionsDescribable, Hashable {
   /// The coding key type of `CodingKey & StringRawRepresentable` for decoding.
   associatedtype CodingKeys: CodingKeysRepresentable
   /// The arguments resolver of the options.
-  associatedtype ArgumentsResolver: ArgumentsResolvable = AnyArgumentsResolver<NoneOptions>
+  associatedtype ArgumentsResolver: ArgumentsResolvable = AnyArgumentsResolver<DefaultOptions.None>
   /// The global options of the commander.
-  associatedtype GlobalOptions: OptionsRepresentable = NoneOptions
+  associatedtype GlobalOptions: OptionsRepresentable = DefaultOptions.None
   /// The short keys of the options' coding keys.
   static var keys: [CodingKeys: Character] { get }
   /// The extends option keys for the `Options`.
@@ -164,6 +127,11 @@ public protocol OptionsRepresentable: OptionsDescribable, Hashable {
   static func decoded(from commandLineArgs: [String]) throws -> Self
 }
 
+/// The protocol represents the conforming type means none and cannot be decoded.
+public protocol NoneOptionsRepresentable: OptionsRepresentable { }
+/// The protocol represents the conforming type means none and cannot be decoded.
+public protocol EmptyOptionsRepresentable: OptionsRepresentable { }
+
 // MARK: - AnyOptions.
 
 /// A generic type wrapping any instances of `OptionsRepresentable` to gain the scale of `Hashable` as
@@ -176,6 +144,71 @@ internal struct AnyOptions<T: OptionsRepresentable>: Hashable {
 internal var _ArgumentsStorage: [AnyHashable: Any] = [:]
 
 // MARK: - Defaults.
+
+// MARK: - DefaultOptions.
+
+public enum DefaultOptions {
+  // MARK: - EmptyCodingKeys.
+  
+  /// The coding key type of `CodingKey & StringRawRepresentable` for decoding.
+  public struct EmptyCodingKeys: CodingKeysRepresentable {
+    
+    public typealias AllCases = [EmptyCodingKeys]
+    public static var allCases: [EmptyCodingKeys] = []
+    
+    public var stringValue: String
+    public var intValue: Int?
+    
+    public init?(stringValue: String) { self.stringValue = stringValue }
+    public init?(intValue: Int) { self.init(stringValue: String(intValue)) }
+    public init?(rawValue: String) { self.init(stringValue: rawValue) }
+  }
+  
+  // MARK: - None.
+  
+  /// The concrete type conforms `NoneOptionsRepresentable` represents the options and arguments is
+  /// not resolvable. Used by the `OptionsRepresentable` as default argument type and
+  /// by the `CommanderRepresentable` as default options type.
+  public struct None: NoneOptionsRepresentable {
+    /// The coding key type of `CodingKey & StringRawRepresentable` for decoding.
+    public typealias CodingKeys = DefaultOptions.EmptyCodingKeys
+    /// The short keys of the options' coding keys.
+    public static let keys: [CodingKeys : Character] = [:]
+    /// The extends option keys for the `Options`.
+    public static let descriptions: [CodingKeys : OptionDescription] = [:]
+    /// Creates a new instance by decoding from the given decoder.
+    ///
+    /// This initializer throws an error if reading from the decoder fails, or
+    /// if the data read is corrupted or otherwise invalid.
+    ///
+    /// - Parameter decoder: The decoder to read data from.
+    public init(from decoder: Decoder) throws {
+      throw OptionsDecoder.Error.unresolvableArguments
+    }
+  }
+  
+  // MARK: - Empty.
+  
+  /// The concrete type conforms `EmptyOptionsRepresentable` represents the options and arguments is
+  /// default empty.
+  public struct Empty: EmptyOptionsRepresentable {
+    /// The coding key type of `CodingKey & StringRawRepresentable` for decoding.
+    public typealias CodingKeys = EmptyCodingKeys
+    /// The short keys of the options' coding keys.
+    public static let keys: [CodingKeys : Character] = [:]
+    /// The extends option keys for the `Options`.
+    public static let descriptions: [CodingKeys : OptionDescription] = [:]
+    /// Creates a new instance by decoding from the given decoder.
+    ///
+    /// This initializer throws an error if reading from the decoder fails, or
+    /// if the data read is corrupted or otherwise invalid.
+    ///
+    /// - Parameter decoder: The decoder to read data from.
+    public init(from decoder: Decoder) throws {
+      // Default do nothing.
+    }
+  }
+}
 
 extension OptionsRepresentable {
   /// Returns the global options of commander.
@@ -228,7 +261,15 @@ extension OptionsRepresentable {
   }
 }
 
-extension OptionsRepresentable where ArgumentsResolver == AnyArgumentsResolver<NoneOptions> {
+extension OptionsRepresentable where ArgumentsResolver == AnyArgumentsResolver<DefaultOptions.None> {
+  /// The arguments of the options if arguments can be resolved.
+  public var arguments: [ArgumentsResolver.Argument] {
+    get { return [] }
+    set { }
+  }
+}
+
+extension OptionsRepresentable where ArgumentsResolver == AnyArgumentsResolver<DefaultOptions.Empty> {
   /// The arguments of the options if arguments can be resolved.
   public var arguments: [ArgumentsResolver.Argument] {
     get { return [] }
