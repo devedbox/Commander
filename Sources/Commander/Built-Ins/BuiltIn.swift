@@ -23,6 +23,31 @@
 //  SOFTWARE.
 //
 
+// MARK: - Public.
+
+/// A closure of `(Error) -> Void` to handle the stderror.
+public var errorHandler: ((Swift.Error) -> Void)? {
+  get { return BuiltIn.Commander.errorHandler }
+  set { BuiltIn.Commander.errorHandler = newValue }
+}
+/// A closure of `(String) -> Void` to handle the stdout.
+public var outputHandler: ((String) -> Void)? {
+  get { return BuiltIn.Commander.outputHandler }
+  set { BuiltIn.Commander.outputHandler = newValue }
+}
+/// The registered available commands of the commander.
+public var commands: [CommandDispatchable.Type] {
+  get { return BuiltIn.Commander.commands }
+  set { BuiltIn.Commander.commands = newValue }
+}
+/// The human-readable usage description of the commands.
+public var usage: String {
+  get { return BuiltIn.Commander.usage }
+  set { BuiltIn.Commander.usage = newValue }
+}
+/// Decoding the current command line arguments of `CommandLine.arguments` as the current command's
+/// options type and dispatch the command with the decoded options.
+public func dispatch() { BuiltIn.Commander().dispatch() }
 // MARK: - BuiltIn.
 
 /// The namespace for built-in concepts and commands.
