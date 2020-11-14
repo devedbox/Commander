@@ -35,7 +35,7 @@ public private(set) var logger: TextOutputStream!
 
 public protocol CommanderRepresentable: CommandDescribable, TextOutputStream {
   /// The associated type of `Options`.
-  associatedtype Options: OptionsRepresentable = Nothing
+  associatedtype Options: OptionsRepresentable = NoneOptions
   /// A closure of `(Error) -> Void` to handle the stderror.
   static var errorHandler: ((Swift.Error) -> Swift.Void)? { get }
   /// A closure of `(String) -> Void` to handle the stdout.
@@ -101,11 +101,11 @@ extension CommanderRepresentable {
   /// command with the decided options.
   public func dispatch(with commandLineArgs: [String]) throws {
     defer {
-      CommandPath.runningCommander = nil // Clear the running commander.
-      CommandPath.runningCommanderPath = nil // Clear the running path of commander.
-      CommandPath.runningGlobalOptions = nil // Clear the running global options.
-      CommandPath.runningCommanderUsage = nil // Clear the runnung commander usage.
-      CommandPath.runningCommands = [] // Clear the running commands.
+      CommandPath.running.commander = nil // Clear the running commander.
+      CommandPath.running.commanderPath = nil // Clear the running path of commander.
+      CommandPath.running.globalOptions = nil // Clear the running global options.
+      CommandPath.running.commanderUsage = nil // Clear the runnung commander usage.
+      CommandPath.running.commands = [] // Clear the running commands.
       logger = nil // Reset the logger.
       _ArgumentsStorage = [:] // Reset the storage of arguments.
     }
@@ -113,10 +113,10 @@ extension CommanderRepresentable {
     let runningPath = commandLineArgs.first!
     
     logger = self
-    CommandPath.runningCommander = type(of: self)
-    CommandPath.runningCommanderPath = runningPath
-    CommandPath.runningCommanderUsage = type(of: self).usage
-    CommandPath.runningCommands = type(of: self).allCommands
+    CommandPath.running.commander = type(of: self)
+    CommandPath.running.commanderPath = runningPath
+    CommandPath.running.commanderUsage = type(of: self).usage
+    CommandPath.running.commands = type(of: self).allCommands
     
     var commands = commandLineArgs.dropFirst()
     let symbol = commands.popFirst()
@@ -142,7 +142,7 @@ extension CommanderRepresentable {
         }
       }
     } catch let dispatcher as CommandPath.Dispatcher {
-      guard Options.self != Nothing.self else {
+      guard Options.self != NoneOptions.self else {
         try Help.resolve(dispatcher.options, path: dispatcher.path, commandLineArgs: commandLineArgs)
         return
       }
@@ -156,7 +156,7 @@ extension CommanderRepresentable {
         )
       }
       
-      CommandPath.runningGlobalOptions = try Options(from: dispatcher.decoder)
+      CommandPath.running.globalOptions = try Options(from: dispatcher.decoder)
       try dispatcher.path.command.dispatch(with: dispatcher.decoded)
       
     } catch Error.unrecognizedOptions(let options, path: let path, underlyingError: let error) {

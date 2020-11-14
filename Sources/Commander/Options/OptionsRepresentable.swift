@@ -50,18 +50,18 @@ public struct AnyArgumentsResolver<T: Decodable>: ArgumentsResolvable {
   public typealias Argument = T
 }
 
-// MARK: - Nothingness.
+// MARK: - NoneOptionsRepresentable.
 
-/// The protocol represents the conforming type means nothing and cannot be decoded.
-public protocol Nothingness: OptionsRepresentable { }
+/// The protocol represents the conforming type means none and cannot be decoded.
+public protocol NoneOptionsRepresentable: OptionsRepresentable { }
 
 /// The concrete type conforms `Nothingness` represents the options and arguments is
 /// not resolvable. Used by the `OptionsRepresentable` as default argument type and
 /// by the `CommanderRepresentable` as default options type.
-public struct Nothing: Nothingness {
+public struct NoneOptions: NoneOptionsRepresentable {
   /// The coding key type of `CodingKey & StringRawRepresentable` for decoding.
   public enum CodingKeys: String, CodingKeysRepresentable {
-    case nothing
+    case none
   }
   /// The short keys of the options' coding keys.
   public static let keys: [CodingKeys : Character] = [:]
@@ -96,7 +96,7 @@ public protocol OptionsDescribable: Decodable, ShellCompletable {
 extension OptionsDescribable {
   /// Returns a bool value indicates if the arguments can be resolved.
   static var isArgumentsResolvable: Bool {
-    return !(argumentType.self == Nothing.self)
+    return !(argumentType.self == NoneOptions.self)
   }
   /// Returns if the given options is valid options for the options describer.
   public static func validate(_ options: String) -> Bool {
@@ -137,9 +137,9 @@ public protocol OptionsRepresentable: OptionsDescribable, Hashable {
   /// The coding key type of `CodingKey & StringRawRepresentable` for decoding.
   associatedtype CodingKeys: CodingKeysRepresentable
   /// The arguments resolver of the options.
-  associatedtype ArgumentsResolver: ArgumentsResolvable = AnyArgumentsResolver<Nothing>
+  associatedtype ArgumentsResolver: ArgumentsResolvable = AnyArgumentsResolver<NoneOptions>
   /// The global options of the commander.
-  associatedtype GlobalOptions: OptionsRepresentable = Nothing
+  associatedtype GlobalOptions: OptionsRepresentable = NoneOptions
   /// The short keys of the options' coding keys.
   static var keys: [CodingKeys: Character] { get }
   /// The extends option keys for the `Options`.
@@ -155,11 +155,11 @@ public protocol OptionsRepresentable: OptionsDescribable, Hashable {
   static func decoded(from commandLineArgs: [String]) throws -> Self
 }
 
-// MARK: - AnyOptions.
+// MARK: - Options.
 
 /// A generic type wrapping any instances of `OptionsRepresentable` to gain the scale of `Hashable` as
 /// a key of `[AnyHashable: Any]`.
-internal struct AnyOptions<T: OptionsRepresentable>: Hashable {
+internal struct Options<T: OptionsRepresentable>: Hashable {
   /// The boxed underlying options of `OptionsRepresentable`.
   internal private(set) var options: T
 }
@@ -171,7 +171,7 @@ internal var _ArgumentsStorage: [AnyHashable: Any] = [:]
 extension OptionsRepresentable {
   /// Returns the global options of commander.
   public var globalOptions: GlobalOptions? {
-    return CommandPath.runningGlobalOptions as? GlobalOptions
+    return CommandPath.running.globalOptions as? GlobalOptions
   }
   /// The short keys of the options' coding keys.
   public static var keys: [String: Character] {
@@ -214,12 +214,12 @@ extension OptionsRepresentable {
   }
   /// The arguments of the options if arguments can be resolved.
   public var arguments: [ArgumentsResolver.Argument] {
-    get { return _ArgumentsStorage[AnyOptions(options: self)] as? [ArgumentsResolver.Argument] ?? [] }
-    set { _ArgumentsStorage[AnyOptions(options: self)] = newValue }
+    get { return _ArgumentsStorage[Options(options: self)] as? [ArgumentsResolver.Argument] ?? [] }
+    set { _ArgumentsStorage[Options(options: self)] = newValue }
   }
 }
 
-extension OptionsRepresentable where ArgumentsResolver == AnyArgumentsResolver<Nothing> {
+extension OptionsRepresentable where ArgumentsResolver == AnyArgumentsResolver<NoneOptions> {
   /// The arguments of the options if arguments can be resolved.
   public var arguments: [ArgumentsResolver.Argument] {
     get { return [] }

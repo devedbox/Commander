@@ -39,18 +39,24 @@ public struct CommandPath {
     internal let decoder: Decoder
   }
   
-  /// The running commander.
-  internal static var runningCommander: CommandDescribable.Type!
-  /// The running command path.
-  internal static var runningCommandPath: CommandPath!
-  /// The running commander path of the commander.
-  internal static var runningCommanderPath: String!
-  /// The running commander's usage.
-  internal static var runningCommanderUsage: String!
-  /// The running global options of the commander.
-  internal static var runningGlobalOptions: OptionsDescribable?
-  /// The running commander's available commands.
-  internal static var runningCommands: [CommandDispatchable.Type] = []
+  /// The running context type of the command path.
+  internal struct RunningContext {
+    /// The running commander.
+    internal var commander: CommandDescribable.Type!
+    /// The running command path.
+    internal var commandPath: CommandPath!
+    /// The running commander path of the commander.
+    internal var commanderPath: String!
+    /// The running commander's usage.
+    internal var commanderUsage: String!
+    /// The running global options of the commander.
+    internal var globalOptions: OptionsDescribable?
+    /// The running commander's available commands.
+    internal var commands: [CommandDispatchable.Type] = []
+  }
+  
+  /// The running context of the command path.
+  internal static var running: RunningContext = RunningContext()
   
   /// The running paths of the ass
   public private(set) var paths: [String]
@@ -99,7 +105,7 @@ public struct CommandPath {
     
     // Set the running command path before run the command path.
     // Defer setting nil of the running command path.
-    type(of: self).runningCommandPath = self; defer { type(of: self).runningCommandPath = nil }
+    type(of: self).running.commandPath = self; defer { type(of: self).running.commandPath = nil }
     
     do {
       try command.dispatch(with: commandLineArgs)

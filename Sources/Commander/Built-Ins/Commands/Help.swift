@@ -88,18 +88,18 @@ internal struct Help: CommandRepresentable {
   }
   /// The main function of the command.
   internal static func main(_ options: Options) throws {
-    let path = self.path?.paths.joined(separator: " ") ?? CommandPath.runningCommanderPath.split(separator: "/").last!.string
+    let path = self.path?.paths.joined(separator: " ") ?? CommandPath.running.commanderPath.split(separator: "/").last!.string
     
     if options.arguments.isEmpty {
       if let command = self.path?.command {
         logger <<< CommandDescriber(path: path).describe(command) <<< "\n"
       } else {
-        logger <<< CommandDescriber(path: path).describe(CommandPath.runningCommander) <<< "\n"
+        logger <<< CommandDescriber(path: path).describe(CommandPath.running.commander) <<< "\n"
       }
     } else {
       var unrecognizedCommand = [String]()
       let commands = options.arguments.compactMap { arg -> CommandDispatchable.Type? in
-        if let command = CommandPath.runningCommands.first(where: { $0.symbol == arg }) {
+        if let command = CommandPath.running.commands.first(where: { $0.symbol == arg }) {
           return command
         } else {
           unrecognizedCommand.append(arg)

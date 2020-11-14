@@ -91,7 +91,7 @@ extension Complete {
 
 extension Complete.Generate {
   internal static var bashCompletion: String {
-    let commander = CommandPath.runningCommanderPath.split(separator: "/").last!
+    let commander = CommandPath.running.commanderPath.split(separator: "/").last!
     return """
     #!/bin/bash
     
@@ -101,7 +101,7 @@ extension Complete.Generate {
       cur=\"${COMP_WORDS[COMP_CWORD]}\"
       # prev=\"${COMP_WORDS[COMP_CWORD-1]}\"
     
-      completions=$(\(CommandPath.runningCommanderPath!) complete \"$COMP_LINE\" -s=bash | tr \"\\n\" \" \")
+      completions=$(\(CommandPath.running.commanderPath!) complete \"$COMP_LINE\" -s=bash | tr \"\\n\" \" \")
     
       COMPREPLY=( $(compgen -W \"$completions\" -- \"$cur\") )
     }
@@ -111,13 +111,13 @@ extension Complete.Generate {
   }
   
   internal static var zshCompletion: String {
-    let commander = CommandPath.runningCommanderPath.split(separator: "/").last!
+    let commander = CommandPath.running.commanderPath.split(separator: "/").last!
     return """
     #compdef \(commander)
     
     _\(commander)() {
       local -a comps
-      comps=($(\((CommandPath.runningCommanderPath!)) complete "$words" | tr \"\\n\" \" \"))
+      comps=($(\((CommandPath.running.commanderPath!)) complete "$words" | tr \"\\n\" \" \"))
       compadd -a comps
     }
     
@@ -162,9 +162,9 @@ internal struct Complete: CommandRepresentable {
     
     guard
       commands.isEmpty == false,
-      let command = CommandPath.runningCommands.first(where: { $0.symbol == commands.first! })
+      let command = CommandPath.running.commands.first(where: { $0.symbol == commands.first! })
     else {
-      logger <<< CommandPath.runningCommander.completions(for: commandLine).joined(separator: " ") <<< "\n"
+      logger <<< CommandPath.running.commander.completions(for: commandLine).joined(separator: " ") <<< "\n"
       return
     }
     
@@ -172,7 +172,7 @@ internal struct Complete: CommandRepresentable {
     // If the command is built-in 'help' command, then complete with the first level commands of
     // commander.
     try (commands.first == Help.symbol).true {
-      logger <<< CommandPath.runningCommands.compactMap { cmd in
+      logger <<< CommandPath.running.commands.compactMap { cmd in
         commands.dropFirst().contains(cmd.symbol).or { cmd.symbol == Help.symbol }.false {
           cmd.symbol
         }
@@ -185,7 +185,7 @@ internal struct Complete: CommandRepresentable {
     
     // MARK: CommandPath.
     
-    let path = try CommandPath(running: command, at: CommandPath.runningCommanderPath).run(
+    let path = try CommandPath(running: command, at: CommandPath.running.commanderPath).run(
       with: Array(commands.dropFirst()),
       skipping: true
     )
