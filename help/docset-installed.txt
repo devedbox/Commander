@@ -1,0 +1,4 @@
+Documentation set was installed to Xcode!
+
+Path: /Users/devedbox/Library/Developer/Shared/Documentation/DocSets/com.devedbox.commander.docset
+Time: 2018-12-14 01:54:42 +0000

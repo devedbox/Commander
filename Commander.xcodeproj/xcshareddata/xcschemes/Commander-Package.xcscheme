@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Commander::commander-sample"
-               BuildableName = "commander-sample"
-               BlueprintName = "commander-sample"
+               BlueprintIdentifier = "Commander::Utility"
+               BuildableName = "Utility.framework"
+               BlueprintName = "Utility"
                ReferencedContainer = "container:Commander.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -42,9 +42,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Commander::Utility"
-               BuildableName = "Utility.framework"
-               BlueprintName = "Utility"
+               BlueprintIdentifier = "Commander::commander-sample"
+               BuildableName = "commander-sample"
+               BlueprintName = "commander-sample"
                ReferencedContainer = "container:Commander.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -54,25 +54,7 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      codeCoverageEnabled = "YES"
-      onlyGenerateCoverageForSpecifiedTargets = "YES"
       shouldUseLaunchSchemeArgsEnv = "YES">
-      <CodeCoverageTargets>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "Commander::Commander"
-            BuildableName = "Commander.framework"
-            BlueprintName = "Commander"
-            ReferencedContainer = "container:Commander.xcodeproj">
-         </BuildableReference>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "Commander::Utility"
-            BuildableName = "Utility.framework"
-            BlueprintName = "Utility"
-            ReferencedContainer = "container:Commander.xcodeproj">
-         </BuildableReference>
-      </CodeCoverageTargets>
       <Testables>
          <TestableReference
             skipped = "NO">
@@ -95,8 +77,6 @@
             </BuildableReference>
          </TestableReference>
       </Testables>
-      <AdditionalOptions>
-      </AdditionalOptions>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
@@ -108,17 +88,6 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "Commander::commander-sample"
-            BuildableName = "commander-sample"
-            BlueprintName = "commander-sample"
-            ReferencedContainer = "container:Commander.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
-      <AdditionalOptions>
-      </AdditionalOptions>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

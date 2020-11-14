@@ -1,0 +1,69 @@
+#!/usr/bin/bash
+# Bash completion scripts for commander.
+#
+
+# _commander() {
+#   declare cur prev count
+#   cur="${COMP_WORDS[COMP_CWORD]}"
+#   prev="${COMP_WORDS[COMP_CWORD-1]}"
+#   count=${#COMP_WORDS[@]}
+
+#   if ((count==2)) && [[ "$prev" == "commander" ]]; then
+#     COMPREPLY=( $(compgen -W "help sample set-args -h --help" -- $cur) )
+#   fi
+#   return
+# }
+
+_commander() {
+  declare cur prev count
+  cur="${COMP_WORDS[COMP_CWORD]}"
+  prev="${COMP_WORDS[COMP_CWORD-1]}"
+  count=${#COMP_WORDS[@]}
+  
+  if ((count==2)) && [[ "$prev" -eq "commander" ]]; then
+    COMPREPLY+=( $(compgen -W "help sample set-args -h --help" -- $cur) )
+    return
+  fi
+
+  if [[ "$prev" -eq "set-args" ]]; then
+    COMPREPLY+=( $(compgen -W "-h -A --help --args --add-args" -- $cur) )
+    return
+  fi
+
+  if ((count==3)); then
+    declare words
+    case "$prev" in
+    sample)
+      words="set-args -s -v -h --help --string-value --verbose"
+      ;;
+    set-args)
+      set_args
+      ;;
+    *)
+      words=""
+      ;;
+    esac
+    COMPREPLY+=( $(compgen -W "$words" -- $cur) )
+    return
+  fi
+
+  if ((count==4)); then
+    declare words
+    case "$prev" in
+    set-args)
+      set_args
+      ;;
+    *)
+      words=""
+      ;;
+    esac
+    COMPREPLY+=( $(compgen -W "$words" -- $cur) )
+    return
+  fi
+}
+
+set_args() {
+  words="-h -A --help --args --add-args"
+}
+
+complete -F _commander commander
