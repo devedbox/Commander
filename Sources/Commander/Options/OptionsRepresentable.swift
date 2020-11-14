@@ -60,8 +60,17 @@ public protocol NoneOptionsRepresentable: OptionsRepresentable { }
 /// by the `CommanderRepresentable` as default options type.
 public struct NoneOptions: NoneOptionsRepresentable {
   /// The coding key type of `CodingKey & StringRawRepresentable` for decoding.
-  public enum CodingKeys: String, CodingKeysRepresentable {
-    case none
+  public struct CodingKeys: CodingKeysRepresentable {
+    
+    public typealias AllCases = [CodingKeys]
+    public static var allCases: [CodingKeys] = []
+    
+    public var stringValue: String
+    public var intValue: Int?
+    
+    public init?(stringValue: String) { self.stringValue = stringValue }
+    public init?(intValue: Int) { self.init(stringValue: String(intValue)) }
+    public init?(rawValue: String) { self.init(stringValue: rawValue) }
   }
   /// The short keys of the options' coding keys.
   public static let keys: [CodingKeys : Character] = [:]
@@ -155,11 +164,11 @@ public protocol OptionsRepresentable: OptionsDescribable, Hashable {
   static func decoded(from commandLineArgs: [String]) throws -> Self
 }
 
-// MARK: - Options.
+// MARK: - AnyOptions.
 
 /// A generic type wrapping any instances of `OptionsRepresentable` to gain the scale of `Hashable` as
 /// a key of `[AnyHashable: Any]`.
-internal struct Options<T: OptionsRepresentable>: Hashable {
+internal struct AnyOptions<T: OptionsRepresentable>: Hashable {
   /// The boxed underlying options of `OptionsRepresentable`.
   internal private(set) var options: T
 }
@@ -214,8 +223,8 @@ extension OptionsRepresentable {
   }
   /// The arguments of the options if arguments can be resolved.
   public var arguments: [ArgumentsResolver.Argument] {
-    get { return _ArgumentsStorage[Options(options: self)] as? [ArgumentsResolver.Argument] ?? [] }
-    set { _ArgumentsStorage[Options(options: self)] = newValue }
+    get { return _ArgumentsStorage[AnyOptions(options: self)] as? [ArgumentsResolver.Argument] ?? [] }
+    set { _ArgumentsStorage[AnyOptions(options: self)] = newValue }
   }
 }
 
