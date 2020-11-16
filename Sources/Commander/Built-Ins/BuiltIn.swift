@@ -26,7 +26,7 @@
 // MARK: - Public.
 
 /// A closure of `(Error) -> Void` to handle the stderror.
-public var errorHandler: ((Swift.Error) -> Void)? {
+public var errorHandler: ((Swift.Error) throws -> Void)? {
   get { return BuiltIn.Commander.errorHandler }
   set { BuiltIn.Commander.errorHandler = newValue }
 }
@@ -57,7 +57,7 @@ public enum BuiltIn {
   
   public final class Commander: CommanderRepresentable {
     /// A closure of `(Error) -> Void` to handle the stderror.
-    public static var errorHandler: ((Swift.Error) -> Void)?
+    public static var errorHandler: ((Swift.Error) throws -> Void)?
     /// A closure of `(String) -> Void` to handle the stdout.
     public static var outputHandler: ((String) -> Void)?
     /// The registered available commands of the commander.

@@ -28,15 +28,21 @@ import Utility
 // MARK: - CommandDescriber.
 
 internal struct CommandDescriber {
-  private let path: String
   private let intents: Int
   
-  internal init(path: String, intents: Int = 0) {
-    self.path = path
+  internal init(intents: Int = 0) {
     self.intents = intents
   }
   
-  internal func describe(_ command: CommandDescribable.Type) -> String {
+  internal func describe(_ commandPath: CommandPath) -> String {
+    return self.describe(
+      commandPath.command,
+      path: commandPath.paths.joined(separator: " "),
+      usagePath: (commandPath.paths.dropFirst() + [commandPath.command.symbol]).joined(separator: " ")
+    )
+  }
+  
+  internal func describe(_ command: CommandDescribable.Type, path: String = "", usagePath: String? = nil) -> String {
     let optionsFormat: (symbol: String, short: String) = (
       OptionsDecoder.optionsFormat.symbol,
       OptionsDecoder.optionsFormat.shortSymbol
@@ -103,7 +109,7 @@ internal struct CommandDescriber {
     """
     
     return """
-    \(intents(0))Usage\(command.level == .commander ? "" : " of '\(command.symbol)'"):
+    \(intents(0))Usage\(command.level == .commander ? "" : " of '\(usagePath ?? command.symbol)'"):
     \(returns(0))
     \(intents(1))$ \(path) \(command.symbol)\(subcommandsSummary)\(optionsSummary)\(argumentsSummary)\(returns(1))
     \(intents(2))\(command.usage)\(subcommandsOutputs)\(optionsOutputs)\(argumentsOutputs)

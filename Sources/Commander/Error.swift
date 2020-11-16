@@ -53,4 +53,16 @@ public enum Error: Swift.Error, CustomStringConvertible {
       return "Unrecognized options\(path == nil ? "" : " for command '\(path!.command.symbol)'"): '\(options.joined(separator: " "))'."
     }
   }
+  
+  /// Returns the need-help error to indicate the current command path needs to print help info.
+  public static func help() -> Swift.Error {
+    return InternalError.needsHelp(path: CommandPath.running.exceptionCommandPath)
+  }
+}
+
+// MARK: - InternalError.
+
+internal enum InternalError: Swift.Error {
+  /// Indicates the command path need print help info.
+  case needsHelp(path: CommandPath)
 }

@@ -33,4 +33,13 @@ Commander.commands = [
   NoArgsCommand.self
 ]
 Commander.usage = "The sample usage command of 'Commander'"
+Commander.errorHandler = {
+  switch $0 {
+  case OptionsDecoder.Error.decodingError(.keyNotFound(_, _)):
+    throw Error.help()
+  default:
+    throw $0
+  }
+}
+
 Commander.dispatch()

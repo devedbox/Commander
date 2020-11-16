@@ -45,6 +45,8 @@ public struct CommandPath {
     internal var commander: CommandDescribable.Type!
     /// The running command path.
     internal var commandPath: CommandPath!
+    /// The command path with exceptions.
+    internal var exceptionCommandPath: CommandPath!
     /// The running commander path of the commander.
     internal var commanderPath: String!
     /// The running commander's usage.
@@ -70,8 +72,99 @@ public struct CommandPath {
     running command: CommandDispatchable.Type,
     at path: String)
   {
-    self.paths = path.split(separator: " ").map { String($0) }
+    self.init(running: command, at: path.split(separator: " ").map { String($0) })
+  }
+  /// Creates an instance of `CommandPath` with the given command and running paths.
+  ///
+  /// - Parameter command: The command to run at the path.
+  /// - Parameter paths: The separated paths of the command to run at.
+  public init(
+    running command: CommandDispatchable.Type,
+    at paths: [String])
+  {
+    self.paths = paths
     self.command = command
+  }
+  /// Returns the all matches available command paths  and unrecognized symbols of the given command symbols.
+  ///
+  /// - Parameter symbols: The command symbols to be evaluated.
+  /// - Returns: The tuple of command paths and unrecognized symbols.
+  public static func maxMatches(_ symbols: [String]) throws -> [CommandPath] {
+    var index = symbols.startIndex
+    var unrecognizedIndices: [Array<String>.Index] = []
+    var commandGroups: [[CommandDescribable.Type]] = []
+    
+    /// Matches the commands in the given symbols as long as possiable.
+    func match(
+      from index: inout Array<String>.Index,
+      in command: CommandDescribable.Type? = nil) -> [CommandDescribable.Type]
+    {
+      guard index < symbols.endIndex else { return [] }
+      
+      var commands: [CommandDescribable.Type] = []
+      let symbol = symbols[index]
+      let matchingCommands = command?.children ?? self.running.commands
+      
+      if let matchingCommand = matchingCommands.first(where: { $0.symbol == symbol }) {
+        symbols.formIndex(after: &index)
+        commands += [matchingCommand]
+        commands += match(from: &index, in: matchingCommand)
+      }
+      
+      return commands
+    }
+    
+    while index < symbols.endIndex {
+      switch match(from: &index) {
+      case let group where group.isEmpty:
+        unrecognizedIndices.append(index)
+        symbols.formIndex(after: &index)
+      case let group where group.isEmpty == false:
+        commandGroups.append(group)
+      default: break
+      }
+    }
+    
+    switch unrecognizedIndices {
+    case let t where t.isEmpty == false:
+      throw Error.unrecognizedCommands(commands: unrecognizedIndices.map { symbols[$0] })
+    default:
+      return commandGroups.compactMap {
+        CommandPath(
+          running: $0.last! as! CommandDispatchable.Type,
+          at: [self.running.commanderPath.split(delimiter: "/").last!] + $0.dropLast().map { $0.symbol }
+        )
+      }
+    }
+  }
+  /// Returns the first mached command path for the given command symbol.
+  ///
+  /// - Parameter symbol: The command symbols to be evaluated.
+  /// - Returns: The matched command path of the symbol.
+  public static func of(_ symbol: String) throws -> CommandPath {
+    func recursiveBuildPaths(
+      _ input: inout [String],
+      in commands: [CommandDispatchable.Type]) -> CommandDispatchable.Type?
+    {
+      guard commands.isEmpty == false else { return nil }
+      if let command = commands.first(where: { $0.symbol == symbol }) { return command }
+      
+      var iterator = commands.makeIterator()
+      while let command = iterator.next() {
+        input.append(command.symbol)
+        if let target = recursiveBuildPaths(&input, in: command.children) { return target }
+        input.removeLast()
+      }
+      
+      return nil
+    }
+    
+    var paths: [String] = [self.running.commanderPath.split(delimiter: "/").last!]
+    if let command = recursiveBuildPaths(&paths, in: self.running.commands) {
+      return CommandPath(running: command, at: paths.joined(separator: " "))
+    }
+    
+    throw Error.unrecognizedCommands(commands: [symbol])
   }
   
   /// Run the command with specific command line arguments and returns the exact running command path
@@ -106,6 +199,7 @@ public struct CommandPath {
     // Set the running command path before run the command path.
     // Defer setting nil of the running command path.
     type(of: self).running.commandPath = self; defer { type(of: self).running.commandPath = nil }
+    type(of: self).running.exceptionCommandPath = self
     
     do {
       try command.dispatch(with: commandLineArgs)

@@ -68,7 +68,7 @@ internal struct Help: CommandRepresentable {
   /// The usage of the command.
   internal static var usage: String = "Prints the help message of the command. Usage: [help [COMMANDS]]"
   /// Try to validate and run the help command if the given options if valid help options.
-  internal static func resolve(
+  internal static func with(
     _ options: [String],
     path: CommandPath?,
     commandLineArgs: [String]) throws
@@ -86,32 +86,25 @@ internal struct Help: CommandRepresentable {
     self.path = path; defer { self.path = nil }
     try main(helpOptions)
   }
+  /// Help the given command symbols for the commander.
+  internal static func with(_ symbols: [String]) throws {
+    try with(try CommandPath.maxMatches(symbols))
+  }
+  /// Help the given command paths for the commander.
+  internal static func with(_ commandPaths: [CommandPath]) throws {
+    (logger ?? BuiltIn.Commander())
+      <<< commandPaths.map { CommandDescriber().describe($0) }.joined(separator: "\n\n") <<< "\n"
+  }
   /// The main function of the command.
   internal static func main(_ options: Options) throws {
-    let path = self.path?.paths.joined(separator: " ") ?? CommandPath.running.commanderPath.split(separator: "/").last!.string
-    
     if options.arguments.isEmpty {
-      if let command = self.path?.command {
-        logger <<< CommandDescriber(path: path).describe(command) <<< "\n"
+      if let commandPath = self.path {
+        logger <<< CommandDescriber().describe(commandPath) <<< "\n"
       } else {
-        logger <<< CommandDescriber(path: path).describe(CommandPath.running.commander) <<< "\n"
+        logger <<< CommandDescriber().describe(CommandPath.running.commander) <<< "\n"
       }
     } else {
-      var unrecognizedCommand = [String]()
-      let commands = options.arguments.compactMap { arg -> CommandDispatchable.Type? in
-        if let command = CommandPath.running.commands.first(where: { $0.symbol == arg }) {
-          return command
-        } else {
-          unrecognizedCommand.append(arg)
-        }
-        return nil
-      }
-      
-      guard unrecognizedCommand.isEmpty else {
-        throw Error.unrecognizedCommands(commands: unrecognizedCommand)
-      }
-      
-      logger <<< commands.map { CommandDescriber(path: path).describe($0) }.joined(separator: "\n\n") <<< "\n"
+      try with(options.arguments)
     }
   }
 }

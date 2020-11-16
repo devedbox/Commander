@@ -37,7 +37,7 @@ public protocol CommanderRepresentable: CommandDescribable, TextOutputStream {
   /// The associated type of `Options`.
   associatedtype Options: OptionsRepresentable = DefaultOptions.None
   /// A closure of `(Error) -> Void` to handle the stderror.
-  static var errorHandler: ((Swift.Error) -> Swift.Void)? { get }
+  static var errorHandler: ((Swift.Error) throws -> Swift.Void)? { get }
   /// A closure of `(String) -> Void` to handle the stdout.
   static var outputHandler: ((String) -> Void)? { get }
   /// The registered available commands of the commander.
@@ -77,9 +77,14 @@ extension CommanderRepresentable {
     do {
       try dispatch(with: Swift.CommandLine.arguments)
     } catch {
-      (type(of: self).errorHandler?(error) == nil).true {
-        var stderr = FileHandle.standardError; print(String(describing: error), to: &stderr)
+      do {
+        (try type(of: self).errorHandler?(error) == nil).true { describe(error) }
+      } catch InternalError.needsHelp(path: let commandPath) { // Catch InternalError.help() only.
+        try? Help.with([commandPath])
+      } catch {
+        describe(error)
       }
+      
       return dispatchFailure()
     }
     return dispatchSuccess()
@@ -89,9 +94,14 @@ extension CommanderRepresentable {
     do {
       try dispatch(with: Swift.CommandLine.arguments)
     } catch {
-      (type(of: self).errorHandler?(error) == nil).true {
-        var stderr = FileHandle.standardError; print(String(describing: error), to: &stderr)
+      do {
+        (try type(of: self).errorHandler?(error) == nil).true { describe(error) }
+      } catch InternalError.needsHelp(path: let commandPath) { // Catch InternalError.help() only.
+        try? Help.with([commandPath])
+      } catch {
+        describe(error)
       }
+      
       return dispatchFailure()
     }
     return dispatchSuccess()
@@ -136,14 +146,14 @@ extension CommanderRepresentable {
         }
         
         if OptionsDecoder.optionsFormat.validate(symbol) {
-          try Help.resolve([symbol], path: nil, commandLineArgs: commandLineArgs)
+          try Help.with([symbol], path: nil, commandLineArgs: commandLineArgs)
         } else {
           throw Error.invalidCommand(command: symbol)
         }
       }
     } catch let dispatcher as CommandPath.Dispatcher {
       guard Options.self != DefaultOptions.None.self else {
-        try Help.resolve(dispatcher.options, path: dispatcher.path, commandLineArgs: commandLineArgs)
+        try Help.with(dispatcher.options, path: dispatcher.path, commandLineArgs: commandLineArgs)
         return
       }
       
@@ -164,9 +174,17 @@ extension CommanderRepresentable {
         try error.map { throw $0 }
       }
       
-      try Help.resolve(options, path: path, commandLineArgs: commandLineArgs)
+      try Help.with(options, path: path, commandLineArgs: commandLineArgs)
+    } catch InternalError.needsHelp(path: let commandPath) {
+      try Help.with([commandPath])
     } catch {
       throw error
     }
+  }
+  
+  /// Help with the error describing.
+  private func describe(_ error: Swift.Error) {
+    var stderr = FileHandle.standardError
+    print(String(describing: error), to: &stderr)
   }
 }
