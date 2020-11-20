@@ -32,6 +32,7 @@ public func allTests() -> [XCTestCaseEntry] {
   return [
     testCase(CommanderTests.allTests),
     testCase(CommandTests.allTests),
+    testCase(WrappedCommandTests.allTests),
     testCase(CommandPathTests.allTests),
     testCase(OptionsDecoderTests.allTests),
     testcase(GlobalOptionsTests.allTests)

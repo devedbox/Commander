@@ -24,6 +24,7 @@
 /* Begin PBXBuildFile section */
 		DC9A614F25651BE6001EAD48 /* DefaultOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC9A614E25651BE6001EAD48 /* DefaultOptions.swift */; };
 		DCD3FC3725666F870026FC05 /* Option.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCD3FC3625666F870026FC05 /* Option.swift */; };
+		DCD3FC5025676E3B0026FC05 /* WrappedCommandTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCD3FC4F25676E3B0026FC05 /* WrappedCommandTests.swift */; };
 		OBJ_102 /* CommandPathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_37 /* CommandPathTests.swift */; };
 		OBJ_103 /* CommandTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_38 /* CommandTests.swift */; };
 		OBJ_104 /* CommanderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_39 /* CommanderTests.swift */; };
@@ -131,6 +132,7 @@
 		"Commander::commander-sample::Product" /* commander-sample */ = {isa = PBXFileReference; lastKnownFileType = text; path = "commander-sample"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC9A614E25651BE6001EAD48 /* DefaultOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultOptions.swift; sourceTree = "<group>"; };
 		DCD3FC3625666F870026FC05 /* Option.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Option.swift; sourceTree = "<group>"; };
+		DCD3FC4F25676E3B0026FC05 /* WrappedCommandTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WrappedCommandTests.swift; sourceTree = "<group>"; };
 		OBJ_10 /* BuiltIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuiltIn.swift; sourceTree = "<group>"; };
 		OBJ_12 /* Complete.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Complete.swift; sourceTree = "<group>"; };
 		OBJ_13 /* Help.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Help.swift; sourceTree = "<group>"; };
@@ -285,6 +287,7 @@
 			children = (
 				OBJ_37 /* CommandPathTests.swift */,
 				OBJ_38 /* CommandTests.swift */,
+				DCD3FC4F25676E3B0026FC05 /* WrappedCommandTests.swift */,
 				OBJ_39 /* CommanderTests.swift */,
 				OBJ_40 /* GlobalOptionsTests.swift */,
 				OBJ_41 /* OptionsDecoderTests.swift */,
@@ -511,6 +514,7 @@
 			buildActionMask = 0;
 			files = (
 				OBJ_102 /* CommandPathTests.swift in Sources */,
+				DCD3FC5025676E3B0026FC05 /* WrappedCommandTests.swift in Sources */,
 				OBJ_103 /* CommandTests.swift in Sources */,
 				OBJ_104 /* CommanderTests.swift in Sources */,
 				OBJ_105 /* GlobalOptionsTests.swift in Sources */,
