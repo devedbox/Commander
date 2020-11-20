@@ -30,9 +30,8 @@
 /// The type represents the description of `Options`. The instances of this type provides the short
 /// symbol of the Options and usage description of the Options.
 public struct OptionDescription {
-  /// Optional short symbol of the `OptionKeyDescription`.
-  // public let shortSymbol: Character?
-  public let defaultValue: Encodable?
+  /// The default value of the option desc.
+  public let defaultValue: Decodable?
   /// Required usage description of the `OptionKeyDescription`.
   public let usage: String
   
@@ -43,7 +42,7 @@ public struct OptionDescription {
   ///
   /// - Returns: The instance of `OptionDescription` with short symbol and usage.
   public static func `default`(
-    value: Encodable?,
+    value: Decodable?,
     usage: String) -> OptionDescription
   {
     return OptionDescription(

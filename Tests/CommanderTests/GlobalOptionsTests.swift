@@ -28,13 +28,17 @@ import XCTest
 @testable import Utility
 
 class MockCommander: CommanderRepresentable {
+  static var errorHandler: ((Swift.Error) throws -> Swift.Void)? = nil
+  
   struct TestsCommand: CommandRepresentable {
     struct Options: OptionsRepresentable {
-      typealias GlobalOptions = MockCommander.Options
-      enum CodingKeys: String, CodingKeysRepresentable {
+      typealias SharedOptions = MockCommander.Options
+      enum CodingKeys: String, OptionKeysRepresentable, CodingKey {
         case mockDir = "mock-dir"
         case target
       }
+      typealias OptionKeys = CodingKeys
+      
       static var keys: [TestsCommand.Options.CodingKeys : Character] = [
         .mockDir: "C",
         .target: "T"
@@ -45,6 +49,8 @@ class MockCommander: CommanderRepresentable {
       ]
       let mockDir: String
       let target: String
+      
+      init() { mockDir = ""; target = "" }
     }
     
     static let symbol: String = "test"
@@ -57,18 +63,22 @@ class MockCommander: CommanderRepresentable {
   
   struct TestsArgsCommand: CommandRepresentable {
     struct Options: OptionsRepresentable {
-      typealias GlobalOptions = MockCommander.Options
-      typealias ArgumentsResolver = AnyArgumentsResolver<[String: UInt8]>
-      enum CodingKeys: String, CodingKeysRepresentable {
+      typealias SharedOptions = MockCommander.Options
+      typealias Argument = [String: UInt8]
+      enum CodingKeys: String, OptionKeysRepresentable, CodingKey {
         case target
       }
+      typealias OptionKeys = CodingKeys
+      
       static var keys: [TestsArgsCommand.Options.CodingKeys : Character] = [
         .target: "T"
       ]
       static var descriptions: [Options.CodingKeys: OptionDescription] = [
         .target: .default(value: "Default", usage: "The target of the test command")
       ]
-      let target: String
+      var target: String
+      
+      init() { target = "" }
     }
     static let children: [CommandDispatchable.Type] = [
       TestsCommand.self
@@ -82,10 +92,11 @@ class MockCommander: CommanderRepresentable {
   }
   
   struct Options: OptionsRepresentable {
-    enum CodingKeys: String, CodingKeysRepresentable {
+    enum CodingKeys: String, OptionKeysRepresentable, CodingKey {
       case mockDir = "mock-dir"
       case verbose
     }
+    typealias OptionKeys = CodingKeys
     
     static var keys: [MockCommander.Options.CodingKeys : Character] = [
       .mockDir: "C",
@@ -99,9 +110,11 @@ class MockCommander: CommanderRepresentable {
     
     let mockDir: String
     let verbose: Bool
+    
+    init() { mockDir = ""; verbose = false  }
   }
   static var outputHandler: ((String) -> Void)? = nil
-  static var errorHandler: ((Swift.Error) -> Void)? = nil
+  
   static var commands: [CommandDispatchable.Type] = [
     MockCommander.TestsCommand.self,
     MockCommander.TestsArgsCommand.self

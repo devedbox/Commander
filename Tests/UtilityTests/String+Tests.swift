@@ -28,6 +28,7 @@ import XCTest
 class StringPlusTests: XCTestCase {
   static let allTests = [
     ("testMerging", testMerging),
+    ("testCamelcase2dashcase", testCamelcase2dashcase),
   ]
   
   func testMerging() {
@@ -37,5 +38,20 @@ class StringPlusTests: XCTestCase {
     
     XCTAssertEqual(merged, long.merging(short))
     XCTAssertEqual(merged, short.merging(long))
+  }
+  
+  func testCamelcase2dashcase() {
+    XCTAssertEqual("stringValue".camelcase2dashcase(), "string-value")
+    XCTAssertEqual("stringVAlue".camelcase2dashcase(), "string-v-alue")
+    XCTAssertEqual("stringVALue".camelcase2dashcase(), "string-v-a-lue")
+    XCTAssertEqual("stringVALUe".camelcase2dashcase(), "string-v-a-l-ue")
+    XCTAssertEqual("stringVALUE".camelcase2dashcase(), "string-v-a-l-u-e")
+    
+    XCTAssertEqual("StringValue".camelcase2dashcase(), "string-value")
+    XCTAssertEqual("STringValue".camelcase2dashcase(), "s-tring-value")
+    XCTAssertEqual("STRingValue".camelcase2dashcase(), "s-t-ring-value")
+    XCTAssertEqual("STRIngValue".camelcase2dashcase(), "s-t-r-ing-value")
+    XCTAssertEqual("STRINgValue".camelcase2dashcase(), "s-t-r-i-ng-value")
+    XCTAssertEqual("STRINGValue".camelcase2dashcase(), "s-t-r-i-n-g-value")
   }
 }

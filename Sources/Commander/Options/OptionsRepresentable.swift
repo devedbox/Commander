@@ -41,11 +41,11 @@ public protocol ArgumentsResolvable {
   associatedtype Argument: Decodable
 }
 
-// MARK: AnyArgumentsResolver.
+// MARK: ArgumentsResolver.
 
 /// A generic concrete type of `ArgumentsResolvable` represents a resolver can resolve any type
 /// of arguments conforming `Decodable`.
-public struct AnyArgumentsResolver<T: Decodable>: ArgumentsResolvable {
+public struct ArgumentsResolver<T: Decodable>: ArgumentsResolvable {
   /// The type of the arguments resolver to resolve with.
   public typealias Argument = T
 }
@@ -56,9 +56,9 @@ public struct AnyArgumentsResolver<T: Decodable>: ArgumentsResolvable {
 /// the `keys`, `descriptions` and `argumentType` of that options.
 public protocol OptionsDescribable: Decodable, ShellCompletable {
   /// The short keys of the options' coding keys.
-  static var keys: [String: Character] { get }
+  static var stringKeys: [String: Character] { get }
   /// Returns the options description list.
-  static var descriptions: [String: OptionDescription] { get }
+  static var stringDescriptions: [String: OptionDescription] { get }
   /// Returns the type of the argument.
   static var argumentType: Decodable.Type { get }
   /// Returns all the coding keys of the options.
@@ -70,26 +70,86 @@ extension OptionsDescribable {
   static var isArgumentsResolvable: Bool {
     return !(argumentType.self == DefaultOptions.None.self || argumentType.self == DefaultOptions.Empty.self)
   }
+  
   /// Returns if the given options is valid options for the options describer.
   public static func validate(_ options: String) -> Bool {
     let optionsFormat = OptionsDecoder.optionsFormat
     
     if options.endsIndex(matchs: optionsFormat.symbol) != nil {
-      return codingKeys.contains(optionsFormat.valueWithoutSymbol(for: options)!)
+      return codingKeys
+        .contains(optionsFormat.valueWithoutSymbol(for: options)!)
     } else if options.endsIndex(matchs: optionsFormat.shortSymbol) != nil {
-      return keys.map { String($0.value) }.contains(optionsFormat.valueWithoutSymbol(for: options)!)
+      return stringKeys
+        .map { String($0.value) }
+        .contains(optionsFormat.valueWithoutSymbol(for: options)!)
     }
     
-    return (codingKeys + keys.map { String($0.value) }).contains(options)
+    return (codingKeys + stringKeys.map { String($0.value) })
+      .contains(options)
   }
 }
 
-// MARK: - CodingKeysRepresentable.
+// MARK: - OptionKeysRepresentable.
 
 /// A protocol represents the conforming types can be the coding key type for `Decoder` types.
-public protocol CodingKeysRepresentable: CodingKey, StringRawRepresentable, Hashable, CaseIterable { }
+public protocol OptionKeysRepresentable: StringRawRepresentable, Hashable, CaseIterable {
+  /// The string to use in a named collection (e.g. a string-keyed dictionary).
+  var stringValue: String { get }
+}
 
-extension CodingKeysRepresentable {
+extension OptionKeysRepresentable {
+  /// Returns the reflected meta info for the given subject, with the given transform closure to map element of the infos
+  /// to the given new type.
+  ///
+  /// - Parameter subject: The subject to be reflected.
+  /// - Parameter transform: The closure used to perform the transforming.
+  /// - Returns: The transformed new meta infos.
+  internal static func transform<S, T>(reflecting subject: S, _ transform: (Mirror.Child) throws -> T?) rethrows -> [T] {
+    return try Mirror(reflecting: subject).children.compactMap(transform)
+  }
+  
+  /// Returns all cases for the `CaseIterable` confirming type by reflecting the given subject and fetchs all the infos
+  /// of type `OptionKeyDescribable`.
+  ///
+  /// - Parameter subject: The subject to be reflected.
+  /// - Returns: The all cases of type `Self`.
+  internal static func allCases<T>(reflecting subject: T) throws -> [Self] {
+    return transform(reflecting: subject) { child -> Self? in
+      if
+        let label = child.label,
+        let _ = child.value as? OptionDescribable
+      {
+        return Self(
+          rawValue: (label.hasPrefix("_") ? String(label.dropFirst()) : label)
+            .camelcase2dashcase()
+        )
+      }
+      return nil
+    }
+  }
+  
+  /// Returns all coding keys for the `OptionKeysRepresentable` confirming types by reflecting the given subject and fetchs all the infos.
+  ///
+  /// - Parameter subject: The subject to be reflected.
+  /// - Returns: The all cases of type `(Self, OptionDescribable)`.
+  internal static func allCodingKeys<T>(reflecting subject: T) throws -> [(Self, OptionDescribable)] {
+    return transform(reflecting: subject) { child -> (Self, OptionDescribable)? in
+      if
+        let label = child.label,
+        let codingKey = Self(
+          rawValue: (label.hasPrefix("_") ? String(label.dropFirst()) : label)
+            .camelcase2dashcase()
+        ),
+        let value = child.value as? OptionDescribable
+      {
+        return (codingKey, value)
+      }
+      return nil
+    }
+  }
+}
+
+extension OptionKeysRepresentable where Self: CodingKey {
   /// A textual representation of this instance.
   ///
   /// Calling this property directly is discouraged. Instead, convert an
@@ -103,23 +163,33 @@ extension CodingKeysRepresentable {
 
 // MARK: - OptionsRepresentable.
 
+public protocol OptionsPropertyWrapper {
+  /// The coding key type of `CodingKey & StringRawRepresentable` for decoding.
+  associatedtype OptionKeys: OptionKeysRepresentable = WrappedOptionKeys<Self>
+  /// The default initializer to initialize the `OptionsPropertyWrapper`, used by mirror to
+  /// reflect the metainfo of the type.
+  init()
+}
+
 /// A protocol represents the conforming types can be the options of a command of `CommandRepresentable`.
 /// The conforming types must be decodable.
 public protocol OptionsRepresentable: OptionsDescribable, Hashable {
   /// The coding key type of `CodingKey & StringRawRepresentable` for decoding.
-  associatedtype CodingKeys: CodingKeysRepresentable
+  associatedtype OptionKeys: OptionKeysRepresentable
+  /// The argument type of the arguments resolver.
+  associatedtype Argument: Decodable = DefaultOptions.None
   /// The arguments resolver of the options.
-  associatedtype ArgumentsResolver: ArgumentsResolvable = AnyArgumentsResolver<DefaultOptions.None>
+  associatedtype ArgumentsResolver: ArgumentsResolvable = Commander.ArgumentsResolver<Argument>
   /// The global options of the commander.
-  associatedtype GlobalOptions: OptionsRepresentable = DefaultOptions.None
+  associatedtype SharedOptions: OptionsRepresentable = DefaultOptions.None
   /// The short keys of the options' coding keys.
-  static var keys: [CodingKeys: Character] { get }
+  static var keys: [OptionKeys: Character] { get }
   /// The extends option keys for the `Options`.
-  static var descriptions: [CodingKeys: OptionDescription] { get }
+  static var descriptions: [OptionKeys: OptionDescription] { get }
   /// Returns the global options of the running commander if any.
-  var globalOptions: GlobalOptions? { get }
+  var sharedOptions: SharedOptions? { get }
   /// The arguments of the options if arguments can be resolved.
-  var arguments: [ArgumentsResolver.Argument] { get set }
+  var arguments: [Self.ArgumentsResolver.Argument] { get set }
   /// Decode the options from the given command line arguments.
   ///
   /// - Parameter commandLineArgs: The command line arguments without command symbol.
@@ -145,134 +215,106 @@ internal var _ArgumentsStorage: [AnyHashable: Any] = [:]
 
 // MARK: - Defaults.
 
-// MARK: - DefaultOptions.
-
-public enum DefaultOptions {
-  // MARK: - EmptyCodingKeys.
-  
-  /// The coding key type of `CodingKey & StringRawRepresentable` for decoding.
-  public struct EmptyCodingKeys: CodingKeysRepresentable {
-    
-    public typealias AllCases = [EmptyCodingKeys]
-    public static var allCases: [EmptyCodingKeys] = []
-    
-    public var stringValue: String
-    public var intValue: Int?
-    
-    public init?(stringValue: String) { self.stringValue = stringValue }
-    public init?(intValue: Int) { self.init(stringValue: String(intValue)) }
-    public init?(rawValue: String) { self.init(stringValue: rawValue) }
-  }
-  
-  // MARK: - None.
-  
-  /// The concrete type conforms `NoneOptionsRepresentable` represents the options and arguments is
-  /// not resolvable. Used by the `OptionsRepresentable` as default argument type and
-  /// by the `CommanderRepresentable` as default options type.
-  public struct None: NoneOptionsRepresentable {
-    /// The coding key type of `CodingKey & StringRawRepresentable` for decoding.
-    public typealias CodingKeys = DefaultOptions.EmptyCodingKeys
-    /// The short keys of the options' coding keys.
-    public static let keys: [CodingKeys : Character] = [:]
-    /// The extends option keys for the `Options`.
-    public static let descriptions: [CodingKeys : OptionDescription] = [:]
-    /// Creates a new instance by decoding from the given decoder.
-    ///
-    /// This initializer throws an error if reading from the decoder fails, or
-    /// if the data read is corrupted or otherwise invalid.
-    ///
-    /// - Parameter decoder: The decoder to read data from.
-    public init(from decoder: Decoder) throws {
-      throw OptionsDecoder.Error.unresolvableArguments
-    }
-  }
-  
-  // MARK: - Empty.
-  
-  /// The concrete type conforms `EmptyOptionsRepresentable` represents the options and arguments is
-  /// default empty.
-  public struct Empty: EmptyOptionsRepresentable {
-    /// The coding key type of `CodingKey & StringRawRepresentable` for decoding.
-    public typealias CodingKeys = EmptyCodingKeys
-    /// The short keys of the options' coding keys.
-    public static let keys: [CodingKeys : Character] = [:]
-    /// The extends option keys for the `Options`.
-    public static let descriptions: [CodingKeys : OptionDescription] = [:]
-    /// Creates a new instance by decoding from the given decoder.
-    ///
-    /// This initializer throws an error if reading from the decoder fails, or
-    /// if the data read is corrupted or otherwise invalid.
-    ///
-    /// - Parameter decoder: The decoder to read data from.
-    public init(from decoder: Decoder) throws {
-      // Default do nothing.
-    }
-  }
-}
-
 extension OptionsRepresentable {
   /// Returns the global options of commander.
-  public var globalOptions: GlobalOptions? {
-    return CommandPath.running.globalOptions as? GlobalOptions
+  public var sharedOptions: SharedOptions? {
+    return CommandPath
+      .running
+      .sharedOptions as? SharedOptions
   }
   /// The short keys of the options' coding keys.
-  public static var keys: [String: Character] {
-    let skeys = keys.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value } as [String: Character]
-    let gkeys = GlobalOptions.keys.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value } as [String: Character]
-    let hkeys = Help.Options.keys.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value } as [String: Character]
-    
-    return gkeys.merging(skeys) {
-      current, _ in current
-    }.merging(hkeys) {
-      current, _ in current
-    }
+  public static var stringKeys: [String: Character] {
+    return SharedOptions
+      .keys
+      .reduce(into: [:]) { $0[$1.key.stringValue] = $1.value }
+      .merging(
+        keys
+          .reduce(into: [:]) { $0[$1.key.stringValue] = $1.value }) {  c, _ in c }
+      .merging(
+        Help
+          .Options
+          .keys
+          .reduce(into: [:]) { $0[$1.key.stringValue] = $1.value }) { c, _ in c }
   }
   /// Returns the options description list.
-  public static var descriptions: [String: OptionDescription] {
-    let sdescs = self.descriptions.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value }
-    let gdescs = GlobalOptions.descriptions.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value }
-    let hdescs = Help.Options.descriptions.reduce(into: [:]) { $0[$1.key.stringValue] = $1.value }
-    
-    return gdescs.merging(sdescs) {
-      current, _ in current
-    }.merging(hdescs) {
-      current, _ in current
-    }
+  public static var stringDescriptions: [String: OptionDescription] {
+    return SharedOptions
+      .descriptions
+      .reduce(into: [:]) { $0[$1.key.stringValue] = $1.value }
+      .merging(
+        descriptions
+          .reduce(into: [:]) { $0[$1.key.stringValue] = $1.value }) { c, _ in c }
+      .merging(
+        Help
+          .Options
+          .descriptions
+          .reduce(into: [:]) { $0[$1.key.stringValue] = $1.value }) { c, _ in c }
   }
   /// Returns the type of the argument.
   public static var argumentType: Decodable.Type {
-    return ArgumentsResolver.Argument.self
+    return ArgumentsResolver
+      .Argument
+      .self
   }
   /// Returns all the coding keys of the options.
   public static var codingKeys: [String] {
-    return CodingKeys.allCases.map { $0.description }
+    return OptionKeys
+      .allCases
+      .map { $0.stringValue }
   }
   /// Decode the options from the given command line arguments.
   ///
   /// - Parameter commandLineArgs: The command line arguments without command symbol.
   /// - Returns: The decoded options of `Self`.
   public static func decoded(from commandLineArgs: [String]) throws -> Self {
-    return try OptionsDecoder().decode(Self.self, from: commandLineArgs)
+    return try OptionsDecoder()
+      .decode(
+        Self.self,
+        from: commandLineArgs
+      )
   }
   /// The arguments of the options if arguments can be resolved.
-  public var arguments: [ArgumentsResolver.Argument] {
+  public var arguments: [Self.ArgumentsResolver.Argument] {
     get { return _ArgumentsStorage[AnyOptions(options: self)] as? [ArgumentsResolver.Argument] ?? [] }
     set { _ArgumentsStorage[AnyOptions(options: self)] = newValue }
   }
 }
 
-extension OptionsRepresentable where ArgumentsResolver == AnyArgumentsResolver<DefaultOptions.None> {
-  /// The arguments of the options if arguments can be resolved.
-  public var arguments: [ArgumentsResolver.Argument] {
-    get { return [] }
-    set { }
+extension OptionsRepresentable where Self.OptionKeys: CodingKey {
+  /// Returns all the coding keys of the options.
+  public static var codingKeys: [String] {
+    return OptionKeys
+      .allCases
+      .map { $0.description }
   }
 }
 
-extension OptionsRepresentable where ArgumentsResolver == AnyArgumentsResolver<DefaultOptions.Empty> {
-  /// The arguments of the options if arguments can be resolved.
-  public var arguments: [ArgumentsResolver.Argument] {
-    get { return [] }
-    set { }
+// MARK: - WrappedOptionKeys.Supports.
+
+extension OptionsRepresentable where Self: OptionsPropertyWrapper, Self.OptionKeys == WrappedOptionKeys<Self> {
+  /// The short keys of the options' coding keys.
+  public static var keys: [Self.OptionKeys: Character] {
+    return try! Self.OptionKeys
+      .allCodingKeys(reflecting: Self.init())
+      .compactMap { `case` -> (Self.OptionKeys, Character)? in
+        if let short = `case`.1.k?.first {
+          return (`case`.0, short)
+        }
+        return nil
+      }
+      .reduce(into: [:]) {
+        $0[$1.0] = $1.1
+      }
+  }
+  /// The extends option keys for the `Options`.
+  public static var descriptions: [Self.OptionKeys: OptionDescription] {
+    return try! Self.OptionKeys
+      .allCodingKeys(reflecting: Self.init())
+      .compactMap { `case` -> (Self.OptionKeys, OptionDescription)? in
+        return (`case`.0, OptionDescription(defaultValue: `case`.1.defaultValue, usage: `case`.1.usage))
+      }
+      .reduce(into: [:]) {
+        $0[$1.0] = $1.1
+      }
   }
 }

@@ -52,7 +52,7 @@ public struct CommandPath {
     /// The running commander's usage.
     internal var commanderUsage: String!
     /// The running global options of the commander.
-    internal var globalOptions: OptionsDescribable?
+    internal var sharedOptions: OptionsDescribable?
     /// The running commander's available commands.
     internal var commands: [CommandDispatchable.Type] = []
   }

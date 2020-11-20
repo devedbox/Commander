@@ -30,15 +30,22 @@ import Foundation
 @testable import Commander
 import Utility
 
-var sharedOptions: TestsCommand.Options = .init(target: "", verbose: false)
+var sharedOptions: TestsCommand.Options = .init()
 
 struct TestsCommand: CommandRepresentable {
   struct Options: OptionsRepresentable {
-    typealias ArgumentsResolver = AnyArgumentsResolver<String>
-    enum CodingKeys: String, CodingKeysRepresentable {
+    init() {
+      target = ""
+      verbose = false
+    }
+    
+    typealias Argument = String
+    enum CodingKeys: String, OptionKeysRepresentable, CodingKey {
       case target
       case verbose
     }
+    typealias OptionKeys = CodingKeys
+    
     static var keys: [TestsCommand.Options.CodingKeys : Character] = [
       .target: "t",
       .verbose: "v"
@@ -78,10 +85,12 @@ struct TestsCommand: CommandRepresentable {
 
 struct TestsArgsCommand: CommandRepresentable {
   struct Options: OptionsRepresentable {
-    typealias ArgumentsResolver = AnyArgumentsResolver<[String: UInt8]>
-    enum CodingKeys: String, CodingKeysRepresentable {
+    typealias Argument = [String: UInt8]
+    enum CodingKeys: String, OptionKeysRepresentable, CodingKey {
       case target
     }
+    typealias OptionKeys = CodingKeys
+    
     static var keys: [TestsArgsCommand.Options.CodingKeys : Character] = [
       .target: "T"
     ]
@@ -89,6 +98,10 @@ struct TestsArgsCommand: CommandRepresentable {
       .target: .default(value: "Default", usage: "The target of the test command")
     ]
     let target: String
+    
+    init() {
+      target = ""
+    }
     
     public static func completions(for commandLine: Utility.CommandLine) -> [String] {
       switch commandLine.arguments.last {

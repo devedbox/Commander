@@ -126,3 +126,37 @@ extension String {
     return results
   }
 }
+
+// MARK: - CamelCase2DashCase.
+
+extension String {
+  /// Returns the case convention from camel case to dash case:
+  /// ```swift
+  /// let value = "stringValue"
+  /// print(value.camelcase2dashcase())
+  ///     string-value
+  /// ```
+  public func camelcase2dashcase() -> String {
+    var separatedComponent: [String] = []
+    var index = self.startIndex
+    
+    while index < self.endIndex {
+      let char = self[index]
+      if char.isUppercase {
+        if separatedComponent.isEmpty {
+          separatedComponent.append(String(char.lowercased()))
+        } else {
+          separatedComponent.append("-\(char.lowercased())")
+        }
+      } else {
+        var component = separatedComponent.popLast() ?? ""
+        component += String(char)
+        separatedComponent.append(component)
+      }
+      
+      self.formIndex(after: &index)
+    }
+    
+    return separatedComponent.joined()
+  }
+}

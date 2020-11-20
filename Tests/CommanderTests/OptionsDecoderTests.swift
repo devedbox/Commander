@@ -54,7 +54,7 @@ extension Array where Element: Hashable {
 
 struct PrimaryOptions: OptionsRepresentable {
   
-  public enum CodingKeys: String, CodingKeysRepresentable {
+  public enum CodingKeys: String, OptionKeysRepresentable, CodingKey {
     case bool
     case int
     case int8
@@ -96,9 +96,10 @@ struct PrimaryOptions: OptionsRepresentable {
     case doubleDict = "double-dict"
     case stringDict = "string-dict"
   }
+  typealias OptionKeys = CodingKeys
   
-  static var keys: [PrimaryOptions.CodingKeys : Character] = [:]
-  static var descriptions: [PrimaryOptions.CodingKeys: OptionDescription] = [:]
+  static var keys: [PrimaryOptions.OptionKeys : Character] = [:]
+  static var descriptions: [PrimaryOptions.OptionKeys: OptionDescription] = [:]
   
   let bool: Bool
   let int: Int
@@ -140,25 +141,69 @@ struct PrimaryOptions: OptionsRepresentable {
   let floatDict: [String: Float]
   let doubleDict: [String: Double]
   let stringDict: [String: String]
+  
+  init() {
+    bool = false
+    int = 0
+    int8 = 0
+    int16 = 0
+    int32 = 0
+    int64 = 0
+    uint = 0
+    uint8 = 0
+    uint16 = 0
+    uint32 = 0
+    uint64 = 0
+    float = 0
+    double = 0
+    string = ""
+    intArray = []
+    int8Array = []
+    int16Array = []
+    int32Array = []
+    int64Array = []
+    uintArray = []
+    uint8Array = []
+    uint16Array = []
+    uint32Array = []
+    uint64Array = []
+    floatArray = []
+    doubleArray = []
+    stringArray = []
+    intDict = [:]
+    int8Dict = [:]
+    int16Dict = [:]
+    int32Dict = [:]
+    int64Dict = [:]
+    uintDict = [:]
+    uint8Dict = [:]
+    uint16Dict = [:]
+    uint32Dict = [:]
+    uint64Dict = [:]
+    floatDict = [:]
+    doubleDict = [:]
+    stringDict = [:]
+  }
 }
 
 struct SimpleOption: OptionsRepresentable {
-  public enum CodingKeys: String, CodingKeysRepresentable {
+  public enum CodingKeys: String, OptionKeysRepresentable, CodingKey {
     case target
     case verbose
     case path
     case configPath = "config-path"
     case locs
   }
+  typealias OptionKeys = CodingKeys
   
   struct Path: Codable, Hashable {
     let value: String
     let location: UInt8
   }
   
-  static var keys: [SimpleOption.CodingKeys : Character] = [:]
+  static var keys: [SimpleOption.OptionKeys : Character] = [:]
   
-  static var descriptions: [SimpleOption.CodingKeys: OptionDescription] = [
+  static var descriptions: [SimpleOption.OptionKeys: OptionDescription] = [
     .target: .usage("The target of the options"),
     .path: .default(value: Path(value: "default", location: 0), usage: ""),
     .locs: .default(value: [1, 2, 3], usage: "")
@@ -169,56 +214,84 @@ struct SimpleOption: OptionsRepresentable {
   let verbose: Bool
   let configPath: String
   let locs: [UInt8]
+  
+  init() {
+    path = Path(value: "", location: 0)
+    target = []
+    verbose = false
+    configPath = ""
+    locs = []
+  }
 }
 
 struct ArgumentsOptions: OptionsRepresentable {
-  typealias ArgumentsResolver = AnyArgumentsResolver<String>
-  enum CodingKeys: String, CodingKeysRepresentable {
+  typealias Argument = String
+  enum CodingKeys: String, OptionKeysRepresentable, CodingKey {
     case bool
   }
-  static var keys: [ArgumentsOptions.CodingKeys : Character] = [:]
-  static var descriptions: [ArgumentsOptions.CodingKeys: OptionDescription] = [:]
+  typealias OptionKeys = CodingKeys
+  
+  static var keys: [ArgumentsOptions.OptionKeys : Character] = [:]
+  static var descriptions: [ArgumentsOptions.OptionKeys: OptionDescription] = [:]
   
   let bool: Bool
+  
+  init() {
+    bool = false
+  }
 }
 
 struct DictArgumentsOptions: OptionsRepresentable {
-  typealias ArgumentsResolver = AnyArgumentsResolver<[String: String]>
-  enum CodingKeys: String, CodingKeysRepresentable {
+  typealias Argument = [String: String]
+  enum CodingKeys: String, OptionKeysRepresentable, CodingKey {
     case bool
   }
-  static var keys: [CodingKeys : Character] = [:]
-  static var descriptions: [CodingKeys: OptionDescription] = [:]
+  typealias OptionKeys = CodingKeys
+  
+  static var keys: [OptionKeys : Character] = [:]
+  static var descriptions: [OptionKeys: OptionDescription] = [:]
   
   let bool: Bool
+  
+  init() {
+    bool = false
+  }
 }
 
 struct ArrayArgumentsOptions: OptionsRepresentable {
-  typealias ArgumentsResolver = AnyArgumentsResolver<[UInt32]>
-  enum CodingKeys: String, CodingKeysRepresentable {
+  typealias Argument = [UInt32]
+  enum CodingKeys: String, OptionKeysRepresentable, CodingKey {
     case bool
   }
-  static var keys: [CodingKeys : Character] = [:]
-  static var descriptions: [CodingKeys: OptionDescription] = [:]
+  typealias OptionKeys = CodingKeys
+  
+  static var keys: [OptionKeys : Character] = [:]
+  static var descriptions: [OptionKeys: OptionDescription] = [:]
   
   let bool: Bool
+  
+  init() {
+    bool = false
+  }
 }
 
 struct ComplexArgumentsOptions: OptionsRepresentable {
-  typealias ArgumentsResolver = AnyArgumentsResolver<String>
-  enum CodingKeys: String, CodingKeysRepresentable {
+  typealias Argument = String
+  enum CodingKeys: String, OptionKeysRepresentable, CodingKey {
     case bool
     case verbose
     case string
     case int
   }
-  static var keys: [ComplexArgumentsOptions.CodingKeys : Character] = [
+  typealias OptionKeys = CodingKeys
+  
+  static var keys: [ComplexArgumentsOptions.OptionKeys : Character] = [
     .bool: "b",
     .verbose: "v",
     .string: "S",
     .int: "i"
   ]
-  static var descriptions: [ComplexArgumentsOptions.CodingKeys: OptionDescription] = [
+  static var descriptions: [ComplexArgumentsOptions.OptionKeys: OptionDescription] = [
     .bool: .default(value: false, usage: ""),
     .verbose: .default(value: false, usage: "")
   ]
@@ -227,31 +300,46 @@ struct ComplexArgumentsOptions: OptionsRepresentable {
   let verbose: Bool
   let string: String
   let int: Int
+  
+  init() {
+    bool = false
+    verbose = false
+    string = ""
+    int = 0
+  }
 }
 
 struct KeyedOptions: OptionsRepresentable {
-  typealias ArgumentsResolver = AnyArgumentsResolver<String>
-  enum CodingKeys: String, CodingKeysRepresentable {
+  typealias Argument = String
+  enum CodingKeys: String, OptionKeysRepresentable, CodingKey {
     case dict
   }
-  static var keys: [KeyedOptions.CodingKeys : Character] = [:]
-  static var descriptions: [KeyedOptions.CodingKeys: OptionDescription] = [
+  typealias OptionKeys = CodingKeys
+  
+  static var keys: [KeyedOptions.OptionKeys : Character] = [:]
+  static var descriptions: [KeyedOptions.OptionKeys: OptionDescription] = [
     .dict: .usage(""),
   ]
   
   let dict: [String: String]
+  
+  init() {
+    dict = [:]
+  }
 }
 
 struct DefaultValueOptions: OptionsRepresentable {
-  enum CodingKeys: String, CodingKeysRepresentable {
+  enum CodingKeys: String, OptionKeysRepresentable, CodingKey {
     case string
     case bool
     case dict
   }
-  static var keys: [CodingKeys : Character] = [
+  typealias OptionKeys = CodingKeys
+  
+  static var keys: [OptionKeys : Character] = [
     :
   ]
-  static var descriptions: [CodingKeys: OptionDescription] = [
+  static var descriptions: [OptionKeys: OptionDescription] = [
     .string: .default(value: "default", usage: ""),
     .dict: .default(value: ["key": "value"], usage: "")
   ]
@@ -259,18 +347,26 @@ struct DefaultValueOptions: OptionsRepresentable {
   let string: String?
   let bool: Bool?
   let dict: [String: String]
+  
+  init() {
+    string = ""
+    bool = false
+    dict = [:]
+  }
 }
 
 struct MismatchTypeDefaultValueOptions: OptionsRepresentable {
-  enum CodingKeys: String, CodingKeysRepresentable {
+  enum CodingKeys: String, OptionKeysRepresentable, CodingKey {
     case string
     case bool
     case dict
   }
-  static var keys: [CodingKeys : Character] = [
+  typealias OptionKeys = CodingKeys
+  
+  static var keys: [OptionKeys : Character] = [
     :
   ]
-  static var descriptions: [CodingKeys: OptionDescription] = [
+  static var descriptions: [OptionKeys: OptionDescription] = [
     .string: .default(value: ["k": 1], usage: ""),
     .dict: .default(value: "default", usage: "")
   ]
@@ -278,38 +374,58 @@ struct MismatchTypeDefaultValueOptions: OptionsRepresentable {
   let string: String
   let bool: Bool?
   let dict: [String: String]
+  
+  init() {
+    string = ""
+    bool = false
+    dict = [:]
+  }
 }
 
 struct ArrayOptions: OptionsRepresentable {
-  enum CodingKeys: String, CodingKeysRepresentable {
+  enum CodingKeys: String, OptionKeysRepresentable, CodingKey {
     case arrayValue = "array-value"
     case stringValue = "string-value"
   }
-  static var keys: [ArrayOptions.CodingKeys : Character] = [
+  typealias OptionKeys = CodingKeys
+  
+  static var keys: [ArrayOptions.OptionKeys : Character] = [
     :
   ]
-  static var descriptions: [ArrayOptions.CodingKeys : OptionDescription] = [
+  static var descriptions: [ArrayOptions.OptionKeys : OptionDescription] = [
     :
   ]
   
   let arrayValue: [String]
   let stringValue: String
+  
+  init() {
+    arrayValue = []
+    stringValue = ""
+  }
 }
 
 struct DictOptions: OptionsRepresentable {
-  enum CodingKeys: String, CodingKeysRepresentable {
+  enum CodingKeys: String, OptionKeysRepresentable, CodingKey {
     case dictValue = "dict-value"
     case stringValue = "string-value"
   }
-  static var keys: [CodingKeys : Character] = [
+  typealias OptionKeys = CodingKeys
+  
+  static var keys: [OptionKeys : Character] = [
     :
   ]
-  static var descriptions: [CodingKeys : OptionDescription] = [
+  static var descriptions: [OptionKeys : OptionDescription] = [
     :
   ]
   
   let dictValue: [String: String]
   let stringValue: String
+  
+  init() {
+    dictValue = [:]
+    stringValue = ""
+  }
 }
 
 // MARK: - OptionsDecoderTests.
@@ -874,7 +990,7 @@ class OptionsDecoderTests: XCTestCase {
       XCTFail()
     } catch OptionsDecoder.Error.decodingError(DecodingError.keyNotFound(let key, let ctx)) {
       XCTAssertTrue(true)
-      XCTAssertEqual(key.stringValue, ComplexArgumentsOptions.CodingKeys.string.stringValue)
+      XCTAssertEqual(key.stringValue, ComplexArgumentsOptions.OptionKeys.string.stringValue)
       XCTAssertFalse(OptionsDecoder.Error.decodingError(DecodingError.keyNotFound(key, ctx)).description.isEmpty)
     } catch {
       XCTFail()

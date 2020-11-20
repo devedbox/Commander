@@ -49,18 +49,22 @@ internal struct CommandDescriber {
     )
     
     let subcommandSymbols = command.children.map { ($0.symbol, $0.usage) }
-    let optionsSymbols = command.optionsDescriber.descriptions.map { desc -> (String, String) in
-      let shortKey = command.optionsDescriber.keys[desc.key]
-      let keyDesc = (shortKey.map { "\(optionsFormat.short)\($0), " } ?? "") + "\(optionsFormat.symbol)\(desc.key)"
-      
-      var usage = desc.value.usage
-      if let defaultValue = desc.value.defaultValue {
-        let separator = usage.hasSuffix(".") ? "" : "."
-        usage += separator + " Optional with default value: '\(defaultValue)'"
+    let optionsSymbols = command
+      .optionsDescriber
+      .stringDescriptions
+      .sorted { $0.key < $1.key }
+      .map { desc -> (String, String) in
+        let shortKey = command.optionsDescriber.stringKeys[desc.key]
+        let keyDesc = (shortKey.map { "\(optionsFormat.short)\($0), " } ?? "") + "\(optionsFormat.symbol)\(desc.key)"
+        
+        var usage = desc.value.usage
+        if let defaultValue = desc.value.defaultValue {
+          let separator = usage.hasSuffix(".") ? "" : "."
+          usage += separator + " Optional with default value: '\(defaultValue)'"
+        }
+        
+        return (keyDesc, usage)
       }
-      
-      return (keyDesc, usage)
-    }
     
     let argumentsSymbols: [(String, String)] = command.optionsDescriber.isArgumentsResolvable == false ? [] : [
       ("[\(String(describing: command.optionsDescriber.argumentType))]", "\(path) \(command.symbol) [options] arg1 arg2 ...")

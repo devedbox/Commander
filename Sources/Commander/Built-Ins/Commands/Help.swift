@@ -31,15 +31,17 @@ import Utility
 internal struct Help: CommandRepresentable {
   /// The options of the `HelpCommand`.
   internal struct Options: OptionsRepresentable {
-    /// Type alias for resolve string arguments.
-    internal typealias ArgumentsResolver = AnyArgumentsResolver<String>
+    /// The argument type of the arguments resolver.
+    internal typealias Argument = String
     /// The coding keys of `Options`.
-    internal enum CodingKeys: String, CodingKeysRepresentable {
+    internal enum CodingKeys: String, OptionKeysRepresentable, CodingKey {
       case help
     }
-    internal static let keys: [Options.CodingKeys: Character] = [.help: "h"]
+    internal typealias OptionKeys = CodingKeys
+    
+    internal static let keys: [Options.OptionKeys: Character] = [.help: "h"]
     /// Returns the description of the options.
-    internal static var descriptions: [Options.CodingKeys: OptionDescription] = [
+    internal static var descriptions: [Options.OptionKeys: OptionDescription] = [
       .help: .usage("Prints the help message of the command. Usage: [[--help|-h][COMMAND --help][COMMAND -h]]")
     ]
     

@@ -113,7 +113,7 @@ extension CommanderRepresentable {
     defer {
       CommandPath.running.commander = nil // Clear the running commander.
       CommandPath.running.commanderPath = nil // Clear the running path of commander.
-      CommandPath.running.globalOptions = nil // Clear the running global options.
+      CommandPath.running.sharedOptions = nil // Clear the running global options.
       CommandPath.running.commanderUsage = nil // Clear the runnung commander usage.
       CommandPath.running.commands = [] // Clear the running commands.
       logger = nil // Reset the logger.
@@ -157,7 +157,7 @@ extension CommanderRepresentable {
         return
       }
       
-      let unrecognizedOptions = dispatcher.options.filter { Options.CodingKeys(rawValue: $0) == nil }
+      let unrecognizedOptions = dispatcher.options.filter { Options.OptionKeys(rawValue: $0) == nil }
       guard unrecognizedOptions.isEmpty else {
         throw Error.unrecognizedOptions(
           unrecognizedOptions,
@@ -166,7 +166,7 @@ extension CommanderRepresentable {
         )
       }
       
-      CommandPath.running.globalOptions = try Options(from: dispatcher.decoder)
+      CommandPath.running.sharedOptions = try Options(from: dispatcher.decoder)
       try dispatcher.path.command.dispatch(with: dispatcher.decoded)
       
     } catch Error.unrecognizedOptions(let options, path: let path, underlyingError: let error) {

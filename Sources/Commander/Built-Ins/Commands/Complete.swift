@@ -32,14 +32,14 @@ extension Help.Options {
   /// command line contains help command's options.
   fileprivate static func validte(_ commandLine: Utility.CommandLine) -> Bool {
     return commandLine.arguments.contains {
-      $0 == OptionsDecoder.optionsFormat.format(CodingKeys.help.rawValue) ||
+      $0 == OptionsDecoder.optionsFormat.format(OptionKeys.help.rawValue) ||
       $0 == OptionsDecoder.optionsFormat.format(String(keys[.help]!), isShort: true)
     }
   }
   /// Filters and excludes the help options from the given container.
   fileprivate static func exclude(from commands: [String]) -> [String] {
     return commands.filter {
-      $0 != OptionsDecoder.optionsFormat.format(CodingKeys.help.rawValue) &&
+      $0 != OptionsDecoder.optionsFormat.format(OptionKeys.help.rawValue) &&
       $0 != OptionsDecoder.optionsFormat.format(String(keys[.help]!), isShort: true)
     }
   }
@@ -60,17 +60,12 @@ extension Complete {
       }
     }
     
-    internal struct Options: OptionsRepresentable {
-      internal enum CodingKeys: String, CodingKeysRepresentable {
-        case shell
-      }
+    internal struct Options: OptionsRepresentable, OptionsPropertyWrapper {
       
-      internal static var keys: [CodingKeys: Character] = [.shell: "s"]
-      internal static var descriptions: [CodingKeys: OptionDescription] = [
-        .shell: .default(value: "bash", usage: "The shell type to gen. Available shell: bash, zsh")
-      ]
+      @Option(k: "s", usage: "The shell type to gen. Available shell: bash, zsh")
+      var shell: Shell = .bash
       
-      internal let shell: Shell
+      init() { }
     }
     
     internal static let symbol = "generate"
@@ -130,19 +125,13 @@ extension Complete.Generate {
 ///
 /// - Precondition: The given arguments must be single and the single element(String) must not be empty.
 internal struct Complete: CommandRepresentable {
-  internal struct Options: OptionsRepresentable {
-    internal typealias ArgumentsResolver = AnyArgumentsResolver<String>
+  internal struct Options: OptionsRepresentable, OptionsPropertyWrapper {
+    internal typealias Argument = String
     
-    internal enum CodingKeys: String, CodingKeysRepresentable {
-      case shell
-    }
+    @Option(k: "s", usage: "The shell type to complete. Available shell: bash, zsh")
+    var shell: Shell = .bash
     
-    internal static var keys: [CodingKeys: Character] = [.shell: "s"]
-    internal static var descriptions: [CodingKeys: OptionDescription] = [
-      .shell: .default(value: "bash", usage: "The shell type to complete. Available shell: bash, zsh")
-    ]
-    
-    internal let shell: Shell
+    init() { }
   }
   
   internal static let symbol = "complete"

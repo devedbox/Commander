@@ -28,25 +28,15 @@
 import Commander
 
 public struct SampleCommand: CommandRepresentable {
-  public struct Options: OptionsRepresentable {
-    public typealias ArgumentsResolver = AnyArgumentsResolver<String>
-    public enum CodingKeys: String, CodingKeysRepresentable {
-      case verbose = "verbose"
-      case stringValue = "string-value"
-    }
+  public struct Options: OptionsRepresentable, OptionsPropertyWrapper {
+    public typealias Argument = String
     
-    public static let keys: [SampleCommand.Options.CodingKeys : Character] = [
-      .verbose: "v",
-      .stringValue: "s"
-    ]
+    @Option(k: "s", usage: "Pass a value of String to the command") var stringValue: String = ""
+    @Option(k: "v", usage: "Prints the logs of the command") var verbose: Bool = false
     
-    public static let descriptions: [SampleCommand.Options.CodingKeys : OptionDescription] = [
-      .verbose: .usage("Prints the logs of the command"),
-      .stringValue: .usage("Pass a value of String to the command")
-    ]
+    public var stringValue1: String?
     
-    public var verbose: Bool = false
-    public var stringValue: String = ""
+    public init() { }
     
     public static func completions(for key: String) -> [String] {
       switch key {
@@ -69,39 +59,23 @@ public struct SampleCommand: CommandRepresentable {
   public static func main(_ options: Options) throws {
     print(options)
     print("arguments: \(options.arguments)")
-    print("\n\n\(Options.CodingKeys.stringValue.stringValue)")
   }
 }
 
 public struct NoArgsCommand: CommandRepresentable {
-  public struct Options: OptionsRepresentable {
-    public enum CodingKeys: String, CodingKeysRepresentable {
-      public static let shortKeys: [NoArgsCommand.Options.CodingKeys : Character] = [:]
-      
-      case addArgs = "add-args"
-      case args
-    }
+  public struct Options: OptionsRepresentable, OptionsPropertyWrapper {
+    @Option(k: "A", usage: "Should add arguments to the command") var addArgs: Bool = false
+    @Option(usage: "The arguments to be added to the command along with '--add-args'") var args: [String] = []
     
-    public static var keys: [NoArgsCommand.Options.CodingKeys : Character] = [
-      .args: "A"
-    ]
-    
-    public static let descriptions: [Options.CodingKeys: OptionDescription] = [
-      .addArgs: .default(value: false, usage: "Should add arguments to the command"),
-      .args: .usage("The arguments to be added to the command along with '--add-args'")
-    ]
-    
-    public var addArgs: Bool
-    public var args: [String]
+    public init() { }
   }
   
-  public static let symbol: String = "set-args"
+  @Option(usage: "set-args")
+  public static var symbol: String = "set-args"
   public static let usage: String = "Set arguments of the command with given arguments"
   
   public static func main(_ options: Options) throws {
     print(options)
     print("arguments: \(options.arguments)")
-    
-    print("\n\n\(Options.CodingKeys.addArgs.stringValue)")
   }
 }

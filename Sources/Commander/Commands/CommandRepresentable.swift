@@ -61,12 +61,12 @@ extension CommandDescribable {
   /// - Returns: Returns the completion list for the given key.
   public static func completions(for commandLine: Utility.CommandLine) -> [String] {
     let optionsf = {
-      optionsDescriber.descriptions.map {
+      optionsDescriber.stringDescriptions.map {
         OptionsDecoder.optionsFormat.format($0.key)
       }
     }
     let shortOptionsf = {
-      optionsDescriber.keys.map {
+      optionsDescriber.stringKeys.map {
         OptionsDecoder.optionsFormat.format(String($0.value), isShort: true)
       }
     }

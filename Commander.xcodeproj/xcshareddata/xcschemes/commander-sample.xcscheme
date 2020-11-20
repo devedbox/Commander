@@ -73,10 +73,14 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "sample set-args -h"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "sample  -h"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "help set-args sampl sample set-args sampl sample"
+            argument = "help set-args sample set-args sample"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument

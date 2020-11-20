@@ -30,13 +30,17 @@ import XCTest
 
 struct Level1Command: CommandRepresentable {
   struct Options: OptionsRepresentable {
-    enum CodingKeys: String, CodingKeysRepresentable {
+    enum CodingKeys: String, OptionKeysRepresentable, CodingKey {
       case value
     }
+    typealias OptionKeys = CodingKeys
+    
     static let keys: [Options.CodingKeys : Character] = [:]
     static let descriptions: [Options.CodingKeys : OptionDescription] = [:]
     
     let value: String
+    
+    init() { value = "" }
   }
   
   static let children: [CommandDispatchable.Type] = [
@@ -53,13 +57,17 @@ struct Level1Command: CommandRepresentable {
 
 struct Level2Command: CommandRepresentable {
   struct Options: OptionsRepresentable {
-    enum CodingKeys: String, CodingKeysRepresentable {
+    enum CodingKeys: String, OptionKeysRepresentable, CodingKey {
       case value
     }
+    typealias OptionKeys = CodingKeys
+    
     static let keys: [Options.CodingKeys : Character] = [:]
     static let descriptions: [Options.CodingKeys : OptionDescription] = [:]
     
     let value: String
+    
+    init() { value = "" }
   }
   
   static let children: [CommandDispatchable.Type] = [
@@ -76,13 +84,17 @@ struct Level2Command: CommandRepresentable {
 
 struct Level3Command: CommandRepresentable {
   struct Options: OptionsRepresentable {
-    enum CodingKeys: String, CodingKeysRepresentable {
+    enum CodingKeys: String, OptionKeysRepresentable, CodingKey {
       case value
     }
+    typealias OptionKeys = CodingKeys
+    
     static let keys: [Options.CodingKeys : Character] = [:]
     static let descriptions: [Options.CodingKeys : OptionDescription] = [:]
     
     let value: String
+    
+    init() { value = "" }
   }
   
   static let children: [CommandDispatchable.Type] = [
@@ -99,13 +111,17 @@ struct Level3Command: CommandRepresentable {
 
 struct Level4Command: CommandRepresentable {
   struct Options: OptionsRepresentable {
-    enum CodingKeys: String, CodingKeysRepresentable {
+    enum CodingKeys: String, OptionKeysRepresentable, CodingKey {
       case value
     }
+    typealias OptionKeys = CodingKeys
+    
     static let keys: [Options.CodingKeys : Character] = [:]
     static let descriptions: [Options.CodingKeys : OptionDescription] = [:]
     
-    let value: String
+    var value: String
+    
+    init() { value = "" }
   }
   
   static let children: [CommandDispatchable.Type] = [

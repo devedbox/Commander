@@ -199,7 +199,7 @@ fileprivate extension Encodable {
       return .value(jsonObject)
     }
     
-    return nil
+    return .value(String(describing: self))
   }
 }
 
@@ -494,8 +494,8 @@ public final class OptionsDecoder {
     _ type: T.Type,
     from commandLineArgs: [String]) throws -> T
   {
-    optionsDescription = T.descriptions
-    codingKeys = T.keys
+    optionsDescription = T.stringDescriptions
+    codingKeys = T.stringKeys
     
     var container = try self.container(from: commandLineArgs)
     
@@ -505,7 +505,7 @@ public final class OptionsDecoder {
     let decoder = _Decoder(referencing: self, wrapping: container)
     
     let unrecognizedOptions = container.dictionaryValue?.keys.filter { key in
-      type.CodingKeys.init(rawValue: key) == nil
+      type.codingKeys.contains(key) == false
     }
     
     guard unrecognizedOptions?.isEmpty ?? true else {
