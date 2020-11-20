@@ -54,36 +54,50 @@ public protocol CommandDescribable: ShellCompletable {
 
 // MARK: - ShellCompletable.
 
+extension BuiltIn {
+  /// Returns the completions list for the specific option key.
+  ///
+  /// - Parameter command: The command to be completed
+  /// - Parameter commandLine: The command line arguments.
+  /// - Returns: Returns the completion list for the given key.
+  public static func complete(
+    _ command: CommandDescribable.Type,
+    for commandLine: Utility.CommandLine) -> [String]
+  {
+    let optionsf = {
+      command.optionsDescriber.stringDescriptions.map {
+        OptionsDecoder.optionsFormat.format($0.key)
+      }
+    }
+    let shortOptionsf = {
+      command.optionsDescriber.stringKeys.map {
+        OptionsDecoder.optionsFormat.format(String($0.value), isShort: true)
+      }
+    }
+    let commandsf = { command.children.map { $0.symbol } }
+    
+    switch commandLine.arguments.last {
+    case let arg? where arg.hasPrefix(OptionsDecoder.optionsFormat.symbol):
+      let options = optionsf()
+      
+      return options.contains(arg) ? command.optionsDescriber.completions(for: commandLine) : options
+    case let arg? where arg.hasPrefix(OptionsDecoder.optionsFormat.shortSymbol):
+      let shortOptions = shortOptionsf()
+      
+      return shortOptions.contains(arg) ? command.optionsDescriber.completions(for: commandLine) : shortOptions + optionsf()
+    default:
+      return optionsf() + shortOptionsf() + commandsf()
+    }
+  }
+}
+
 extension CommandDescribable {
   /// Returns the completions list for the specific option key.
   ///
   /// - Parameter commandLine: The command line arguments.
   /// - Returns: Returns the completion list for the given key.
   public static func completions(for commandLine: Utility.CommandLine) -> [String] {
-    let optionsf = {
-      optionsDescriber.stringDescriptions.map {
-        OptionsDecoder.optionsFormat.format($0.key)
-      }
-    }
-    let shortOptionsf = {
-      optionsDescriber.stringKeys.map {
-        OptionsDecoder.optionsFormat.format(String($0.value), isShort: true)
-      }
-    }
-    let commandsf = { children.map { $0.symbol } }
-    
-    switch commandLine.arguments.last {
-    case let arg? where arg.hasPrefix(OptionsDecoder.optionsFormat.symbol):
-      let options = optionsf()
-      
-      return options.contains(arg) ? optionsDescriber.completions(for: commandLine) : options
-    case let arg? where arg.hasPrefix(OptionsDecoder.optionsFormat.shortSymbol):
-      let shortOptions = shortOptionsf()
-      
-      return shortOptions.contains(arg) ? optionsDescriber.completions(for: commandLine) : shortOptions + optionsf()
-    default:
-      return optionsf() + shortOptionsf() + commandsf()
-    }
+    return BuiltIn.complete(self, for: commandLine)
   }
 }
 
