@@ -50,7 +50,7 @@ public struct SampleCommand: CommandRepresentable {
     }
   }
   
-  public static let children = [
+  public static let children: Children = [
     NoArgsCommand.self
   ]
 

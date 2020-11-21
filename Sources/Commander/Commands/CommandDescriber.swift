@@ -48,7 +48,7 @@ internal struct CommandDescriber {
       OptionsDecoder.optionsFormat.shortSymbol
     )
     
-    let subcommandSymbols = command.children.map { ($0.symbol, $0.usage) }
+    let subcommandSymbols = command.childrenDescribers.map { ($0.symbol, $0.usage) }
     let optionsSymbols = command
       .optionsDescriber
       .stringDescriptions

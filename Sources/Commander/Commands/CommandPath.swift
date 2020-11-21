@@ -103,7 +103,7 @@ public struct CommandPath {
       
       var commands: [CommandDescribable.Type] = []
       let symbol = symbols[index]
-      let matchingCommands = command?.children ?? self.running.commands
+      let matchingCommands = command?.childrenDescribers ?? self.running.commands
       
       if let matchingCommand = matchingCommands.first(where: { $0.symbol == symbol }) {
         symbols.formIndex(after: &index)

@@ -54,7 +54,7 @@ extension CommanderRepresentable {
   /// Returns the options type of the command.
   public static var optionsDescriber: OptionsDescribable.Type { return Options.self }
   /// Returns the children of the insrance of `CommandDescribable`.
-  public static var children: [CommandDescribable.Type] { return allCommands }
+  public static var childrenDescribers: [CommandDescribable.Type] { return allCommands }
   /// The command symbol also name of the command.
   public static var symbol: String { return "" }
   /// The command level.

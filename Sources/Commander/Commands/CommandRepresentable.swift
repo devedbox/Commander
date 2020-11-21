@@ -40,10 +40,15 @@ public enum CommandLevel {
 // MARK: - CommandDescribable.
 
 public protocol CommandDescribable: ShellCompletable {
+  /// The type alias for `OptionsDescribable.Type`.
+  typealias OptionsDescriber = OptionsDescribable.Type
+  /// The type alias for [CommandDescribable.Type]`.
+  typealias ChildrenDescribers = [CommandDescribable.Type]
+  
   /// Returns the options type of the instance of `CommandDescribable`.
-  static var optionsDescriber: OptionsDescribable.Type { get }
+  static var optionsDescriber: OptionsDescriber { get }
   /// Returns the children of the insrance of `CommandDescribable`.
-  static var children: [CommandDescribable.Type] { get }
+  static var childrenDescribers: ChildrenDescribers { get }
   /// The command symbol also name of the command.
   static var symbol: String { get }
   /// The human-readable usage description of the commands.
@@ -74,7 +79,7 @@ extension BuiltIn {
         OptionsDecoder.optionsFormat.format(String($0.value), isShort: true)
       }
     }
-    let commandsf = { command.children.map { $0.symbol } }
+    let commandsf = { command.childrenDescribers.map { $0.symbol } }
     
     switch commandLine.arguments.last {
     case let arg? where arg.hasPrefix(OptionsDecoder.optionsFormat.symbol):
@@ -107,8 +112,10 @@ extension CommandDescribable {
 /// This protocol represents type-erased command types without associated types can be used as
 /// argument rather than generic constraints.
 public protocol CommandDispatchable: CommandDescribable {
+  /// The children type of the sub commands of the command.
+  typealias Children = [CommandDispatchable.Type]
   /// Returns the subcommands of the command.
-  static var children: [CommandDispatchable.Type] { get }
+  static var children: Children { get }
   /// Dispatch the commands with command line arguments.
   ///
   /// - Parameter commandLineArgs: The command line arguments with dropping command symbol.
@@ -127,11 +134,11 @@ extension CommandDispatchable {
     return String(reflecting: self).split(delimiter: ".").last?.camelcase2dashcase().replacingOccurrences(of: "-command", with: "") ?? ""
   }
   /// Returns the children of the insrance of `CommandDescribable`.
-  public static var children: [CommandDescribable.Type] {
-    return self.children as [CommandDispatchable.Type]
+  public static var childrenDescribers: [CommandDescribable.Type] {
+    return self.children
   }
   /// Reutrns the subcommands of the command.
-  // public static var children: [CommandDispatchable.Type] { return [] }
+  public static var children: Children { return [] }
   /// The level of the 'CommandDispatchable'.
   public static var level: CommandLevel { return .command }
 }
@@ -157,7 +164,7 @@ extension CommandRepresentable {
     return Options.self
   }
   /// Returns the children of the insrance of `CommandDescribable`.
-  public static var children: [CommandDispatchable.Type] { return [] }
+  public static var children: Children { return [] }
   /// Dispatch the command with command line arguments.
   public static func dispatch(with commandLineArgs: [String]) throws {
     try self.main(try Options.decoded(from: commandLineArgs))

@@ -30,9 +30,9 @@ import Foundation
 @testable import Commander
 import Utility
 
-var sharedOptions: TestsCommand.Options = .init()
+var sharedOptions: TestCommand.Options = .init()
 
-struct TestsCommand: CommandRepresentable {
+struct TestCommand: CommandRepresentable {
   struct Options: OptionsRepresentable {
     init() {
       target = ""
@@ -46,11 +46,11 @@ struct TestsCommand: CommandRepresentable {
     }
     typealias OptionKeys = CodingKeys
     
-    static var keys: [TestsCommand.Options.CodingKeys : Character] = [
+    static var keys: [TestCommand.Options.CodingKeys : Character] = [
       .target: "t",
       .verbose: "v"
     ]
-    static var descriptions: [TestsCommand.Options.CodingKeys: OptionDescription] = [
+    static var descriptions: [TestCommand.Options.CodingKeys: OptionDescription] = [
       .target: .default(value: "Default", usage: "The target of the test command"),
       .verbose: .usage("verbose")
     ]
@@ -75,15 +75,14 @@ struct TestsCommand: CommandRepresentable {
     }
   }
   
-  static let symbol: String = "test"
-  static var usage: String = "Mocked command for tests"
+  static var usage = "Mocked command for tests"
   
-  static func main(_ options: TestsCommand.Options) throws {
+  static func main(_ options: TestCommand.Options) throws {
     
   }
 }
 
-struct TestsArgsCommand: CommandRepresentable {
+struct TestArgsCommand: CommandRepresentable {
   struct Options: OptionsRepresentable {
     typealias Argument = [String: UInt8]
     enum CodingKeys: String, OptionKeysRepresentable, CodingKey {
@@ -91,7 +90,7 @@ struct TestsArgsCommand: CommandRepresentable {
     }
     typealias OptionKeys = CodingKeys
     
-    static var keys: [TestsArgsCommand.Options.CodingKeys : Character] = [
+    static var keys: [TestArgsCommand.Options.CodingKeys : Character] = [
       .target: "T"
     ]
     static var descriptions: [Options.CodingKeys: OptionDescription] = [
@@ -117,11 +116,12 @@ struct TestsArgsCommand: CommandRepresentable {
       }
     }
   }
-  static let children: [CommandDispatchable.Type] = [
-    TestsCommand.self
+  
+  static let children: Children = [
+    TestCommand.self
   ]
-  static let symbol: String = "test-args"
-  static var usage: String = "Mocked command for tests args"
+  
+  static let usage = "Mocked command for tests args"
   
   static func main(_ options: Options) throws {
     
@@ -136,8 +136,8 @@ class CommandTests: XCTestCase {
   
   override func setUp() {
     BuiltIn.Commander.commands = [
-      TestsCommand.self,
-      TestsArgsCommand.self
+      TestCommand.self,
+      TestArgsCommand.self
     ]
     BuiltIn.Commander.usage = "Mocked usage"
   }

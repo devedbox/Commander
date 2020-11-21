@@ -94,7 +94,7 @@ struct WrappedTestsArgsCommand: CommandRepresentable {
     }
   }
   static let children: [CommandDispatchable.Type] = [
-    TestsCommand.self
+    TestCommand.self
   ]
   static let symbol: String = "test-args"
   static var usage: String = "Mocked command for tests args"
