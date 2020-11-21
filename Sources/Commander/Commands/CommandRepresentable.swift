@@ -122,6 +122,10 @@ public protocol CommandDispatchable: CommandDescribable {
 // MARK: - CommandDescribable.
 
 extension CommandDispatchable {
+  /// The command symbol also name of the command.
+  public static var symbol: String {
+    return String(reflecting: self).split(delimiter: ".").last?.camelcase2dashcase().replacingOccurrences(of: "-command", with: "") ?? ""
+  }
   /// Returns the children of the insrance of `CommandDescribable`.
   public static var children: [CommandDescribable.Type] {
     return self.children as [CommandDispatchable.Type]

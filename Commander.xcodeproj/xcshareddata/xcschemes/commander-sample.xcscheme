@@ -77,6 +77,10 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "sample  -h"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "help"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

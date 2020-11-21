@@ -50,10 +50,10 @@ public struct SampleCommand: CommandRepresentable {
     }
   }
   
-  public static let children: [CommandDispatchable.Type] = [
+  public static let children = [
     NoArgsCommand.self
   ]
-  public static let symbol: String = "sample"
+
   public static let usage: String = "Show sample usage of commander"
   
   public static func main(_ options: Options) throws {
@@ -70,7 +70,6 @@ public struct NoArgsCommand: CommandRepresentable {
     public init() { }
   }
   
-  @Option(usage: "set-args")
   public static var symbol: String = "set-args"
   public static let usage: String = "Set arguments of the command with given arguments"
   
